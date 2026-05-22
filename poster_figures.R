@@ -126,24 +126,24 @@ COR <- c("G1" = "#7BAFD4",   # Low Utilization
          "G3" = "#E8B96B",   # Acute / Hospital
          "G4" = "#D98585")   # Atypical
 
-G_LABELS <- c("G1 · Low Utilization",
-              "G2 · Coordinated Outpatient",
-              "G3 · Acute / Hospital",
-              "G4 · Atypical")
+G_LABELS <- c("G1 · Low utilization",
+              "G2 · Coordinated outpatient",
+              "G3 · Acute",
+              "G4 · Atypical pattern")
 
 # Shared legend string — used in captions / footnotes of all figures
 LEGENDA_EN <- paste0(
-  "G1 = Low Utilization  ·  G2 = Coordinated Outpatient  ·  ",
-  "G3 = Acute/Hospital  ·  G4 = Atypical"
+  "G1 = Low utilization  ·  G2 = Coordinated outpatient  ·  ",
+  "G3 = Acute  ·  G4 = Atypical pattern"
 )
 
 # English names for the 5 count variables
 VARS_V3 <- c("consultas", "ps", "exames", "internacoes", "terapias")
-VAR_EN  <- c(consultas   = "Outpatient Visits",
-             ps          = "ER Visits",
+VAR_EN  <- c(consultas   = "Medical Consultations",
+             ps          = "Emergency Visits",
              exames      = "Diagnostic Exams",
              internacoes = "Hospitalizations",
-             terapias    = "Therapy Sessions")
+             terapias    = "Therapies")
 
 # Figure / table captions — numbered, bold label + normal text
 # Format: "**Figure X.** Description. Legend."
@@ -480,15 +480,15 @@ plot_pca_row <- function(g_idx) {
                alpha = col_val, size = col_val)) +
     geom_point(shape = 16) +
     scale_colour_manual(
-      values = c(setNames(g_color, g_lbl), other = "grey84"),
+      values = c(setNames(g_color, g_lbl), other = "grey60"),
       guide  = "none"
     ) +
     scale_alpha_manual(
-      values = c(setNames(0.80, g_lbl), other = 0.12),
+      values = c(setNames(0.75, g_lbl), other = 0.25),
       guide  = "none"
     ) +
     scale_size_manual(
-      values = c(setNames(1.0, g_lbl), other = 0.25),
+      values = c(setNames(0.6, g_lbl), other = 0.15),
       guide  = "none"
     ) +
     facet_wrap(~ panel, nrow = 1) +
