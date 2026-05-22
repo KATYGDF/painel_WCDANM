@@ -23,34 +23,32 @@
 
 # ── DIMENSIONS — edit here, then re-source ───────────────────────────────────
 #
-# HOW TO GET THE RIGHT SIZE FROM CANVA:
-#   1. Click the white content box in Canva → note W × H in pixels (top bar)
-#   2. Paste those values into CANVA_W_PX / CANVA_H_PX below
-#   3. The script converts to inches automatically using DPI
-#   4. Split H between figures using the fractions (e.g. fig1 gets 35% of height)
+# HOW TO GET SIZES FROM CANVA:
+#   Click the white box → Avançados → Largura / Altura (in mm)
+#   Paste the values below. The script converts mm → inches automatically.
 #
-# Current defaults assume a white box of ~2 800 × 2 200 px (adjust to yours):
+# White content box (from Canva "Avançados"):
+CANVA_W_MM <- 353.06    # Largura
+CANVA_H_MM <- 200.68    # Altura
 
-DPI         <- 150       # 150 dpi is fine for A0/A1 poster printing
+DPI <- 300              # 300 dpi for crisp text at poster print size
 
-CANVA_W_PX  <- 2800      # ← paste white box WIDTH  in pixels from Canva
-CANVA_H_PX  <- 2200      # ← paste white box HEIGHT in pixels from Canva
+# Fraction of box height for each figure (adjust until preview looks right):
+FRAC_FIG1  <- 0.42      # EDA distributions   (upper strip)
+FRAC_FIG3  <- 0.50      # Confusion matrices  (lower half)
+FRAC_FIG4  <- 1.00      # PCA by group        (use full box height)
 
-# Fraction of box height assigned to each figure (must sum ≤ 1)
-FRAC_FIG1   <- 0.35      # EDA distributions   (~upper third)
-FRAC_FIG3   <- 0.40      # Confusion matrices  (~middle)
-FRAC_FIG4   <- 1.00      # PCA by group        (full height — usually its own box)
-
-# Derived dimensions in inches (do not edit)
-BOX_W <- CANVA_W_PX / DPI
-BOX_H <- CANVA_H_PX / DPI
+# Derived sizes in inches (do not edit below this line)
+BOX_W <- CANVA_W_MM / 25.4
+BOX_H <- CANVA_H_MM / 25.4
 
 W1 <- BOX_W;   H1 <- BOX_H * FRAC_FIG1
 W3 <- BOX_W;   H3 <- BOX_H * FRAC_FIG3
 W4 <- BOX_W;   H4 <- BOX_H * FRAC_FIG4
 
-cat(sprintf("Box: %.1f × %.1f in  |  fig1: %.1f×%.1f  fig3: %.1f×%.1f  fig4: %.1f×%.1f\n",
-            BOX_W, BOX_H, W1, H1, W3, H3, W4, H4))
+cat(sprintf(
+  "Box: %.2f × %.2f in (%.0f × %.0f mm)\n  fig1: %.2f×%.2f in\n  fig3: %.2f×%.2f in\n  fig4: %.2f×%.2f in\n\n",
+  BOX_W, BOX_H, CANVA_W_MM, CANVA_H_MM, W1, H1, W3, H3, W4, H4))
 
 # ── 0. Packages & directories ─────────────────────────────────────────────────
 
