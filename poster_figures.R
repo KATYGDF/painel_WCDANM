@@ -61,7 +61,7 @@ cat(sprintf(paste0(
 # ── 0. Packages & directories ─────────────────────────────────────────────────
 
 pkgs  <- c("dplyr", "tidyr", "ggplot2", "patchwork", "scales",
-           "clue", "aricode", "gt", "webshot2")
+           "clue", "aricode", "gt", "webshot2", "ggtext")
 novos <- pkgs[!sapply(pkgs, requireNamespace, quietly = TRUE)]
 if (length(novos) > 0) {
   message("Installing: ", paste(novos, collapse = ", "))
@@ -75,7 +75,7 @@ suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2)
   library(patchwork); library(scales)
   library(clue); library(aricode)
-  library(gt)
+  library(gt); library(ggtext)
 })
 
 DIR_OUT  <- "poster/figs"
@@ -138,7 +138,33 @@ VAR_EN  <- c(consultas   = "Outpatient Visits",
              internacoes = "Hospitalizations",
              terapias    = "Therapy Sessions")
 
-# Poster theme — slightly larger than default for print legibility
+# Figure / table captions — numbered, bold label + normal text
+# Format: "**Figure X.** Description. Legend."
+CAP1 <- paste0(
+  "**Figure 1.** Distribution of count variables by latent group (n = 5,000). ",
+  "Grey bars: overall histogram (density scale). Coloured curves: kernel density per true group; ",
+  "x-axis truncated at the 97th percentile.<br>",
+  LEGENDA_EN
+)
+CAP2 <- paste0(
+  "**Table 1.** Latent group recovery metrics for three variable sets and two methods. ",
+  "*g* selected by BIC (NB Mixture) or Silhouette (K-means). ",
+  "★ Best overall result."
+)
+CAP3 <- paste0(
+  "**Figure 2.** Confusion matrices for the best variable set (V3: 5 variables), ",
+  "NB Mixture (left) vs. K-means (right). ",
+  "Diagonal = correct assignments. Labels paired via Hungarian algorithm.<br>",
+  LEGENDA_EN
+)
+CAP4 <- paste0(
+  "**Figure 3.** PCA projection (log1p + scaled) of V3 variables. ",
+  "Each row highlights one true group (coloured); remaining points in grey. ",
+  "Columns: ground truth | NB Mixture estimate | K-means estimate.<br>",
+  LEGENDA_EN
+)
+
+# Poster theme — caption uses element_markdown for bold "Figure X." prefix
 TEMA_P <- theme_minimal(base_size = 13) +
   theme(
     panel.grid.minor  = element_blank(),
@@ -146,7 +172,9 @@ TEMA_P <- theme_minimal(base_size = 13) +
     strip.background  = element_rect(fill = "#f2f2f2", colour = NA),
     plot.title        = element_text(face = "bold", size = 14),
     plot.subtitle     = element_text(colour = "grey40", size = 10),
-    plot.caption      = element_text(colour = "grey55", size = 9, hjust = 0),
+    plot.caption      = ggtext::element_markdown(
+                          colour = "grey20", size = 10,
+                          hjust = 0.5, margin = margin(t = 8)),
     legend.position   = "bottom",
     legend.title      = element_text(face = "bold", size = 10),
     legend.text       = element_text(size = 10)
@@ -234,8 +262,7 @@ fig1 <- ggplot(df_long, aes(x = count)) +
     subtitle = sprintf(
       "n = %d  ·  x-axis truncated at P97 per variable  ·  density curves per true group",
       n),
-    caption  = paste0("True groups known from simulation (ground truth). Mixture structure visible in all variables.\n",
-                     LEGENDA_EN)
+    caption  = CAP1
   ) +
   guides(
     fill   = guide_legend(nrow = 1, override.aes = list(alpha = 0.55, linewidth = 0)),
@@ -274,7 +301,7 @@ tab_data <- data.frame(
 
 gt_tbl <- gt(tab_data) %>%
   tab_header(
-    title    = md("**Latent Group Recovery — Variable Sets × Methods**"),
+    title    = md("**Table 1.** Latent Group Recovery — Variable Sets × Methods"),
     subtitle = md("*g* selected by BIC (NB Mixture) and Silhouette (K-means) &nbsp;·&nbsp; n = 5 000")
   ) %>%
   cols_label(
@@ -375,12 +402,8 @@ p_km <- plot_conf_en(
 fig3 <- (p_nb | p_km) +
   plot_annotation(
     title   = "Confusion Matrices — Best Variable Set (V3: 5 variables)",
-    caption = paste0(
-      "n = ", n, "  ·  4 true latent groups  ·  ",
-      "Labels paired via Hungarian (Kuhn-Munkres) algorithm\n",
-      LEGENDA_EN
-    ),
-    theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
+    caption = CAP3,
+    theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
 windows(width = W3, height = H3)   # preview — resize to taste, then adjust W3/H3 above
@@ -466,14 +489,8 @@ plot_pca_row <- function(g_idx) {
 fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
   plot_annotation(
     title   = "PCA Classification by Group — V3 (log1p + scaled)",
-    caption = paste0(
-      "Each row highlights one true group (coloured); remaining points in grey.\n",
-      "Columns: ground truth | NB Mixture estimate | K-means estimate.\n",
-      "V3: Outpatient Visits · ER Visits · Diagnostic Exams · ",
-      "Hospitalizations · Therapy Sessions  ·  n = ", n, "\n",
-      LEGENDA_EN
-    ),
-    theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
+    caption = CAP4,
+    theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
 windows(width = W4, height = H4)   # preview — resize to taste, then adjust W4/H4 above
