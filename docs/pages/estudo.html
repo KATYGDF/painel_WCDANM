@@ -376,8 +376,6 @@ algoritmo húngaro (Kuhn-Munkres, 1955).
   <tbody>
     <tr><td><strong>ARI</strong> — Rand Ajustado</td>
         <td>0 = aleatório · 1 = perfeito · métrica primária</td></tr>
-    <tr><td><strong>NMI</strong> — Informação Mútua Normalizada</td>
-        <td>0–1; sensível ao número de grupos</td></tr>
     <tr><td><strong>Acurácia</strong> (pareamento húngaro)</td>
         <td>Proporção de classificações corretas após bijeção ótima</td></tr>
     <tr><td><strong>Pureza</strong></td>
@@ -391,7 +389,7 @@ algoritmo húngaro (Kuhn-Munkres, 1955).
 
 <div class="resultado-destaque">
   <strong>Melhor resultado:</strong> Mistura NB · V3 (5 variáveis) · \(g^* = 4\) ·
-  ARI = 0,729 · Acurácia = 0,877 · NMI = 0,594 · Pureza = 0,861.
+  ARI = 0,729 · Acurácia = 0,877 · Pureza = 0,861.
   O BIC selecionou corretamente o número verdadeiro de grupos (\(g = 4\)).
 </div>
 
@@ -400,7 +398,7 @@ algoritmo húngaro (Kuhn-Munkres, 1955).
     <tr>
       <th>Conjunto</th><th>Método</th>
       <th class="num">g*</th>
-      <th class="num">ARI</th><th class="num">NMI</th>
+      <th class="num">ARI</th>
       <th class="num">Acurácia</th><th class="num">Pureza</th>
       <th class="num">Tempo (s)</th>
     </tr>
@@ -408,37 +406,37 @@ algoritmo húngaro (Kuhn-Munkres, 1955).
   <tbody>
     <tr>
       <td>V1 · 3 vars</td><td>Mistura NB</td>
-      <td class="num">3</td><td class="num">0,630</td><td class="num">0,483</td>
+      <td class="num">3</td><td class="num">0,630</td>
       <td class="num">0,820</td><td class="num">0,796</td>
       <td class="num">1.347,7</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">3</td><td class="num">0,570</td><td class="num">0,445</td>
+      <td class="num">3</td><td class="num">0,570</td>
       <td class="num">0,797</td><td class="num">0,768</td>
       <td class="num">1,4</td>
     </tr>
     <tr class="sep">
       <td>V2 · + internações</td><td>Mistura NB</td>
-      <td class="num">3</td><td class="num">0,658</td><td class="num">0,513</td>
+      <td class="num">3</td><td class="num">0,658</td>
       <td class="num">0,836</td><td class="num">0,814</td>
       <td class="num">1.525,5</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">4</td><td class="num">0,580</td><td class="num">0,472</td>
+      <td class="num">4</td><td class="num">0,580</td>
       <td class="num">0,777</td><td class="num">0,803</td>
       <td class="num">1,0</td>
     </tr>
     <tr class="sep best">
       <td>V3 · + terapias ★</td><td>Mistura NB</td>
-      <td class="num">4</td><td class="num">0,729</td><td class="num">0,594</td>
+      <td class="num">4</td><td class="num">0,729</td>
       <td class="num">0,877</td><td class="num">0,861</td>
       <td class="num">1.617,0</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">4</td><td class="num">0,673</td><td class="num">0,540</td>
+      <td class="num">4</td><td class="num">0,673</td>
       <td class="num">0,815</td><td class="num">0,843</td>
       <td class="num">0,9</td>
     </tr>

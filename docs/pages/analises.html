@@ -242,7 +242,7 @@ blockquote.cit cite {
 Esta página compara a <strong>Mistura de Binomiais Negativas</strong> e o <strong>K-means</strong>
 na tarefa de recuperar os grupos latentes definidos no processo de simulação.
 A comparação é feita em três conjuntos progressivos de variáveis e avaliada por
-ARI, NMI, acurácia e pureza.
+ARI, acurácia e pureza.
 </p>
 
 <p>
@@ -619,47 +619,6 @@ O numerador conta os pares de observações que a partição estimada e o gabari
 máximos possíveis das duas partições, também descontado o acaso.
 </p>
 
-<h3>Informação Mútua Normalizada (NMI)</h3>
-
-<p>
-Mede quanto a partição estimada reduz a incerteza sobre o gabarito verdadeiro,
-normalizada para o intervalo \([0,1]\). A forma aritmética (Strehl &amp; Ghosh, 2002)
-usa a média das entropias como denominador:
-</p>
-
-<div class="eq">
-$$\text{NMI}(U,V) \;=\; \frac{2\,I(U;\,V)}{H(U)+H(V)}$$
-</div>
-
-<p>
-com os termos expandidos explicitamente:
-</p>
-
-<div class="eq">
-$$I(U;\,V) \;=\; \sum_{i=1}^{G}\sum_{j=1}^{G}
-  \frac{n_{ij}}{n}\,\log\!\frac{n\,n_{ij}}{a_i\,b_j}$$
-</div>
-
-<div class="eq">
-$$H(U) = -\sum_{i=1}^{G}\frac{a_i}{n}\log\frac{a_i}{n}, \qquad
-  H(V) = -\sum_{j=1}^{G}\frac{b_j}{n}\log\frac{b_j}{n}$$
-</div>
-
-<p>Onde:</p>
-<ul>
-  <li>\(U\) — partição estimada; \(V\) — gabarito verdadeiro;</li>
-  <li>\(n_{ij}\), \(a_i\), \(b_j\), \(n\) — mesmas quantidades da tabela de contingência
-      definidas no ARI acima;</li>
-  <li>\(I(U;V)\) — informação mútua: redução de incerteza sobre \(V\) ao conhecer \(U\);</li>
-  <li>\(H(U)\), \(H(V)\) — entropias de Shannon das duas partições.</li>
-</ul>
-<p>
-NMI = 1 indica recuperação perfeita; NMI = 0 indica independência entre as partições.
-A métrica é sensível à superescolha de \(g\): modelos com muitos clusters obtêm
-NMI artificialmente elevado, mesmo sem correspondência real com o gabarito.
-Por isso é usada como complemento ao ARI, não como critério primário.
-</p>
-
 <h3>Acurácia (correspondência húngara)</h3>
 
 <p>
@@ -742,7 +701,6 @@ O destaque em verde (★) indica o melhor resultado global por ARI.
       <th>Método</th>
       <th class="num">g</th>
       <th class="num">ARI</th>
-      <th class="num">NMI</th>
       <th class="num">Acurácia</th>
       <th class="num">Pureza</th>
       <th class="num">Tempo (s)</th>
@@ -753,13 +711,13 @@ O destaque em verde (★) indica o melhor resultado global por ARI.
     <!-- V1 -->
     <tr>
       <td>V1 · Baseline</td><td>Mistura NB</td>
-      <td class="num">3</td><td class="num">0,630</td><td class="num">0,483</td>
+      <td class="num">3</td><td class="num">0,630</td>
       <td class="num">0,820</td><td class="num">0,796</td>
       <td class="num">1.347,7</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">3</td><td class="num">0,570</td><td class="num">0,445</td>
+      <td class="num">3</td><td class="num">0,570</td>
       <td class="num">0,797</td><td class="num">0,768</td>
       <td class="num">1,4</td>
     </tr>
@@ -767,13 +725,13 @@ O destaque em verde (★) indica o melhor resultado global por ARI.
     <!-- V2 -->
     <tr class="sep">
       <td>V2 · + internações</td><td>Mistura NB</td>
-      <td class="num">3</td><td class="num">0,658</td><td class="num">0,513</td>
+      <td class="num">3</td><td class="num">0,658</td>
       <td class="num">0,836</td><td class="num">0,814</td>
       <td class="num">1.525,5</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">4</td><td class="num">0,580</td><td class="num">0,472</td>
+      <td class="num">4</td><td class="num">0,580</td>
       <td class="num">0,777</td><td class="num">0,803</td>
       <td class="num">1,0</td>
     </tr>
@@ -781,13 +739,13 @@ O destaque em verde (★) indica o melhor resultado global por ARI.
     <!-- V3 — melhor global -->
     <tr class="sep best">
       <td>V3 · + terapias</td><td>Mistura NB ★</td>
-      <td class="num">4</td><td class="num">0,729</td><td class="num">0,594</td>
+      <td class="num">4</td><td class="num">0,729</td>
       <td class="num">0,877</td><td class="num">0,861</td>
       <td class="num">1.617,0</td>
     </tr>
     <tr>
       <td></td><td>K-means</td>
-      <td class="num">4</td><td class="num">0,673</td><td class="num">0,540</td>
+      <td class="num">4</td><td class="num">0,673</td>
       <td class="num">0,815</td><td class="num">0,843</td>
       <td class="num">0,9</td>
     </tr>
@@ -903,10 +861,10 @@ O círculo destacado em cada curva indica o valor selecionado.
 <h3>Evolução das métricas V1 → V3</h3>
 <div class="fig-wrapper">
   <img src="../assets/img/analises/06_evolucao_metricas.png"
-       alt="Evolução de ARI, Acurácia, NMI e Pureza de V1 a V3"
+       alt="Evolução de ARI, Acurácia e Pureza de V1 a V3"
        loading="lazy">
   <p class="fig-caption">
-    <strong>Figura 5.</strong> Evolução das quatro métricas ao longo dos três conjuntos ativos.
+    <strong>Figura 5.</strong> Evolução das três métricas ao longo dos três conjuntos ativos.
     Nos dados simulados, caracterizados por sobredispersão e estrutura latente probabilística,
     a Mistura NB (verde) recuperou os grupos com maior aderência ao gabarito verdadeiro do que
     o K-means (vermelho) em todos os conjuntos e métricas.
@@ -1225,7 +1183,7 @@ calc_metricas &lt;- function(real_int, estimado_int) {
   list(
     g        = length(unique(estimado_int)),
     ari      = round(aricode::ARI(real_int, estimado_int),              3),
-    nmi      = round(aricode::NMI(real_int, estimado_int),              3),
+
     acuracia = round(mean(est_par == real_int),                         3),
     pureza   = round(pur,                                               3)
   )
@@ -1281,7 +1239,7 @@ for (nome_v in names(CONJUNTOS)) {
 
   resultados[[length(resultados) + 1]] &lt;- data.frame(
     Conjunto = label, Método = "Mistura NB",
-    g = M1_met$g, ARI = M1_met$ari, NMI = M1_met$nmi,
+    g = M1_met$g, ARI = M1_met$ari,
     Acuracia = M1_met$acuracia, Pureza = M1_met$pureza,
     Tempo_s = round(dt, 1), stringsAsFactors = FALSE
   )
@@ -1306,7 +1264,7 @@ for (nome_v in names(CONJUNTOS)) {
 
   resultados[[length(resultados) + 1]] &lt;- data.frame(
     Conjunto = label, Método = "K-means",
-    g = M2_met$g, ARI = M2_met$ari, NMI = M2_met$nmi,
+    g = M2_met$g, ARI = M2_met$ari,
     Acuracia = M2_met$acuracia, Pureza = M2_met$pureza,
     Tempo_s = round(dt, 1), stringsAsFactors = FALSE
   )
@@ -1394,13 +1352,6 @@ cat(sprintf("\nSalvo em '%s/' — comparacao_variaveis.rds · nb_fits_por_conjun
     <cite>Ng, S. K., Xiang, L., &amp; Yau, K. K. W. (2019).</cite>
     <em>Mixture modelling for medical and health sciences.</em>
     CRC Press / Taylor &amp; Francis. ISBN 978-1-4822-3675-0.
-  </div>
-
-  <div class="ref-entry">
-    <cite>Strehl, A., &amp; Ghosh, J. (2002).</cite>
-    Cluster ensembles — a knowledge reuse framework for combining multiple
-    partitions.
-    <em>Journal of Machine Learning Research</em>, <em>3</em>, 583–617.
   </div>
 
   <div class="ref-entry">
