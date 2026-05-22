@@ -124,6 +124,12 @@ G_LABELS <- c("G1 · Low Utilization",
               "G3 · Acute / Hospital",
               "G4 · Atypical")
 
+# Shared legend string — used in captions / footnotes of all figures
+LEGENDA_EN <- paste0(
+  "G1 = Low Utilization  ·  G2 = Coordinated Outpatient  ·  ",
+  "G3 = Acute/Hospital  ·  G4 = Atypical"
+)
+
 # English names for the 5 count variables
 VARS_V3 <- c("consultas", "ps", "exames", "internacoes", "terapias")
 VAR_EN  <- c(consultas   = "Outpatient Visits",
@@ -228,7 +234,8 @@ fig1 <- ggplot(df_long, aes(x = count)) +
     subtitle = sprintf(
       "n = %d  ·  x-axis truncated at P97 per variable  ·  density curves per true group",
       n),
-    caption  = "True groups known from simulation (ground truth). Mixture structure visible in all variables."
+    caption  = paste0("True groups known from simulation (ground truth). Mixture structure visible in all variables.\n",
+                     LEGENDA_EN)
   ) +
   guides(
     fill   = guide_legend(nrow = 1, override.aes = list(alpha = 0.55, linewidth = 0)),
@@ -262,7 +269,6 @@ tab_data <- data.frame(
   g        = c(3L, 3L, 3L, 4L, 4L, 4L),
   ARI      = c(0.630, 0.570, 0.658, 0.580, 0.729, 0.673),
   Accuracy = c(0.820, 0.797, 0.836, 0.777, 0.877, 0.815),
-  Purity   = c(0.796, 0.768, 0.814, 0.803, 0.861, 0.843),
   stringsAsFactors = FALSE
 )
 
@@ -274,9 +280,9 @@ gt_tbl <- gt(tab_data) %>%
   cols_label(
     Set = "Set", Variables = "Variables included",
     Method = "Method", g = md("*g*"),
-    ARI = "ARI", Accuracy = "Accuracy", Purity = "Purity"
+    ARI = "ARI", Accuracy = "Accuracy"
   ) %>%
-  fmt_number(columns = c(ARI, Accuracy, Purity), decimals = 3) %>%
+  fmt_number(columns = c(ARI, Accuracy), decimals = 3) %>%
   # Highlight best row
   tab_style(
     style     = list(cell_fill(color = "#fdf6e3"),
@@ -291,8 +297,8 @@ gt_tbl <- gt(tab_data) %>%
   # Center numeric columns
   tab_style(
     style     = cell_text(align = "center"),
-    locations = list(cells_body(columns = c(g, ARI, Accuracy, Purity)),
-                     cells_column_labels(columns = c(g, ARI, Accuracy, Purity)))
+    locations = list(cells_body(columns = c(g, ARI, Accuracy)),
+                     cells_column_labels(columns = c(g, ARI, Accuracy)))
   ) %>%
   # Dim empty Variable/Set cells
   tab_style(
@@ -303,9 +309,8 @@ gt_tbl <- gt(tab_data) %>%
     footnote  = md("★ Best overall — BIC selected *g* = 4, matching the true number of latent groups."),
     locations = cells_body(columns = Method, rows = 5)
   ) %>%
-  tab_footnote(
-    footnote  = "Groups: G1 = Low Utilization · G2 = Coordinated Outpatient · G3 = Acute/Hospital · G4 = Atypical",
-    locations = cells_column_labels(columns = Variables)
+  tab_source_note(
+    source_note = md(paste0("**Legend:** ", LEGENDA_EN))
   ) %>%
   tab_style(
     style     = cell_text(color = "white", weight = "bold"),
@@ -373,8 +378,7 @@ fig3 <- (p_nb | p_km) +
     caption = paste0(
       "n = ", n, "  ·  4 true latent groups  ·  ",
       "Labels paired via Hungarian (Kuhn-Munkres) algorithm\n",
-      "G1 = Low Utilization  ·  G2 = Coordinated Outpatient  ·  ",
-      "G3 = Acute/Hospital  ·  G4 = Atypical"
+      LEGENDA_EN
     ),
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
@@ -466,7 +470,8 @@ fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
       "Each row highlights one true group (coloured); remaining points in grey.\n",
       "Columns: ground truth | NB Mixture estimate | K-means estimate.\n",
       "V3: Outpatient Visits · ER Visits · Diagnostic Exams · ",
-      "Hospitalizations · Therapy Sessions  ·  n = ", n
+      "Hospitalizations · Therapy Sessions  ·  n = ", n, "\n",
+      LEGENDA_EN
     ),
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
