@@ -1,0 +1,199 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+
+% Core packages
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+
+% Tighter paragraphs
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7\baselineskip}
+
+\begin{document}
+
+% ── Title ─────────────────────────────────────────────────────────────────
+\begin{center}
+{\Large\bfseries
+\setlength{\baselineskip}{20pt}
+Latent Heterogeneity in Health Care Utilization
+Counts Using Negative Binomial Mixtures
+\par}
+\end{center}
+
+% ── Authors and affiliations ──────────────────────────────────────────────
+\begin{flushleft}
+Katy Freitas\textsuperscript{1,2},
+Susana Faria\textsuperscript{1}
+and Thiago Pavin\textsuperscript{2}
+
+\vspace{0.15cm}
+
+{\small
+\begin{tabular}{@{}ll@{}}
+\textsuperscript{1} & Department of Mathematics, University of Minho, Portugal \\
+\textsuperscript{2} & Independent Researcher, Health Management and Data Science, Brazil \\
+\end{tabular}
+}
+
+\vspace{0.3cm}
+
+E-mail addresses:
+\href{mailto:katygdf@gmail.com}{\textit{katygdf@gmail.com}};
+\href{mailto:sfaria@math.uminho.pt}{\textit{sfaria@math.uminho.pt}};
+\href{mailto:thiagopavin@gmail.com}{\textit{thiagopavin@gmail.com}}
+
+\end{flushleft}
+
+\noindent\rule{\textwidth}{0.4pt}
+
+% ── Abstract ──────────────────────────────────────────────────────────────
+\justifying
+
+\noindent\textbf{Abstract}
+
+\vspace{-0.2cm}
+
+We assess whether finite Negative Binomial mixture models recover latent
+utilization groups more accurately than clustering in overdispersed count data.
+We generated a synthetic dataset of 5,000 beneficiaries with five health-care utilization
+variables, structured into four latent groups and calibrated to Brazilian
+regulatory benchmarks. Model parameters were estimated by maximum likelihood using Expectation-Maximization algorithm.
+The results suggest that finite Negative Binomial mixture models provide a more suitable approach to identifying latent utilization profiles in overdispersed health-care count data.
+
+\noindent\textbf{Keywords:} finite mixture models, negative binomial
+distribution, health-care utilization.
+
+\noindent\rule{\textwidth}{0.4pt}
+
+% ── Paragraph 1 ──────────────────────────────────────────────────────────
+Health-care utilization data are typically characterized by discreteness,
+asymmetry and overdispersion, often exhibiting substantial variability
+between individuals with low and high levels of service use.
+These features challenge the adequacy of purely geometric clustering
+approaches, such as K-means, particularly when the underlying population
+comprises latent subgroups.
+Finite mixture models provide a probabilistic framework for representing
+unobserved heterogeneity by assuming that the observed population arises
+from a combination of latent components~\cite{mclachlan2000finite,ng2019mixture}.
+
+% ── Paragraph 2 ──────────────────────────────────────────────────────────
+In this work, we investigate whether a finite mixture model based on
+Negative Binomial components can recover latent utilization profiles more
+accurately than K-means.
+We generated synthetic ~\cite{tucker2020generating} to emulate
+health-care utilization in Brazil, following the simulation
+approach of Deb and Trivedi~\cite{deb1997demand} for modelling health-care
+demand via finite mixtures.
+The data consists of 5,000 beneficiaries, structured into four latent
+groups and described by five count variables: \textit{medical consultations}, 
+\textit{emergency visits}, \textit{diagnostic exams}, \textit{hospitalizations} 
+and \textit{therapies}.
+The marginal distributions of the simulated variables were calibrated using
+aggregate indicators from the Brazilian National Regulatory Agency for
+Private Health Insurance and Plans.
+Since the true latent group membership is known by construction, the
+performance of each clustering method can be assessed using clustering performance was evaluated using the Adjusted Rand Index (ARI) ~\cite{hubert1985comparing} and Classification accuracy ~\cite{munkres1957algorithms}.
+
+% ── Paragraph 3 ──────────────────────────────────────────────────────────
+The proposed model assumes that each latent component follows a product
+of independent Negative Binomial distributions~\cite{cameron2013regression},
+one for each utilization variable.
+Hospitalization and therapy variables exhibit structural excess of
+zeros~\cite{lambert1992zero}, accommodated within each component.
+Parameter estimation was conducted using maximum likelihood via the Expectation-Maximization
+algorithm~\cite{dempster1977maximum}, with the number of components selected
+according to the Bayesian Information Criterion (BIC).
+For comparison, K-means clustering was applied to log-transformed and
+standardized count data, with the number of clusters selected using the
+Silhouette criterion. These preprocessing steps are necessary because
+K-means relies on Euclidean distances, which are sensitive to scale
+differences and distributional skewness \cite{hastie2009elements}.
+
+% ── Paragraph 4 ──────────────────────────────────────────────────────────
+The best performance was obtained by the Negative Binomial mixture model
+when all five variables were included.
+In this specification, the BIC selected four
+components, matching the true number of latent groups.
+The model attained ARI\,=\,0.729,
+NMI\,=\,0.594, accuracy\,=\,0.877
+and purity\,=\,0.861, outperforming K-means, which achieved
+ARI\,=\,0.673 and accuracy\,=\,0.815.
+The inclusion of rare but informative variables, particularly therapies,
+improved the recovery of the latent structure.
+
+% ── Paragraph 5 ──────────────────────────────────────────────────────────
+These results provide evidence that, in overdispersed count data
+with latent heterogeneity, Negative Binomial mixture models constitute a
+more suitable framework than traditional clustering methods for recovering
+hidden utilization profiles.
+This is a methodological study and does not aim to classify real
+beneficiaries or detect operational anomalies.
+
+% ── Acknowledgements ─────────────────────────────────────────────────────
+\textbf{Acknowledgements.} The research is supported
+by the Auditoria Inteligente 360 project under a technological
+co-development partnership agreement.
+
+% ── References ───────────────────────────────────────────────────────────
+{\small
+\begin{thebibliography}{10}
+
+\bibitem{mclachlan2000finite}
+G.~J. McLachlan and D.~Peel.
+\textit{Finite Mixture Models}.
+John Wiley \& Sons, 2000.
+
+\bibitem{ng2019mixture}
+S.-K. Ng, L.~Xiang, and K.~K.~W. Yau.
+\textit{Mixture Modelling for Medical and Health Sciences}.
+Chapman and Hall/CRC, 2019.
+
+\bibitem{tucker2020generating}
+A.~Tucker, Z.~Wang, Y.~Rotalinti, and P.~Myles.
+Generating high-fidelity synthetic patient data for assessing machine
+learning healthcare software.
+\textit{NPJ Digital Medicine}, 3(1):147, 2020.
+
+\bibitem{deb1997demand}
+P.~Deb and P.~K. Trivedi.
+Demand for medical care by the elderly: a finite mixture approach.
+\textit{J.\ Appl.\ Econom.}, 12(3):313--336, 1997.
+
+\bibitem{cameron2013regression}
+A.~C. Cameron and P.~K. Trivedi.
+\textit{Regression Analysis of Count Data}, 2nd~ed.
+Cambridge University Press, 2013.
+
+\bibitem{lambert1992zero}
+D.~Lambert.
+Zero-inflated Poisson regression, with an application to defects in
+manufacturing.
+\textit{Technometrics}, 34(1):1--14, 1992.
+
+\bibitem{dempster1977maximum}
+A.~P. Dempster, N.~M. Laird, and D.~B. Rubin.
+Maximum likelihood from incomplete data via the EM algorithm.
+\textit{J.\ R.\ Stat.\ Soc.\ Ser.\ B}, 39(1):1--38, 1977.
+
+\bibitem{hubert1985comparing}
+L.~Hubert and P.~Arabie.
+Comparing partitions.
+\textit{J.\ Classification}, 2(1):193--218, 1985.
+
+\bibitem{munkres1957algorithms}
+J.~Munkres.
+Algorithms for the assignment and transportation problems.
+\textit{J.\ Soc.\ Ind.\ Appl.\ Math.}, 5(1):32--38, 1957.
+
+\bibitem{hastie2009elements}
+T.~Hastie, R.~Tibshirani, and J.~Friedman.
+\textit{The Elements of Statistical Learning}, 2nd~ed.
+Springer, 2009.
+
+\end{thebibliography}
+}
+
+\end{document}
