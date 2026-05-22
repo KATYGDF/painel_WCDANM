@@ -343,6 +343,15 @@ gt_tbl <- gt(tab_data) %>%
     style     = cell_text(color = "white", weight = "bold"),
     locations = cells_column_labels(everything())
   ) %>%
+  # Proportional column widths — fills viewport without leaving dead whitespace
+  cols_width(
+    Set       ~ pct(6),
+    Variables ~ pct(40),
+    Method    ~ pct(20),
+    g         ~ pct(7),
+    ARI       ~ pct(13),
+    Accuracy  ~ pct(14)
+  ) %>%
   tab_options(
     table.font.size                = px(14),
     table.width                    = pct(100),
