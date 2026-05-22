@@ -8,14 +8,26 @@
 #   fig3_confusion_matrix.png   — best model confusion matrix (V3 · NB Mixture)
 #   fig4_pca_by_group.png       — PCA projection by group (4 rows × 3 columns)
 #
+# HOW TO ADJUST FIGURE SIZE:
+#   Edit the W/H variables in the DIMENSIONS block below, then re-source.
+#   windows() opens a preview — text and elements scale correctly because
+#   ggsave() re-renders at the exact W × H you specify (300 dpi).
+#
 # Run from project root (C:/Katy/Doutorado/painel_WCDANM):
 #   source("poster_figures.R")
 #
 # One-time dependency for fig2:
 #   install.packages("webshot2")
-#   webshot2::install_chromote()   # or: install.packages("chromote")
 # =============================================================================
 
+
+# ── DIMENSIONS (inches) — edit here, then re-source ──────────────────────────
+#   Rule of thumb for poster: width ≈ column width in inches, height as needed.
+
+W1 <- 20;   H1 <- 5.5   # fig1 · EDA distributions  (wide strip)
+W3 <- 12;   H3 <- 6     # fig3 · Confusion matrices  (side-by-side)
+W4 <- 15;   H4 <- 17    # fig4 · PCA by group        (tall 4-row panel)
+DPI <- 300              # resolution for all saved files
 
 # ── 0. Packages & directories ─────────────────────────────────────────────────
 
@@ -195,10 +207,11 @@ fig1 <- ggplot(df_long, aes(x = count)) +
   ) +
   TEMA_P
 
-windows(width = 20, height = 5.5)
+windows(width = W1, height = H1)   # preview — resize to taste, then adjust W1/H1 above
 print(fig1)
-cat("  → fig1 open — resize window, then save with:\n")
-cat("    savePlot('poster/figs/fig1_eda_distributions.png', type = 'png')\n\n")
+ggsave(file.path(DIR_OUT, "fig1_eda_distributions.png"),
+       fig1, width = W1, height = H1, dpi = DPI, bg = "white")
+cat("  ✓ fig1_eda_distributions.png  (", W1, "×", H1, "in ·", DPI, "dpi)\n\n")
 
 
 # =============================================================================
@@ -334,10 +347,11 @@ fig3 <- (p_nb | p_km) +
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-windows(width = 12, height = 6)
+windows(width = W3, height = H3)   # preview — resize to taste, then adjust W3/H3 above
 print(fig3)
-cat("  → fig3 open — resize window, then save with:\n")
-cat("    savePlot('poster/figs/fig3_confusion_matrix.png', type = 'png')\n\n")
+ggsave(file.path(DIR_OUT, "fig3_confusion_matrix.png"),
+       fig3, width = W3, height = H3, dpi = DPI, bg = "white")
+cat("  ✓ fig3_confusion_matrix.png  (", W3, "×", H3, "in ·", DPI, "dpi)\n\n")
 
 
 # =============================================================================
@@ -425,19 +439,17 @@ fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-windows(width = 15, height = 17)
+windows(width = W4, height = H4)   # preview — resize to taste, then adjust W4/H4 above
 print(fig4)
-cat("  → fig4 open — resize window, then save with:\n")
-cat("    savePlot('poster/figs/fig4_pca_by_group.png', type = 'png')\n\n")
+ggsave(file.path(DIR_OUT, "fig4_pca_by_group.png"),
+       fig4, width = W4, height = H4, dpi = DPI, bg = "white")
+cat("  ✓ fig4_pca_by_group.png  (", W4, "×", H4, "in ·", DPI, "dpi)\n\n")
 
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 cat(strrep("─", 60), "\n")
-cat("Done. Figures open in Windows graphics devices.\n\n")
-cat("Resize each window as needed, then save with savePlot():\n")
-cat("  savePlot('poster/figs/fig1_eda_distributions.png', type = 'png')\n")
-cat("  savePlot('poster/figs/fig3_confusion_matrix.png',  type = 'png')\n")
-cat("  savePlot('poster/figs/fig4_pca_by_group.png',      type = 'png')\n\n")
-cat("fig2 (results table) is saved automatically via gt + webshot2.\n")
+cat("Done. Figures saved to:", DIR_OUT, "\n\n")
+cat("To change size: edit W1/H1, W3/H3, W4/H4 at the top of the\n")
+cat("script and re-source — text will scale proportionally.\n")
 cat(strrep("─", 60), "\n")
