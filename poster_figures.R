@@ -34,19 +34,21 @@ DPI <- 300              # 300 dpi for crisp text at poster print size
 
 # Fraction of box height for each figure (adjust until preview looks right;
 # fig1 + fig2 should sum to ~1.0 if they share the same box):
-FRAC_FIG1  <- 0.42      # EDA distributions   (upper strip)
-FRAC_FIG2  <- 0.55      # Results table       (lower portion)
-FRAC_FIG3  <- 0.50      # Confusion matrices  (half height)
-FRAC_FIG4  <- 1.00      # PCA by group        (full box height)
+FRAC_FIG1  <- 0.42      # EDA distributions   (upper strip)   — height fraction
+FRAC_FIG2  <- 0.55      # Results table       (lower portion) — height fraction
+FRAC_FIG3  <- 0.50      # Confusion matrices  (half height)   — height fraction
+FRAC_FIG4  <- 1.00      # PCA by group        (full height)   — height fraction
+
+W_FIG2     <- 0.80      # ← table width as fraction of box width (reduce to shrink)
 
 # Derived sizes in inches (do not edit below this line)
 BOX_W <- CANVA_W_MM / 25.4
 BOX_H <- CANVA_H_MM / 25.4
 
-W1 <- BOX_W;   H1 <- BOX_H * FRAC_FIG1
-W2 <- BOX_W;   H2 <- BOX_H * FRAC_FIG2
-W3 <- BOX_W;   H3 <- BOX_H * FRAC_FIG3
-W4 <- BOX_W;   H4 <- BOX_H * FRAC_FIG4
+W1 <- BOX_W;              H1 <- BOX_H * FRAC_FIG1
+W2 <- BOX_W * W_FIG2;     H2 <- BOX_H * FRAC_FIG2
+W3 <- BOX_W;              H3 <- BOX_H * FRAC_FIG3
+W4 <- BOX_W;              H4 <- BOX_H * FRAC_FIG4
 
 cat(sprintf(paste0(
   "Box: %.2f × %.2f in (%.0f × %.0f mm)\n",
