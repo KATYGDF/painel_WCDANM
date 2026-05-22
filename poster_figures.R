@@ -264,6 +264,10 @@ gt_tbl <- gt(tab_data) %>%
     footnote  = "Groups: G1 = Low Utilization · G2 = Coordinated Outpatient · G3 = Acute/Hospital · G4 = Atypical",
     locations = cells_column_labels(columns = Variables)
   ) %>%
+  tab_style(
+    style     = cell_text(color = "white", weight = "bold"),
+    locations = cells_column_labels(everything())
+  ) %>%
   tab_options(
     table.font.size                = px(14),
     table.width                    = pct(100),
@@ -271,8 +275,6 @@ gt_tbl <- gt(tab_data) %>%
     heading.title.font.size        = px(16),
     heading.subtitle.font.size     = px(13),
     column_labels.background.color = "#2c3e50",
-    column_labels.font.color       = "white",
-    column_labels.font.weight      = "bold",
     column_labels.border.top.style = "hidden",
     table_body.hlines.color        = "#e0e0e0",
     stub.background.color          = "white",
