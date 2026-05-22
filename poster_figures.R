@@ -70,6 +70,12 @@ if (length(novos) > 0) {
     install.packages("webshot2", repos = "https://cloud.r-project.org", quiet = TRUE)
 }
 
+# Confirm critical packages loaded — stop early with a clear message if missing
+for (pkg in c("ggtext", "patchwork", "gt")) {
+  if (!requireNamespace(pkg, quietly = TRUE))
+    stop(sprintf("Package '%s' could not be installed. Run: install.packages('%s')", pkg, pkg))
+}
+
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(ggplot2)
   library(patchwork); library(scales)
@@ -142,7 +148,7 @@ VAR_EN  <- c(consultas   = "Outpatient Visits",
 CAP1 <- paste0(
   "**Figure 1.** Distribution of count variables by latent group (n = 5,000). ",
   "Grey bars: overall histogram (density scale). Coloured curves: kernel density per true group; ",
-  "x-axis truncated at the 97th percentile.<br>",
+  "x-axis truncated at the 97th percentile.\n",
   LEGENDA_EN
 )
 CAP2 <- paste0(
@@ -153,17 +159,21 @@ CAP2 <- paste0(
 CAP3 <- paste0(
   "**Figure 2.** Confusion matrices for the best variable set (V3: 5 variables), ",
   "NB Mixture (left) vs. K-means (right). ",
-  "Diagonal = correct assignments. Labels paired via Hungarian algorithm.<br>",
+  "Diagonal = correct assignments. Labels paired via Hungarian algorithm.\n",
   LEGENDA_EN
 )
 CAP4 <- paste0(
   "**Figure 3.** PCA projection (log1p + scaled) of V3 variables. ",
   "Each row highlights one true group (coloured); remaining points in grey. ",
-  "Columns: ground truth | NB Mixture estimate | K-means estimate.<br>",
+  "Columns: ground truth | NB Mixture estimate | K-means estimate.\n",
   LEGENDA_EN
 )
 
-# Poster theme — caption uses element_markdown for bold "Figure X." prefix
+# Caption element: element_markdown renders **bold** prefix; \n = line break
+cap_elem <- ggtext::element_markdown(colour = "grey20", size = 10,
+                                     hjust = 0.5, margin = margin(t = 8))
+
+# Poster theme
 TEMA_P <- theme_minimal(base_size = 13) +
   theme(
     panel.grid.minor  = element_blank(),
@@ -171,9 +181,7 @@ TEMA_P <- theme_minimal(base_size = 13) +
     strip.background  = element_rect(fill = "#f2f2f2", colour = NA),
     plot.title        = element_text(face = "bold", size = 14),
     plot.subtitle     = element_text(colour = "grey40", size = 10),
-    plot.caption      = ggtext::element_markdown(
-                          colour = "grey20", size = 10,
-                          hjust = 0.5, margin = margin(t = 8)),
+    plot.caption      = cap_elem,
     legend.position   = "bottom",
     legend.title      = element_text(face = "bold", size = 10),
     legend.text       = element_text(size = 10)
