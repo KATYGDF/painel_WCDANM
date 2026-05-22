@@ -10,8 +10,7 @@
 #
 # HOW TO ADJUST FIGURE SIZE:
 #   Edit the W/H variables in the DIMENSIONS block below, then re-source.
-#   windows() opens a preview — text and elements scale correctly because
-#   ggsave() re-renders at the exact W × H you specify (300 dpi).
+#   ggsave() renders at the exact W × H specified — text scales correctly.
 #
 # Run from project root (C:/Katy/Doutorado/painel_WCDANM):
 #   source("poster_figures.R")
@@ -270,8 +269,6 @@ fig1 <- ggplot(df_long, aes(x = count)) +
   ) +
   TEMA_P
 
-windows(width = W1, height = H1)   # preview — resize to taste, then adjust W1/H1 above
-print(fig1)
 ggsave(file.path(DIR_OUT, "fig1_eda_distributions.png"),
        fig1, width = W1, height = H1, dpi = DPI, bg = "white")
 cat("  ✓ fig1_eda_distributions.png  (", W1, "×", H1, "in ·", DPI, "dpi)\n\n")
@@ -415,8 +412,6 @@ fig3 <- (p_nb | p_km) +
     theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-windows(width = W3, height = H3)   # preview — resize to taste, then adjust W3/H3 above
-print(fig3)
 ggsave(file.path(DIR_OUT, "fig3_confusion_matrix.png"),
        fig3, width = W3, height = H3, dpi = DPI, bg = "white")
 cat("  ✓ fig3_confusion_matrix.png  (", W3, "×", H3, "in ·", DPI, "dpi)\n\n")
@@ -502,8 +497,6 @@ fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
     theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-windows(width = W4, height = H4)   # preview — resize to taste, then adjust W4/H4 above
-print(fig4)
 ggsave(file.path(DIR_OUT, "fig4_pca_by_group.png"),
        fig4, width = W4, height = H4, dpi = DPI, bg = "white")
 cat("  ✓ fig4_pca_by_group.png  (", W4, "×", H4, "in ·", DPI, "dpi)\n\n")
