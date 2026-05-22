@@ -33,22 +33,30 @@ CANVA_H_MM <- 200.68    # Altura
 
 DPI <- 300              # 300 dpi for crisp text at poster print size
 
-# Fraction of box height for each figure (adjust until preview looks right):
+# Fraction of box height for each figure (adjust until preview looks right;
+# fig1 + fig2 should sum to ~1.0 if they share the same box):
 FRAC_FIG1  <- 0.42      # EDA distributions   (upper strip)
-FRAC_FIG3  <- 0.50      # Confusion matrices  (lower half)
-FRAC_FIG4  <- 1.00      # PCA by group        (use full box height)
+FRAC_FIG2  <- 0.55      # Results table       (lower portion)
+FRAC_FIG3  <- 0.50      # Confusion matrices  (half height)
+FRAC_FIG4  <- 1.00      # PCA by group        (full box height)
 
 # Derived sizes in inches (do not edit below this line)
 BOX_W <- CANVA_W_MM / 25.4
 BOX_H <- CANVA_H_MM / 25.4
 
 W1 <- BOX_W;   H1 <- BOX_H * FRAC_FIG1
+W2 <- BOX_W;   H2 <- BOX_H * FRAC_FIG2
 W3 <- BOX_W;   H3 <- BOX_H * FRAC_FIG3
 W4 <- BOX_W;   H4 <- BOX_H * FRAC_FIG4
 
-cat(sprintf(
-  "Box: %.2f × %.2f in (%.0f × %.0f mm)\n  fig1: %.2f×%.2f in\n  fig3: %.2f×%.2f in\n  fig4: %.2f×%.2f in\n\n",
-  BOX_W, BOX_H, CANVA_W_MM, CANVA_H_MM, W1, H1, W3, H3, W4, H4))
+cat(sprintf(paste0(
+  "Box: %.2f × %.2f in (%.0f × %.0f mm)\n",
+  "  fig1 (EDA):     %.2f × %.2f in\n",
+  "  fig2 (table):   %.2f × %.2f in\n",
+  "  fig3 (conf.):   %.2f × %.2f in\n",
+  "  fig4 (PCA):     %.2f × %.2f in\n\n"),
+  BOX_W, BOX_H, CANVA_W_MM, CANVA_H_MM,
+  W1, H1, W2, H2, W3, H3, W4, H4))
 
 # ── 0. Packages & directories ─────────────────────────────────────────────────
 
@@ -316,10 +324,13 @@ gt_tbl <- gt(tab_data) %>%
     source_notes.font.size         = px(11)
   )
 
+# vwidth/vheight: viewport in px (zoom=2 doubles it, giving W2*DPI output pixels)
 tryCatch({
   gtsave(gt_tbl, file.path(DIR_OUT, "fig2_results_table.png"),
-         zoom = 2, expand = 15)
-  cat("  ✓ fig2_results_table.png\n\n")
+         vwidth  = round(W2 * DPI / 2),
+         vheight = round(H2 * DPI / 2),
+         zoom = 2, expand = 0)
+  cat("  ✓ fig2_results_table.png  (", round(W2, 2), "×", round(H2, 2), "in ·", DPI, "dpi)\n\n")
 }, error = function(e) {
   message("  ✗ fig2 failed: ", conditionMessage(e))
   message("    Run once: install.packages('webshot2')")
