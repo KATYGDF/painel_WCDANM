@@ -195,9 +195,10 @@ fig1 <- ggplot(df_long, aes(x = count)) +
   ) +
   TEMA_P
 
-ggsave(file.path(DIR_OUT, "fig1_eda_distributions.png"),
-       fig1, width = 20, height = 5.5, dpi = 300, bg = "white")
-cat("  ✓ fig1_eda_distributions.png\n\n")
+windows(width = 20, height = 5.5)
+print(fig1)
+cat("  → fig1 open — resize window, then save with:\n")
+cat("    savePlot('poster/figs/fig1_eda_distributions.png', type = 'png')\n\n")
 
 
 # =============================================================================
@@ -333,9 +334,10 @@ fig3 <- (p_nb | p_km) +
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-ggsave(file.path(DIR_OUT, "fig3_confusion_matrix.png"),
-       fig3, width = 12, height = 6, dpi = 300, bg = "white")
-cat("  ✓ fig3_confusion_matrix.png\n\n")
+windows(width = 12, height = 6)
+print(fig3)
+cat("  → fig3 open — resize window, then save with:\n")
+cat("    savePlot('poster/figs/fig3_confusion_matrix.png', type = 'png')\n\n")
 
 
 # =============================================================================
@@ -423,17 +425,19 @@ fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
     theme = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
   )
 
-ggsave(file.path(DIR_OUT, "fig4_pca_by_group.png"),
-       fig4, width = 15, height = 17, dpi = 300, bg = "white")
-cat("  ✓ fig4_pca_by_group.png\n\n")
+windows(width = 15, height = 17)
+print(fig4)
+cat("  → fig4 open — resize window, then save with:\n")
+cat("    savePlot('poster/figs/fig4_pca_by_group.png', type = 'png')\n\n")
 
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
 cat(strrep("─", 60), "\n")
-cat("Done. Files written to:", DIR_OUT, "\n")
-cat("  fig1_eda_distributions.png   20 × 5.5 in\n")
-cat("  fig2_results_table.png       (requires webshot2)\n")
-cat("  fig3_confusion_matrix.png    12 × 6 in\n")
-cat("  fig4_pca_by_group.png        15 × 17 in\n")
+cat("Done. Figures open in Windows graphics devices.\n\n")
+cat("Resize each window as needed, then save with savePlot():\n")
+cat("  savePlot('poster/figs/fig1_eda_distributions.png', type = 'png')\n")
+cat("  savePlot('poster/figs/fig3_confusion_matrix.png',  type = 'png')\n")
+cat("  savePlot('poster/figs/fig4_pca_by_group.png',      type = 'png')\n\n")
+cat("fig2 (results table) is saved automatically via gt + webshot2.\n")
 cat(strrep("─", 60), "\n")
