@@ -171,9 +171,16 @@ CAP4 <- paste0(
   LEGENDA_EN
 )
 
-# Caption element: element_markdown renders **bold** prefix; \n = line break
-cap_elem <- ggtext::element_markdown(colour = "grey20", size = 10,
-                                     hjust = 0.5, margin = margin(t = 8))
+# Caption element: element_textbox_simple wraps text automatically AND
+# renders **bold** markdown — solves captions being cut off at figure edge
+cap_elem <- ggtext::element_textbox_simple(
+  colour    = "grey20",
+  size      = 10,
+  hjust     = 0.5,        # centre-align the box itself
+  halign    = 0.5,        # centre-align text inside the box
+  margin    = margin(t = 8),
+  padding   = margin(0, 4, 0, 4)
+)
 
 # Poster theme
 TEMA_P <- theme_minimal(base_size = 13) +
