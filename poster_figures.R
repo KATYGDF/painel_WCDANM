@@ -35,10 +35,10 @@
 #                  WIDTH (mm)   HEIGHT (mm)
 DIM_MM <- list(
   fig0 = c(W = 160, H = 200),   # Methodology panel  (left/side panel)
-  fig1 = c(W = 175, H =  55),   # EDA distributions  (wide, short)
-  fig2 = c(W = 175, H =  60),   # Results table      (wide, short)
-  fig3 = c(W = 175, H =  70),   # Confusion matrices (wide)
-  fig4 = c(W = 140, H = 200)    # PCA by group       (narrow, tall)
+  fig1 = c(W = 217, H = 135),   # EDA distributions
+  fig2 = c(W = 217, H =  80),   # Results table
+  fig3 = c(W = 217, H =  76),   # Confusion matrices
+  fig4 = c(W = 200, H = 295)    # PCA by group       (tall)
 )
 
 DPI <- 300              # 300 dpi for crisp text at poster print size
@@ -171,7 +171,7 @@ CAP3 <- paste0(
   
 )
 CAP4 <- paste0(
-  "**Figure 3.** PCA projection (log1p + scaled) of V3 variables. ",
+  "**Figure 3.** PCA projection of V3 variables. ",
   "Each row highlights one true group (coloured); remaining points in grey. ",
   "Columns: ground truth | NB Mixture estimate | K-means estimate.\n"
   
