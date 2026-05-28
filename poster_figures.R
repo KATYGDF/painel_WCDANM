@@ -322,7 +322,7 @@ tab_data <- data.frame(
 gt_tbl <- gt(tab_data) %>%
   tab_header(
     title    = md("**Table 1.** Latent Group Recovery — Variable Sets × Methods"),
-    subtitle = md("*g* selected by BIC (NB Mixture) and Silhouette (K-means) &nbsp;·&nbsp; n = 5 000")
+    subtitle = md("*g* selected by BIC (NB Mixture) and Silhouette (K-means) &nbsp;·&nbsp; n = 5,000")
   ) %>%
   cols_label(
     Set = "Set", Variables = "Variables included",
