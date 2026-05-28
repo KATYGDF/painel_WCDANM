@@ -588,9 +588,13 @@ meth_html <- sprintf('<!DOCTYPE html>
 
   <div class="block">
     <div class="method-title">M1 &mdash; Negative Binomial Mixture.</div>
-    Product of independent NB distributions per component.
-    Maximum likelihood via the Expectation-Maximisation (EM) algorithm.
-    Number of components <i>g</i> &isin; {1, &hellip;, 4} selected by BIC.
+    Each observation <b>x</b><sub><i>i</i></sub> = (<i>x</i><sub><i>i</i>1</sub>, &hellip;,
+    <i>x</i><sub><i>ip</i></sub>) &isin; &#8469;<sup><i>p</i></sup>
+    is a multivariate count vector with <i>p</i> &isin; {3, 4, 5} variables.
+    Under conditional independence of the <i>p</i> variables given the latent component,
+    the component-specific density factors as a product of <i>p</i> independent NB marginals.
+    Parameters estimated by maximum likelihood via the EM algorithm;
+    number of components <i>g</i> &isin; {1, &hellip;, 4} selected by BIC.
     <div class="formula-wrap">
       <i>f</i>(<b>x</b><sub><i>i</i></sub> | &Theta;) =
       &nbsp;<span style="font-size:1.3em">&sum;</span><sub style="font-size:0.65em"><i>k</i>=1</sub><sup style="font-size:0.65em"><i>g</i></sup>&nbsp;
