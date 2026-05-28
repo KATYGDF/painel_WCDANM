@@ -235,8 +235,8 @@ plot_conf_en <- function(ct, titulo, subtitulo) {
     geom_tile(aes(fill = Freq), colour = "white", linewidth = 0.9) +
     geom_text(
       aes(label = ifelse(Freq > 0,
-                         paste0(Freq, "\n(", sprintf("%.1f%%", pct), ")"), "")),
-      size = 3.4, lineheight = 1.1, colour = "grey10"
+                         paste0(Freq, "  (", sprintf("%.1f%%", pct), ")"), "")),
+      size = 3.0, colour = "grey10"
     ) +
     scale_fill_gradient(low = "#eef5fb", high = "#2980b9", name = "n") +
     scale_x_discrete(position = "top") +
