@@ -23,45 +23,47 @@
 # ── DIMENSIONS — edit here, then re-source ───────────────────────────────────
 #
 # HOW TO GET SIZES FROM CANVA:
-#   Click the white box → Avançados → Largura / Altura (in mm)
-#   Paste the values below. The script converts mm → inches automatically.
+#   In Canva, click (or draw) the placeholder box where each figure will go,
+#   open "Avançados" and read Largura × Altura in mm.
+#   Paste those mm values below — one width/height pair per figure.
+#   The script converts mm → inches automatically (text scales correctly).
 #
-# White content box (from Canva "Avançados"):
-CANVA_W_MM <- 353.06    # Largura
-CANVA_H_MM <- 200.68    # Altura
+# Layout (current draft):
+#   LEFT column   : fig1 (EDA) on top · Table 1 in the middle · fig3 (conf.) below
+#   RIGHT column  : fig4 (PCA), tall · fig0 (methodology) elsewhere
+#
+#                  WIDTH (mm)   HEIGHT (mm)
+DIM_MM <- list(
+  fig0 = c(W = 160, H = 200),   # Methodology panel  (left/side panel)
+  fig1 = c(W = 175, H =  55),   # EDA distributions  (wide, short)
+  fig2 = c(W = 175, H =  60),   # Results table      (wide, short)
+  fig3 = c(W = 175, H =  70),   # Confusion matrices (wide)
+  fig4 = c(W = 140, H = 200)    # PCA by group       (narrow, tall)
+)
 
 DPI <- 300              # 300 dpi for crisp text at poster print size
 
-# Fraction of box height for each figure (adjust until preview looks right;
-# fig1 + fig2 should sum to ~1.0 if they share the same box):
-FRAC_FIG1  <- 0.42      # EDA distributions   (upper strip)   — height fraction
-FRAC_FIG2  <- 0.55      # Results table       (lower portion) — height fraction
-FRAC_FIG3  <- 0.50      # Confusion matrices  (half height)   — height fraction
-FRAC_FIG4  <- 1.00      # PCA by group        (full height)   — height fraction
+# ── Derived sizes in inches (do not edit below this line) ──
+mm2in <- function(mm) unname(mm) / 25.4
 
-W_FIG2     <- 0.50      # ← table width as fraction of box width (reduce to shrink)
-
-# Methodology panel (fig0) — left column dimensions in mm
-W0_MM <- 160            # ← width of the methodology column in Canva (measure it)
-H0_MM <- 200            # ← height of the methodology column in Canva
-
-# Derived sizes in inches (do not edit below this line)
-BOX_W <- CANVA_W_MM / 25.4
-BOX_H <- CANVA_H_MM / 25.4
-
-W1 <- BOX_W;              H1 <- BOX_H * FRAC_FIG1
-W2 <- BOX_W * W_FIG2;     H2 <- BOX_H * FRAC_FIG2
-W3 <- BOX_W;              H3 <- BOX_H * FRAC_FIG3
-W4 <- BOX_W*0.4;          H4 <- BOX_H * FRAC_FIG4
+W0_MM <- unname(DIM_MM$fig0["W"]); H0_MM <- unname(DIM_MM$fig0["H"]); W0 <- mm2in(W0_MM)
+W1 <- mm2in(DIM_MM$fig1["W"]);  H1 <- mm2in(DIM_MM$fig1["H"])
+W2 <- mm2in(DIM_MM$fig2["W"]);  H2 <- mm2in(DIM_MM$fig2["H"])
+W3 <- mm2in(DIM_MM$fig3["W"]);  H3 <- mm2in(DIM_MM$fig3["H"])
+W4 <- mm2in(DIM_MM$fig4["W"]);  H4 <- mm2in(DIM_MM$fig4["H"])
 
 cat(sprintf(paste0(
-  "Box: %.2f × %.2f in (%.0f × %.0f mm)\n",
-  "  fig1 (EDA):     %.2f × %.2f in\n",
-  "  fig2 (table):   %.2f × %.2f in\n",
-  "  fig3 (conf.):   %.2f × %.2f in\n",
-  "  fig4 (PCA):     %.2f × %.2f in\n\n"),
-  BOX_W, BOX_H, CANVA_W_MM, CANVA_H_MM,
-  W1, H1, W2, H2, W3, H3, W4, H4))
+  "Figure sizes (mm → in):\n",
+  "  fig0 (method.): %3.0f × %3.0f mm\n",
+  "  fig1 (EDA):     %3.0f × %3.0f mm  →  %.2f × %.2f in\n",
+  "  fig2 (table):   %3.0f × %3.0f mm  →  %.2f × %.2f in\n",
+  "  fig3 (conf.):   %3.0f × %3.0f mm  →  %.2f × %.2f in\n",
+  "  fig4 (PCA):     %3.0f × %3.0f mm  →  %.2f × %.2f in\n\n"),
+  DIM_MM$fig0["W"], DIM_MM$fig0["H"],
+  DIM_MM$fig1["W"], DIM_MM$fig1["H"], W1, H1,
+  DIM_MM$fig2["W"], DIM_MM$fig2["H"], W2, H2,
+  DIM_MM$fig3["W"], DIM_MM$fig3["H"], W3, H3,
+  DIM_MM$fig4["W"], DIM_MM$fig4["H"], W4, H4))
 
 # ── 0. Packages & directories ─────────────────────────────────────────────────
 
