@@ -276,7 +276,7 @@ fig1 <- ggplot(df_long, aes(x = count)) +
                alpha = 0.28, linewidth = 0.8) +
   scale_fill_manual(values = COR, name = "True group", labels = G_LABELS) +
   scale_colour_manual(values = COR, name = "True group", labels = G_LABELS) +
-  facet_wrap(~ variable, scales = "free", ncol = 5) +
+  facet_wrap(~ variable, scales = "free", ncol = 3) +   # 3 on top, 2 below
   labs(
     x        = "Count",
     y        = "Density",
