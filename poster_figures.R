@@ -39,7 +39,11 @@ FRAC_FIG2  <- 0.55      # Results table       (lower portion) — height fractio
 FRAC_FIG3  <- 0.50      # Confusion matrices  (half height)   — height fraction
 FRAC_FIG4  <- 1.00      # PCA by group        (full height)   — height fraction
 
-W_FIG2     <- 0.80      # ← table width as fraction of box width (reduce to shrink)
+W_FIG2     <- 0.50      # ← table width as fraction of box width (reduce to shrink)
+
+# Methodology panel (fig0) — left column dimensions in mm
+W0_MM <- 160            # ← width of the methodology column in Canva (measure it)
+H0_MM <- 200            # ← height of the methodology column in Canva
 
 # Derived sizes in inches (do not edit below this line)
 BOX_W <- CANVA_W_MM / 25.4
@@ -48,7 +52,7 @@ BOX_H <- CANVA_H_MM / 25.4
 W1 <- BOX_W;              H1 <- BOX_H * FRAC_FIG1
 W2 <- BOX_W * W_FIG2;     H2 <- BOX_H * FRAC_FIG2
 W3 <- BOX_W;              H3 <- BOX_H * FRAC_FIG3
-W4 <- BOX_W;              H4 <- BOX_H * FRAC_FIG4
+W4 <- BOX_W*0.4;          H4 <- BOX_H * FRAC_FIG4
 
 cat(sprintf(paste0(
   "Box: %.2f × %.2f in (%.0f × %.0f mm)\n",
@@ -123,35 +127,35 @@ cat(sprintf("Data loaded: %d obs · 4 true groups\n\n", n))
 # Order in factor: 1=baixo_uso 2=ambulatorial 3=agudo 4=atipico
 COR <- c("G1" = "#7BAFD4",   # Low Utilization
          "G2" = "#6EBF8B",   # Coordinated Outpatient
-         "G3" = "#E8B96B",   # Acute / Hospital
+         "G3" = "#E8B96B",   # Acute
          "G4" = "#D98585")   # Atypical
 
 G_LABELS <- c("G1 · Low utilization",
               "G2 · Coordinated outpatient",
               "G3 · Acute",
-              "G4 · Atypical pattern")
+              "G4 · Atypical")
 
 # Shared legend string — used in captions / footnotes of all figures
 LEGENDA_EN <- paste0(
   "G1 = Low utilization  ·  G2 = Coordinated outpatient  ·  ",
-  "G3 = Acute  ·  G4 = Atypical pattern"
+  "G3 = Acute  ·  G4 = Atypical"
 )
 
 # English names for the 5 count variables
 VARS_V3 <- c("consultas", "ps", "exames", "internacoes", "terapias")
-VAR_EN  <- c(consultas   = "Medical Consultations",
-             ps          = "Emergency Visits",
-             exames      = "Diagnostic Exams",
-             internacoes = "Hospitalizations",
-             terapias    = "Therapies")
+VAR_EN  <- c(consultas   = "medical consultations",
+             ps          = "emergency visits",
+             exames      = "diagnostic exams",
+             internacoes = "hospitalizations",
+             terapias    = "therapies")
 
 # Figure / table captions — numbered, bold label + normal text
 # Format: "**Figure X.** Description. Legend."
 CAP1 <- paste0(
   "**Figure 1.** Distribution of count variables by latent group (n = 5,000). ",
   "Grey bars: overall histogram (density scale). Coloured curves: kernel density per true group; ",
-  "x-axis truncated at the 97th percentile.\n",
-  LEGENDA_EN
+  "x-axis truncated at the 97th percentile.\n"
+  
 )
 CAP2 <- paste0(
   "**Table 1.** Latent group recovery metrics for three variable sets and two methods. ",
@@ -161,14 +165,14 @@ CAP2 <- paste0(
 CAP3 <- paste0(
   "**Figure 2.** Confusion matrices for the best variable set (V3: 5 variables), ",
   "NB Mixture (left) vs. K-means (right). ",
-  "Diagonal = correct assignments. Labels paired via Hungarian algorithm.\n",
-  LEGENDA_EN
+  "Diagonal = correct assignments. Labels paired via Hungarian algorithm.\n"
+  
 )
 CAP4 <- paste0(
   "**Figure 3.** PCA projection (log1p + scaled) of V3 variables. ",
   "Each row highlights one true group (coloured); remaining points in grey. ",
-  "Columns: ground truth | NB Mixture estimate | K-means estimate.\n",
-  LEGENDA_EN
+  "Columns: ground truth | NB Mixture estimate | K-means estimate.\n"
+  
 )
 
 # Caption element: element_textbox_simple wraps text automatically AND
@@ -300,9 +304,9 @@ cat("Generating fig2_results_table.png ...\n")
 tab_data <- data.frame(
   Set = c("V1", "", "V2", "", "V3", ""),
   Variables = c(
-    "Outpatient Visits · Diagnostic Exams · ER Visits", "",
-    "V1  +  Hospitalizations",                          "",
-    "V2  +  Therapy Sessions",                          ""
+    "medical consultations · diagnostic exams · emergency visits", "",
+    "V1  +  hospitalizations",                          "",
+    "V2  +  therapies",                          ""
   ),
   Method   = c("NB Mixture", "K-means",
                "NB Mixture", "K-means",
@@ -509,15 +513,144 @@ plot_pca_row <- function(g_idx) {
 
 fig4 <- wrap_plots(lapply(1:4, plot_pca_row), ncol = 1) +
   plot_annotation(
-    title   = "PCA Classification by Group — V3 (log1p + scaled)",
+    title   = "PCA Classification",
     caption = CAP4,
-    theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 15))
+    theme   = TEMA_P + theme(plot.title = element_text(face = "bold", size = 12))
   )
 
 ggsave(file.path(DIR_OUT, "fig4_pca_by_group.png"),
        fig4, width = W4, height = H4, dpi = DPI, bg = "white")
 cat("  ✓ fig4_pca_by_group.png  (", W4, "×", H4, "in ·", DPI, "dpi)\n\n")
 
+
+# =============================================================================
+# FIG 0 · Methodology panel (HTML → PNG via webshot2)
+# =============================================================================
+
+cat("Generating fig0_methodology.png ...\n")
+
+meth_html <- sprintf('<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px; line-height: 1.5;
+    width: %dpx; background: white;
+  }
+  .header {
+    background: #1a4a72; color: white;
+    font-weight: bold; font-size: 18px;
+    padding: 10px 16px; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .body { padding: 14px 16px; }
+  .block { margin-bottom: 11px; }
+  .label { font-weight: bold; }
+  .method-title { font-weight: bold; margin-bottom: 4px; }
+  .formula-wrap {
+    text-align: center; margin: 8px 0 4px;
+    font-family: "Cambria Math", "Georgia", serif;
+    font-size: 15px;
+  }
+  .where {
+    font-size: 13px; color: #333; margin: 4px 0 0 8px;
+    line-height: 1.65;
+  }
+  sub, sup { font-size: 0.72em; }
+  i { font-style: italic; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="header">Methodology</div>
+<div class="body">
+
+  <div class="block">
+    <span class="label">Data:</span>
+    A synthetic dataset of 5,000 beneficiaries structured into four latent
+    groups and described by five count variables: <i>medical consultations,
+    emergency visits, diagnostic exams, hospitalizations</i> and <i>therapies.</i>
+    Marginal distributions calibrated to ANS panel indicators.
+  </div>
+
+  <div class="block">
+    <span class="label">Latent profiles:</span>
+    G1 &middot; Low utilization &nbsp;&nbsp;
+    G2 &middot; Coordinated outpatient &nbsp;&nbsp;
+    G3 &middot; Acute &nbsp;&nbsp;
+    G4 &middot; Atypical pattern
+  </div>
+
+  <hr>
+
+  <div class="block">
+    <div class="method-title">M1 &mdash; Negative Binomial Mixture.</div>
+    Product of independent NB distributions per component.
+    Maximum likelihood via the Expectation-Maximisation (EM) algorithm.
+    Number of components <i>g</i> &isin; {1, &hellip;, 4} selected by BIC.
+    <div class="formula-wrap">
+      <i>f</i>(<b>x</b><sub><i>i</i></sub> | &Theta;) =
+      &nbsp;<span style="font-size:1.3em">&sum;</span><sub style="font-size:0.65em"><i>k</i>=1</sub><sup style="font-size:0.65em"><i>g</i></sup>&nbsp;
+      &pi;<sub><i>k</i></sub>
+      &nbsp;<span style="font-size:1.3em">&prod;</span><sub style="font-size:0.65em"><i>j</i>=1</sub><sup style="font-size:0.65em"><i>p</i></sup>&nbsp;
+      NB(<i>x</i><sub><i>ij</i></sub> | &mu;<sub><i>kj</i></sub>, &phi;<sub><i>kj</i></sub>)
+    </div>
+    <div class="where">
+      &pi;<sub><i>k</i></sub> is the weight of component <i>k</i>, with
+        &sum;<sub><i>k</i></sub>&pi;<sub><i>k</i></sub> = 1 and &pi;<sub><i>k</i></sub> &ge; 0<br>
+      &mu;<sub><i>kj</i></sub> is the NB mean of variable <i>j</i> in component <i>k</i><br>
+      &phi;<sub><i>kj</i></sub> is the corresponding dispersion parameter<br>
+      &Theta; = {&pi;<sub><i>k</i></sub>, &mu;<sub><i>kj</i></sub>, &phi;<sub><i>kj</i></sub>}
+        denotes the full set of parameters
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="block">
+    <div class="method-title">M2 &mdash; K-means (baseline).</div>
+    Applied to log-transformed and standardised counts.
+    Number of clusters selected by the Silhouette criterion.
+    <div class="formula-wrap">
+      arg&nbsp;min<sub>{<i>C</i><sub>1</sub>,&hellip;,<i>C</i><sub><i>k</i></sub>}</sub>
+      &nbsp;<span style="font-size:1.3em">&sum;</span><sub style="font-size:0.65em"><i>j</i>=1</sub><sup style="font-size:0.65em"><i>k</i></sup>&nbsp;
+      <span style="font-size:1.3em">&sum;</span><sub style="font-size:0.65em"><i>x</i><sub><i>i</i></sub>&isin;<i>C</i><sub><i>j</i></sub></sub>
+      &nbsp;&#8214;<i>x</i><sub><i>i</i></sub> &minus; &mu;<sub><i>j</i></sub>&#8214;<sup>2</sup>
+    </div>
+    <div class="where">
+      <i>C</i><sub>1</sub>, &hellip;, <i>C</i><sub><i>k</i></sub>
+        are the <i>k</i> partitions (clusters)<br>
+      &mu;<sub><i>j</i></sub> = <sup>1</sup>&frasl;<sub>|<i>C</i><sub><i>j</i></sub>|</sub>
+        &sum;<sub><i>x</i><sub><i>i</i></sub>&isin;<i>C</i><sub><i>j</i></sub></sub>
+        <i>x</i><sub><i>i</i></sub> is the centroid of cluster <i>j</i><br>
+      &nbsp;&#8214;&nbsp;&middot;&nbsp;&#8214;<sup>2</sup>
+        is the squared Euclidean distance
+    </div>
+  </div>
+
+</div>
+</body>
+</html>', round(W0_MM / 25.4 * DPI / 2))
+
+tmp_meth <- tempfile(fileext = ".html")
+writeLines(meth_html, tmp_meth, useBytes = FALSE)
+
+tryCatch({
+  webshot2::webshot(
+    tmp_meth,
+    file.path(DIR_OUT, "fig0_methodology.png"),
+    vwidth  = round(W0_MM / 25.4 * DPI / 2),
+    vheight = round(H0_MM / 25.4 * DPI / 2),
+    zoom    = 2,
+    delay   = 0.2
+  )
+  cat("  ✓ fig0_methodology.png  (", W0_MM, "×", H0_MM, "mm)\n\n")
+}, error = function(e) {
+  message("  ✗ fig0 failed: ", conditionMessage(e))
+})
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 
