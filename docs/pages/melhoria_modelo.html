@@ -1134,14 +1134,30 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 </ul>
 
 <div class="alerta">
-  <strong>Implicação metodológica:</strong> o ICL é frequentemente
+  <strong>Implicação metodológica:</strong> o ICL é, com frequência,
   recomendado na literatura como alternativa ao BIC em situações de
   sobreposição entre componentes. <em>Os resultados aqui obtidos indicam
-  exatamente o oposto:</em> quando a sobreposição constitui a estrutura
-  real do problema, e não um artefato, o ICL apresenta excessivo
-  conservadorismo. Sua utilização justifica-se apenas quando há razão
-  substantiva para supor componentes <em>bem separados</em>.
+  o oposto:</em> quando a sobreposição constitui a estrutura real do
+  problema — e não um artefato decorrente de erro de especificação — o
+  ICL apresenta excessivo conservadorismo. Conforme estabelecido por
+  Biernacki, Celeux &amp; Govaert (2000) e reafirmado em revisão recente
+  por Celeux, Frühwirth-Schnatter &amp; Robert (2019, cap. 7), o ICL é
+  apropriado quando o objetivo é <em>classificação</em> e os componentes
+  podem ser supostos bem separados; em <em>modelagem de densidade</em>
+  com sobreposição admissível, recomendam-se o BIC ou o Bootstrap LRT.
+  Baudry (2015) demonstrou formalmente que o ICL é consistente para o
+  número de <em>clusters bem separados</em>, e não para o número de
+  <em>componentes da mistura</em> — objetos estatisticamente distintos
+  quando há sobreposição.
 </div>
+
+<blockquote class="cit">
+  &ldquo;ICL is to be preferred to BIC when the aim is to retrieve clusters
+  represented by Gaussian components, while BIC remains preferable when
+  one is interested in the modelling of the data distribution.&rdquo;
+  <cite>Biernacki, Celeux &amp; Govaert (2000). <em>IEEE Transactions on
+  Pattern Analysis and Machine Intelligence</em>, 22(7), 723.</cite>
+</blockquote>
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -1765,6 +1781,13 @@ tab_init <span class="op">&lt;-</span> <span class="fn">do.call</span>(rbind, ta
 <h2 id="referencias">13 · Referências</h2>
 
 <div class="ref-entry">
+  <cite>Baudry, J.-P. (2015).</cite>
+  Estimation and model selection for model-based clustering with the
+  conditional classification likelihood.
+  <em>Electronic Journal of Statistics</em>, <em>9</em>(1), 1041–1077.
+</div>
+
+<div class="ref-entry">
   <cite>Biernacki, C., Celeux, G. &amp; Govaert, G. (2000).</cite>
   Assessing a mixture model for clustering with the integrated completed
   likelihood.
@@ -1792,6 +1815,14 @@ tab_init <span class="op">&lt;-</span> <span class="fn">do.call</span>(rbind, ta
   A classification EM algorithm for clustering and two stochastic versions.
   <em>Computational Statistics &amp; Data Analysis</em>, <em>14</em>(3),
   315–332.
+</div>
+
+<div class="ref-entry">
+  <cite>Celeux, G., Frühwirth-Schnatter, S. &amp; Robert, C. P. (2019).</cite>
+  Model selection for mixture models — Perspectives and strategies. In:
+  Frühwirth-Schnatter, S., Celeux, G. &amp; Robert, C. P. (Eds.),
+  <em>Handbook of Mixture Analysis</em> (pp. 117–154). Chapman &amp;
+  Hall/CRC.
 </div>
 
 <div class="ref-entry">
