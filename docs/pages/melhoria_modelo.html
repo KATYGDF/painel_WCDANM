@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Melhoria do Modelo — Inicialização + BLRT — SimSaúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+
+<!-- MathJax 3 -->
+<script>
+MathJax = {
+  tex: {
+    inlineMath:  [['\\(', '\\)']],
+    displayMath: [['$$', '$$']],
+    tags: 'none'
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<style>
+
+.eq {
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.2rem;
+  background: var(--surface, #f8f7f4);
+  border-left: 3px solid var(--accent, #4a7c59);
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.toc {
+  background: var(--surface, #f8f7f4);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.toc ol { margin: 0.4rem 0 0 1.2rem; padding: 0; }
+.toc li { margin: 0.3rem 0; }
+.toc a  { color: var(--accent, #4a7c59); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+/* ── Citação literal ───────────────────────────────────────── */
+blockquote.cit {
+  margin: 1.2rem 0;
+  padding: 0.75rem 1.2rem;
+  border-left: 3px solid var(--accent, #4a7c59);
+  background: var(--surface, #f8f7f4);
+  font-style: italic;
+  font-size: 0.91rem;
+  line-height: 1.6;
+  color: var(--ink, #1a1a1a);
+}
+blockquote.cit cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--muted, #666);
+}
+
+/* ── Nota lateral em amarelo ───────────────────────────────── */
+.nota {
+  background: #fffbf0;
+  border-left: 3px solid #e6a817;
+  padding: 0.7rem 1rem;
+  font-size: 0.87rem;
+  color: var(--muted, #444);
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+
+/* ── Bloco de teoria (azul claro) ──────────────────────────── */
+.teoria {
+  background: #f0f7ff;
+  border-left: 3px solid #2980b9;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+.teoria strong { color: #1a5276; }
+
+/* ── Achado experimental (verde) ───────────────────────────── */
+.achado {
+  background: #f0f9ee;
+  border-left: 3px solid #4a7c59;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.achado strong { color: #2d5a40; }
+.achado .tag {
+  display: inline-block;
+  background: #4a7c59;
+  color: white;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: 2px;
+}
+
+/* ── Alerta (vermelho) ─────────────────────────────────────── */
+.alerta {
+  background: #fdf1ee;
+  border-left: 3px solid #c0392b;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.alerta strong { color: #922b21; }
+
+/* ── Figura ─────────────────────────────────────────────────── */
+.fig-wrapper {
+  margin: 1.8rem 0;
+  text-align: center;
+}
+.fig-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 4px;
+  background: white;
+}
+.fig-caption {
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  margin-top: 0.6rem;
+  line-height: 1.55;
+  text-align: left;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fig-caption strong { color: var(--ink, #1a1a1a); }
+
+/* ── Referências ────────────────────────────────────────────── */
+.ref-entry {
+  padding: 0.55rem 0 0.55rem 1.1rem;
+  border-left: 2px solid var(--border, #ddd);
+  margin-bottom: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.ref-entry cite {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink, #1a1a1a);
+}
+
+/* ── Tabela de parâmetros ──────────────────────────────────── */
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin: 1.2rem 0;
+}
+.param-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  text-align: left;
+}
+.param-table td {
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+}
+.param-table tr:last-child td { border-bottom: none; }
+.param-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.param-table .ok  { color: #2d5a40; font-weight: 600; }
+.param-table .err { color: #922b21; font-weight: 600; }
+.param-table .best { background: #fef9e7; font-weight: 600; }
+
+/* ── Tag inline ─────────────────────────────────────────────── */
+.tag-inline {
+  display: inline-block;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.72rem;
+  background: #ecf0f1;
+  color: #2c3e50;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  margin: 0 0.15rem;
+}
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="../index.html" class="sidebar-brand">SimSaúde</a>
+  <p class="sidebar-subtitle">Modelagem de Heterogeneidade<br>em Saúde Suplementar</p>
+  <ul class="sidebar-nav">
+    <li><a href="../index.html">Início</a></li>
+    <li><a href="estudo.html">O Estudo</a></li>
+    <li><a href="simulacao.html">Simulação</a></li>
+    <li><a href="eda_simsaude.html">EDA</a></li>
+    <li><a href="construcao_progressiva.html">Construção</a></li>
+    <li><a href="fundamentacao_em.html">Fundamentação EM</a></li>
+    <li><a href="analises.html">Análises</a></li>
+    <li><a href="melhoria_modelo.html" class="active">Melhoria do Modelo</a></li>
+  </ul>
+  <div class="sidebar-footer">Katy Garcia de Freitas · 2026</div>
+</nav>
+
+<main class="main">
+<div class="prose">
+
+<h1>Melhoria do Modelo — Inicialização do EM e Bootstrap LRT</h1>
+<p class="lead">
+  Quando a sobredispersão é alta e os grupos latentes se sobrepõem, os critérios
+  penalizados clássicos (AIC, BIC, ICL) <strong>subestimam sistematicamente</strong>
+  o número de componentes. Esta página documenta o experimento controlado que
+  identifica o <em>Bootstrap LRT</em> como o único critério capaz de recuperar
+  a cardinalidade verdadeira nesse cenário, e mostra que — neste caso específico —
+  a escolha da inicialização do EM <strong>não importa para a qualidade da
+  solução</strong>, apenas para o custo computacional.
+</p>
+
+<div class="toc">
+  <strong>Nesta página</strong>
+  <ol>
+    <li><a href="#motivacao">Motivação: o problema da sobreposição</a></li>
+    <li><a href="#design">Desenho experimental</a></li>
+    <li><a href="#dados">Dados simulados</a></li>
+    <li><a href="#inits">Estratégias de inicialização</a></li>
+    <li><a href="#criterios">Critérios de seleção de componentes</a></li>
+    <li><a href="#modA">Resultados — Módulo A · Inicializações</a></li>
+    <li><a href="#modB">Resultados — Módulo B · Critérios penalizados</a></li>
+    <li><a href="#modC">Resultados — Módulo C · Bootstrap LRT</a></li>
+    <li><a href="#modD">Resultados — Módulo D · Modelo final e estabilidade</a></li>
+    <li><a href="#conclusoes">Sete conclusões metodológicas</a></li>
+    <li><a href="#proximos">Próximos passos</a></li>
+    <li><a href="#referencias">Referências</a></li>
+  </ol>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="motivacao">1 · Motivação: o problema da sobreposição</h2>
+
+<p>
+  A página <a href="analises.html">Análises</a> mostra que a Mistura de Binomial
+  Negativa supera o K-means na recuperação dos grupos latentes em dados
+  multivariados com 5 variáveis. Mas há um cenário onde até a NB enfrenta
+  dificuldade: quando dois grupos têm médias <strong>próximas</strong> e a
+  <strong>sobredispersão é alta</strong>, suas distribuições marginais se
+  sobrepõem substancialmente — e o ganho em ajustar um componente extra fica
+  diluído na variabilidade intra-grupo.
+</p>
+
+<p>
+  É exatamente esse cenário que isolamos aqui em um experimento univariado
+  controlado: apenas a variável <em>consultas</em>, com quatro grupos cujas
+  médias (\(\mu_1 = 2,\ \mu_2 = 12,\ \mu_3 = 25,\ \mu_4 = 50\)) estão
+  espaçadas, mas a dispersão é grande o suficiente
+  (\(\theta = 2{,}5\)) para que G3 (agudo, \(\mu=25\)) e G4 (atípico,
+  \(\mu=50\)) sejam quase indistinguíveis nos dados observados.
+</p>
+
+<div class="teoria">
+  <strong>Por que isso é uma questão de identificabilidade.</strong>
+  A log-verossimilhança da mistura NB é uma função altamente irregular do número
+  de componentes \(g\). Quando dois componentes verdadeiros se sobrepõem, o
+  <em>ganho</em> em log-verossimilhança ao incluir o componente extra é
+  pequeno — e os critérios penalizados (BIC, AIC, ICL) podem julgar esse
+  ganho insuficiente para compensar a penalidade. O modelo escolhido será
+  estável (alto ARI bootstrap), mas com cardinalidade errada.
+</div>
+
+<p>
+  A pergunta empírica desta página é dupla:
+</p>
+
+<ol>
+  <li>
+    <strong>Importa a inicialização?</strong> Diferentes pontos de partida do
+    algoritmo EM (random, k-means, CEM, SEM) levam a soluções diferentes em
+    cenário de sobreposição? Em caso positivo, qual é a melhor?
+  </li>
+  <li>
+    <strong>Importa o critério de seleção?</strong> AIC, BIC, ICL, AIC3 e
+    <em>Bootstrap LRT</em> — qual deles recupera o número correto de grupos
+    \(g=4\)?
+  </li>
+</ol>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="design">2 · Desenho experimental</h2>
+
+<p>
+  O experimento é uma grade fatorial \(4 \times 5 + \text{BLRT}\):
+  quatro estratégias de inicialização cruzadas com cinco valores de \(g\), mais
+  o teste sequencial Bootstrap LRT.
+</p>
+
+<table class="param-table">
+  <thead>
+    <tr><th>Fator</th><th>Níveis</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Dados</strong></td>
+      <td>\(n=5\,000\) observações simuladas de uma mistura NB com 4
+        componentes verdadeiros (\(\boldsymbol{\mu} = (2, 12, 25, 50)\),
+        \(\boldsymbol{\pi} = (0{,}25,\ 0{,}25,\ 0{,}25,\ 0{,}25)\),
+        \(\theta = 2{,}5\)).</td>
+    </tr>
+    <tr>
+      <td><strong>Inicialização</strong></td>
+      <td>Random multistart · k-means + EM · CEM + EM · SEM + EM
+        (4 estratégias × 20 reinícios cada)</td>
+    </tr>
+    <tr>
+      <td><strong>Cardinalidade</strong></td>
+      <td>\(g \in \{2, 3, 4, 5, 6\}\) (5 valores)</td>
+    </tr>
+    <tr>
+      <td><strong>Critérios</strong></td>
+      <td>AIC, BIC, ICL, AIC3, Bootstrap LRT (\(B = 99\))</td>
+    </tr>
+    <tr>
+      <td><strong>Estabilidade</strong></td>
+      <td>Bootstrap não-paramétrico via ARI (\(B = 100\))</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="nota">
+  <strong>Reprodutibilidade.</strong> Toda a análise está no script
+  <code>src/03_analises/04_univariado_init_comparacao.R</code>. Saídas em
+  <code>docs/assets/img/univariado_init/</code> (figuras + tabelas formatadas)
+  e <code>src/03_analises/rds/univariado_init/</code> (CSVs).
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="dados">3 · Dados simulados</h2>
+
+<p>
+  A simulação reproduz exatamente o gerador da página
+  <a href="simulacao.html">Simulação</a> restrito à variável <em>consultas</em>.
+  A Figura&nbsp;1 mostra a distribuição empírica das 5.000 contagens, separada
+  por grupo verdadeiro.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig01_dados_simulados.png"
+       alt="Distribuicao de consultas por grupo verdadeiro"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 1.</strong> Densidades empíricas das contagens de consultas
+    por grupo latente verdadeiro. G1 (verde, \(\mu=2\)) é claramente separado;
+    G2 (azul, \(\mu=12\)) ocupa a região central; <strong>G3 (laranja,
+    \(\mu=25\)) e G4 (vermelho, \(\mu=50\)) compartilham massa substancial</strong>
+    na cauda direita — é essa sobreposição que torna a seleção de \(g\) difícil.
+  </p>
+</div>
+
+<p>
+  A leitura visual é direta: G1 e G2 são modas bem definidas e separadas. G3 e G4
+  formam um <em>contínuo</em> de cauda longa. Esse continuum é onde a NB
+  univariada típica (com θ pequeno) deixa de distinguir componentes.
+</p>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="inits">4 · Estratégias de inicialização</h2>
+
+<p>
+  Comparamos quatro estratégias amplamente usadas na literatura. As três
+  primeiras seguem diretamente a comparação de Scharl, Grün &amp; Leisch
+  (2010), que avaliaram oito estratégias no pacote <code>flexmix</code> — o
+  mesmo que usamos aqui.
+</p>
+
+<blockquote class="cit">
+  &ldquo;The choice of good starting values plays an important role. So far
+  initialization strategies have only been investigated for data from a
+  mixture of multivariate normal distributions. In this work several
+  initialization procedures are evaluated for mixtures of regression models
+  with and without random effects in an extensive simulation study on different
+  artificial datasets.&rdquo;
+  <cite>Scharl, T., Grün, B. &amp; Leisch, F. (2010). <em>Bioinformatics</em>
+    26(3), 370–377.</cite>
+</blockquote>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th>Estratégia</th>
+      <th>Mecanismo</th>
+      <th>Referência</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Random multistart</strong></td>
+      <td>Vinte execuções de EM completo a partir de partições aleatórias dos
+        rótulos \(z_i \in \{1,\ldots,g\}\); seleciona o ajuste com maior
+        log-verossimilhança final.</td>
+      <td>McLachlan &amp; Peel (2000)</td>
+    </tr>
+    <tr>
+      <td><strong>k-means + EM</strong></td>
+      <td>Aplica k-means em \(\log(1+\text{consultas})\), passa a partição
+        resultante como semente do EM completo (uma única execução).</td>
+      <td>Scharl et al. (2010)</td>
+    </tr>
+    <tr>
+      <td><strong>CEM + EM</strong></td>
+      <td>Vinte execuções do <em>Classification EM</em> (E-step com atribuição
+        dura, <code>classify="hard"</code>); a melhor solução é refinada por
+        EM completo.</td>
+      <td>Celeux &amp; Govaert (1992)</td>
+    </tr>
+    <tr>
+      <td><strong>SEM + EM</strong></td>
+      <td>Vinte execuções do <em>Stochastic EM</em> (E-step amostra rótulos
+        da posterior, <code>classify="random"</code>); a melhor é refinada por
+        EM completo.</td>
+      <td>Celeux &amp; Diebolt (1985)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="teoria">
+  <strong>Por que comparar essas quatro?</strong>
+  Cada estratégia exibe um <em>perfil de exploração</em> diferente do espaço
+  de parâmetros: <em>random</em> é o baseline incondicional;
+  <em>k-means</em> impõe uma estrutura geométrica plausível;
+  <em>CEM</em> tende a soluções com componentes bem separados (atribuição dura);
+  <em>SEM</em> escapa de ótimos locais via estocasticidade.
+  Se houver diferenças relevantes entre elas, deveriam aparecer em cenários
+  difíceis como este.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="criterios">5 · Critérios de seleção de componentes</h2>
+
+<p>
+  Para cada combinação <em>inicialização × g</em> calculamos quatro critérios
+  penalizados clássicos e o Bootstrap LRT sequencial:
+</p>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th>Critério</th>
+      <th>Fórmula</th>
+      <th>Penalidade</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>AIC</strong></td>
+      <td>\(-2\ell + 2p\)</td>
+      <td>Linear em \(p\) (parâmetros). Tende a superestimar \(g\).</td>
+    </tr>
+    <tr>
+      <td><strong>BIC</strong></td>
+      <td>\(-2\ell + p \log n\)</td>
+      <td>Cresce com \(n\). Padrão de fato em misturas finitas.</td>
+    </tr>
+    <tr>
+      <td><strong>AIC3</strong></td>
+      <td>\(-2\ell + 3p\)</td>
+      <td>Compromisso entre AIC e BIC. Sugerido por Bozdogan para misturas.</td>
+    </tr>
+    <tr>
+      <td><strong>ICL</strong></td>
+      <td>\(\text{BIC} - 2 \sum_{i,k} \hat z_{ik} \log \hat z_{ik}\)</td>
+      <td>BIC + penalidade pela entropia da classificação. Favorece
+        componentes bem separados.</td>
+    </tr>
+    <tr>
+      <td><strong>Bootstrap LRT</strong></td>
+      <td>Teste \(H_0\!: g\) vs \(H_1\!: g+1\) via reamostragem paramétrica</td>
+      <td>Calibração empírica da distribuição nula do LRT.
+        Não-assintótica.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  O ICL e o BLRT merecem nota especial.
+</p>
+
+<div class="teoria">
+  <strong>ICL — Integrated Completed Likelihood.</strong>
+  Biernacki, Celeux &amp; Govaert (2000) propuseram o ICL como BIC com uma
+  penalidade adicional pela entropia das probabilidades posteriores.
+  Quando os componentes estão <em>bem separados</em>, as posteriores são
+  próximas de \(\{0,1\}\) e a entropia é baixa — ICL converge para BIC.
+  Quando os componentes se <em>sobrepõem</em>, as posteriores ficam difusas,
+  a entropia explode, e o ICL penaliza fortemente — preferindo modelos com
+  <em>menos</em> componentes. Isto é uma virtude em alguns contextos, mas
+  uma <strong>vulnerabilidade</strong> quando a sobreposição é a própria
+  estrutura do problema.
+</div>
+
+<div class="teoria">
+  <strong>Bootstrap LRT.</strong>
+  Em misturas finitas, a estatística \(2(\ell_{g+1} - \ell_g)\)
+  <em>não</em> segue \(\chi^2\) sob \(H_0\) — as condições de regularidade
+  de Wilks são violadas porque o parâmetro adicional fica na fronteira do
+  espaço (peso zero) quando \(g\) é verdadeiro. A solução de McLachlan (1987)
+  é simular a distribuição nula <em>empiricamente</em>: gerar \(B\) amostras
+  paramétricas sob o modelo de \(g\) componentes ajustado, recalcular o LRT
+  para cada uma, e comparar o LRT observado contra essa distribuição
+  empírica.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modA">6 · Resultados — Módulo A · Inicializações</h2>
+
+<p>
+  A Tabela&nbsp;1 reporta log-verossimilhança, BIC, ICL, AIC e tempo
+  computacional para todas as 20 combinações <em>inicialização × g</em>.
+  A Figura&nbsp;2 mostra a mesma informação graficamente.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab01_inicializacoes.png"
+       alt="Tabela 1 — comparacao por inicializacao"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 1.</strong> log-verossimilhança, critérios penalizados e
+    tempo por estratégia de inicialização e \(g\). Cor de fundo na coluna BIC:
+    verde = menor (melhor), vermelho = maior. CEM falha para \(g \geq 4\) e
+    SEM falha para \(g=5\) (componentes colapsam).
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig02_loglik_por_init.png"
+       alt="logLik vs k por inicializacao"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 2.</strong> log-verossimilhança em função de \(g\) para
+    cada estratégia. As quatro linhas se sobrepõem quase perfeitamente
+    quando o ajuste converge — todas as inicializações encontram o mesmo
+    máximo global. A queda visível entre \(g=2\) e \(g=3\) reflete a
+    separação real entre G1+G2 e o continuum G3/G4; entre \(g=3\) e \(g=4\)
+    o ganho é praticamente nulo.
+  </p>
+</div>
+
+<h3>Análise da Figura 2</h3>
+
+<p>
+  Três fatos saltam aos olhos:
+</p>
+
+<ol>
+  <li>
+    <strong>As quatro estratégias se sobrepõem.</strong> Para cada \(g\),
+    a log-verossimilhança máxima atingida é praticamente idêntica nas quatro
+    inicializações (diferenças \(< 0{,}4\) unidades, dentro de ruído numérico).
+    Isto significa que o EM <em>não fica preso em ótimos locais</em> neste
+    problema — todos os pontos de partida convergem para a mesma solução.
+  </li>
+  <li>
+    <strong>O ganho de \(g=3\) para \(g=4\) é minúsculo</strong> (1,4 unidades de
+    log-verossimilhança com \(n=5\,000\)). É essa magnitude que vai
+    determinar o destino de cada critério penalizado: BIC penaliza
+    \(\log(5000)/2 \approx 4{,}26\) por parâmetro, e \(g=3 \to g=4\) adiciona
+    2 parâmetros (1 média + 1 peso) — penalidade total \(\approx 8{,}5\), maior
+    que o ganho de 2,8 em \(-2\ell\). BIC <em>vai</em> rejeitar.
+  </li>
+  <li>
+    <strong>CEM falha em três das cinco cardinalidades</strong> (g = 4, 5, 6).
+    A atribuição dura do CEM colapsa componentes pequenos sob sobredispersão
+    alta — confirmando uma fragilidade conhecida do método em dados de contagem.
+  </li>
+</ol>
+
+<div class="achado">
+  <span class="tag">Achado A1</span>
+  <strong>Inicialização não afeta a qualidade neste problema.</strong>
+  Random, k-means e SEM+EM atingem a mesma log-verossimilhança máxima para
+  todo \(g\) testado. O desafio do problema é de <em>identificabilidade</em>,
+  não de otimização.
+</div>
+
+<div class="achado">
+  <span class="tag">Achado A2</span>
+  <strong>k-means é ~50× mais rápido que random multistart</strong> com
+  qualidade idêntica (\(g=3\): 1,6&nbsp;s vs 80,5&nbsp;s; \(g=4\): 1,6&nbsp;s
+  vs 98,8&nbsp;s). É a escolha prática de partida — escalar para random
+  multistart só se houver suspeita de ótimo local.
+</div>
+
+<blockquote class="cit">
+  &ldquo;Random initialization yields very long runtimes compared with CEM or
+  short runs of EM. However, the cluster results are similar.&rdquo;
+  <cite>Scharl, Grün &amp; Leisch (2010), conclusão #4 do estudo de simulação.</cite>
+</blockquote>
+
+<blockquote class="cit">
+  &ldquo;The impact of the cluster method used is much larger than the impact
+  of the initialization strategy.&rdquo;
+  <cite>Scharl, Grün &amp; Leisch (2010), conclusão #5.</cite>
+</blockquote>
+
+<p>
+  Nosso experimento corrobora empiricamente a observação canônica do Scharl
+  et al. (2010): no caso em que o EM converge sem ficar preso, a estratégia
+  de inicialização é praticamente irrelevante para a <em>qualidade</em> da
+  solução, importando apenas para o <em>custo computacional</em>.
+</p>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modB">7 · Resultados — Módulo B · Critérios penalizados</h2>
+
+<p>
+  Tomando a melhor inicialização por \(g\) (em todos os casos: random ou
+  k-means — empatados em log-verossimilhança), aplicamos os quatro critérios
+  penalizados. A Tabela&nbsp;2 e a Figura&nbsp;3 mostram o resultado.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab02_criterios_por_k.png"
+       alt="Tabela 2 — criterios por k"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 2.</strong> Critérios de seleção avaliados na melhor
+    inicialização para cada \(g\). A coluna <em>Selecionado por</em> indica
+    quais critérios escolhem cada \(g\) como ótimo. A linha destacada em
+    amarelo é o \(g\) final por consenso de votos (3).
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig03_criterios_por_k.png"
+       alt="Criterios normalizados por k"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 3.</strong> Os quatro critérios penalizados, normalizados
+    para o intervalo [0, 1] (0 = melhor, 1 = pior) para permitir comparação
+    visual. Linha tracejada cinza marca \(g=4\) (verdade). <strong>Nenhum
+    critério penalizado consegue identificar o \(g\) verdadeiro:</strong>
+    AIC/BIC/AIC3 escolhem \(g=3\); ICL escolhe \(g=2\) (ainda mais
+    conservador).
+  </p>
+</div>
+
+<h3>Análise da Figura 3</h3>
+
+<p>
+  Os mínimos de cada curva são autoexplicativos:
+</p>
+
+<ul>
+  <li>
+    <strong>BIC, AIC, AIC3 → \(g=3\):</strong> os três concordam em incluir
+    o componente que separa o continuum G3/G4 da moda central (G1, G2), mas
+    nenhum considera vantajoso dividir esse continuum em dois grupos
+    separados. O ganho de log-verossimilhança não vence a penalidade.
+  </li>
+  <li>
+    <strong>ICL → \(g=2\):</strong> mais conservador ainda. A penalidade
+    adicional pela entropia da classificação cresce monotonicamente com \(g\)
+    porque, conforme adicionamos componentes que se sobrepõem aos existentes,
+    as posteriores ficam mais difusas. ICL é, em termos práticos, monótono
+    crescente neste cenário — qualquer \(g > 2\) é penalizado.
+  </li>
+</ul>
+
+<div class="alerta">
+  <strong>Alerta metodológico:</strong> o ICL é frequentemente recomendado
+  como alternativa ao BIC quando há sobreposição entre componentes. <em>O
+  experimento aqui mostra exatamente o oposto:</em> quando a sobreposição é a
+  estrutura real do problema (e não um artefato), o ICL é catastroficamente
+  conservador. Use ICL apenas quando houver razão substantiva para acreditar
+  em componentes <em>bem separados</em>.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modC">8 · Resultados — Módulo C · Bootstrap LRT</h2>
+
+<p>
+  O teste paramétrico de razão de verossimilhança via bootstrap (McLachlan,
+  1987) é a única alternativa que <em>não</em> depende de aproximações
+  assintóticas. Para cada par \((g, g+1)\), simulamos \(B=99\) amostras de
+  tamanho \(n=5\,000\) sob o modelo ajustado com \(g\) componentes, recalculamos
+  o LRT em cada uma, e construímos o p-valor empírico
+  \(p = (\#\{\text{LRT}^{(b)} \geq \text{LRT}_\text{obs}\} + 1)/(B+1)\).
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab03_blrt.png"
+       alt="Tabela 3 — BLRT sequencial"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 3.</strong> Bootstrap LRT sequencial. A linha em amarelo
+    (\(g=4 \to 5\), p = 0,57) é onde o teste deixa de rejeitar \(H_0\), fixando
+    \(g^* = 4\).
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig04_blrt_distribuicoes.png"
+       alt="Distribuicoes bootstrap LRT"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 4.</strong> Quatro distribuições bootstrap da estatística
+    LRT sob \(H_0\), uma para cada par \((g, g+1)\). A linha vermelha tracejada
+    marca o LRT observado nos dados reais. Note como em \(g=2 \to 3\) e
+    \(g=3 \to 4\) o LRT observado está na cauda direita (p &lt; 0,05);
+    em \(g=4 \to 5\) e \(g=5 \to 6\) o LRT observado é praticamente zero,
+    consistente com a distribuição nula.
+  </p>
+</div>
+
+<h3>Análise da Figura 4</h3>
+
+<p>
+  Os quatro paineis revelam um padrão que justifica integralmente o uso do
+  BLRT em vez do χ² assintótico:
+</p>
+
+<ul>
+  <li>
+    <strong>\(g=2 \to 3\):</strong> LRT observado = 306,9. Distribuição
+    bootstrap fortemente concentrada perto de zero. \(p=0{,}01\) → rejeita
+    \(H_0\). Há um terceiro componente.
+  </li>
+  <li>
+    <strong>\(g=3 \to 4\):</strong> LRT observado = <strong>apenas
+    2,8</strong> — extraordinariamente pequeno. Mas a distribuição bootstrap
+    sob \(H_0\) está ainda mais comprimida (a maioria dos LRTs replicados
+    fica abaixo de 1). Resultado: \(p=0{,}04\) → <strong>rejeita
+    \(H_0\)</strong>. <em>Há um quarto componente.</em>
+  </li>
+  <li>
+    <strong>\(g=4 \to 5\):</strong> LRT observado ≈ 0, p = 0,57 → não rejeita.
+    \(g=4\) é suficiente.
+  </li>
+  <li>
+    <strong>\(g=5 \to 6\):</strong> idem (p = 0,47), confirmando o teto.
+  </li>
+</ul>
+
+<div class="achado">
+  <span class="tag">Achado C1</span>
+  <strong>O BLRT é o único critério que recupera \(g=4\).</strong>
+  Ele detecta um ganho de log-verossimilhança de apenas 2,8 unidades como
+  significativo porque a distribuição empírica de LRT sob \(H_0\) é ainda mais
+  concentrada em zero — uma estrutura que a aproximação χ²(df) ignora por
+  completo.
+</div>
+
+<blockquote class="cit">
+  &ldquo;The likelihood ratio statistic \(-2\log\lambda\) does not have its
+  usual asymptotic null distribution of chi-squared with the difference in
+  the number of parameters under the two hypotheses, owing to the breakdown
+  of the standard regularity conditions for the chi-squared
+  approximation.&rdquo;
+  <cite>McLachlan, G. J. (1987). Journal of the Royal Statistical Society
+    Series C, 36(3), 318–324.</cite>
+</blockquote>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modD">9 · Resultados — Módulo D · Modelo final e estabilidade</h2>
+
+<p>
+  Tomando o voto majoritário entre os cinco critérios (AIC=3, BIC=3, AIC3=3,
+  ICL=2, BLRT=4), o consenso seria \(g=3\). Avaliamos a estabilidade
+  desse modelo por bootstrap não-paramétrico: reamostramos com reposição
+  \(B=100\) vezes, reajustamos a mistura com \(g=3\), e calculamos o ARI
+  entre a partição original e a do bootstrap.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig05_estabilidade_ari.png"
+       alt="Estabilidade ARI bootstrap"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 5.</strong> Distribuição bootstrap do Adjusted Rand Index
+    entre a partição original (\(g=3\)) e as partições obtidas em \(B=100\)
+    reamostragens. ARI médio = 0,894, IC 95% [0,724; 1,000]. Limiar usual de
+    estabilidade (0,80) marcado em laranja. O modelo \(g=3\) é
+    <strong>estavelmente reproduzido</strong> sob reamostragem.
+  </p>
+</div>
+
+<div class="alerta">
+  <strong>Atenção interpretativa:</strong> ARI = 0,894 é alto, mas isso
+  significa que o modelo \(g=3\) é <em>consistentemente o mesmo modelo
+  errado</em>, não que \(g=3\) seja a cardinalidade correta. Estabilidade
+  de partição não é evidência de cardinalidade correta — é apenas evidência
+  de que o procedimento converge para a mesma solução em reamostragens.
+  Quando o critério de seleção subestima \(g\), a partição resultante pode
+  ser perfeitamente estável e completamente equivocada.
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig06_modelo_final.png"
+       alt="Modelo final ajustado"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 6.</strong> Modelo final por consenso (\(g=3\), inicialização
+    random) sobreposto ao histograma dos dados. As três linhas coloridas são
+    as componentes NB ajustadas; a linha preta tracejada é a mistura total.
+    A terceira componente é uma <em>fusão</em> de G3 e G4 verdadeiros —
+    consistente com a interpretação de que BIC/AIC/ICL não conseguiram
+    separar o continuum de cauda direita.
+  </p>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="conclusoes">10 · Sete conclusões metodológicas</h2>
+
+<p>
+  Cada conclusão é apoiada empiricamente nos resultados acima e referenciada
+  na literatura quando aplicável.
+</p>
+
+<div class="achado">
+  <span class="tag">Conclusão 1</span>
+  <strong>O problema é de identificabilidade, não de otimização.</strong>
+  As quatro estratégias de inicialização chegaram ao mesmo máximo da
+  log-verossimilhança para todo \(g\). O obstáculo está na paisagem da
+  verossimilhança em si: o ganho de \(g=3\) para \(g=4\) é apenas 1,4
+  unidades, pequeno demais para qualquer critério penalizado clássico
+  considerar relevante.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 2</span>
+  <strong>k-means inicializa o EM ~50× mais rápido com qualidade
+  equivalente.</strong> Para mistura NB univariada deste tipo, sempre comece
+  por k-means. Escalar para random multistart só se houver razão para
+  suspeitar de ótimo local.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 3</span>
+  <strong>Bootstrap LRT é o único critério que recupera \(g=4\).</strong>
+  Os critérios penalizados clássicos (AIC, BIC, AIC3, ICL) subestimaram
+  sistematicamente. O BLRT detectou \(g=3 \to g=4\) como significativo
+  (p = 0,04) mesmo com ganho de log-verossimilhança ínfimo, porque a
+  distribuição empírica de LRT sob \(H_0\) é mais concentrada em zero do
+  que a aproximação χ² assintótica supõe.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 4</span>
+  <strong>CEM é frágil para contagens sobredispersas.</strong>
+  CEM+EM falhou em 3 de 5 valores de \(g\) (\(g\) = 4, 5, 6). A classificação
+  dura do CEM colapsa componentes pequenos quando há sobreposição.
+  Não usar CEM como default em mistura NB com θ baixo.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 5</span>
+  <strong>ICL é catastroficamente conservador em cenários sobrepostos.</strong>
+  ICL escolheu \(g=2\), duas categorias abaixo da verdade. A penalidade por
+  entropia da classificação cresce monotonicamente com a sobreposição.
+  ICL é apropriado quando se sabe que os componentes são bem separados —
+  exatamente o oposto deste cenário.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 6</span>
+  <strong>Voto majoritário entre critérios falha aqui.</strong>
+  Quatro critérios em cinco apontam \(g \leq 3\); apenas o BLRT aponta \(g=4\).
+  A maioria está errada. Lição: quando um critério é especificamente
+  justificado pelo tipo de dado (BLRT para sobreposição com sobredispersão),
+  ele deve ter peso desproporcional — ou ser usado como árbitro final em vez
+  de um voto entre muitos.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 7</span>
+  <strong>Estabilidade alta não implica cardinalidade correta.</strong>
+  O modelo \(g=3\) tem ARI bootstrap = 0,894 (IC95% [0,724; 1,000]) —
+  altamente estável. Mas está estavelmente <em>errado</em>: funde G3 e G4.
+  Estabilidade de partição mede consistência de reamostragem, não acerto da
+  cardinalidade.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="proximos">11 · Próximos passos</h2>
+
+<p>
+  Este experimento fixa um único cenário (\(\theta=2{,}5\), 4 grupos, médias
+  espaçadas). Para fortalecer as conclusões e produzir um experimento
+  factorial publicável, propõem-se três extensões:
+</p>
+
+<ol>
+  <li>
+    <strong>Replicar com \(\theta\) variável</strong> (e.g., \(\theta \in
+    \{1, 2{,}5, 5, 10\}\)) para mapear o regime em que cada critério
+    quebra. Hipótese: com \(\theta \geq 10\), todos os critérios convergem
+    para \(g=4\); com \(\theta \leq 1\), até o BLRT pode falhar.
+  </li>
+  <li>
+    <strong>Replicar com diferentes espaçamentos de \(\boldsymbol{\mu}\)</strong>
+    para isolar o efeito da sobreposição induzida pela proximidade das médias
+    versus pela dispersão.
+  </li>
+  <li>
+    <strong>Adicionar short-EM (Biernacki, Celeux &amp; Govaert, 2003)</strong>
+    como quinta estratégia de inicialização (várias execuções curtas de EM,
+    seleciona a melhor, refina com EM completo). Completa a comparação do
+    Scharl et al. (2010).
+  </li>
+  <li>
+    <strong>Repetir réplicas estocásticas</strong> (e.g., 30 simulações
+    independentes por configuração) para construir distribuições de
+    \(g^*\) por critério — mostra robustez ou variabilidade dos resultados
+    aqui apresentados.
+  </li>
+</ol>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">12 · Referências</h2>
+
+<div class="ref-entry">
+  <cite>Biernacki, C., Celeux, G. &amp; Govaert, G. (2000).</cite>
+  Assessing a mixture model for clustering with the integrated completed
+  likelihood.
+  <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>,
+  <em>22</em>(7), 719–725.
+</div>
+
+<div class="ref-entry">
+  <cite>Biernacki, C., Celeux, G. &amp; Govaert, G. (2003).</cite>
+  Choosing starting values for the EM algorithm for getting the highest
+  likelihood in multivariate Gaussian mixture models.
+  <em>Computational Statistics &amp; Data Analysis</em>, <em>41</em>(3–4),
+  561–575.
+</div>
+
+<div class="ref-entry">
+  <cite>Celeux, G. &amp; Diebolt, J. (1985).</cite>
+  The SEM algorithm: a probabilistic teacher algorithm derived from the EM
+  algorithm for the mixture problem.
+  <em>Computational Statistics Quarterly</em>, <em>2</em>, 73–82.
+</div>
+
+<div class="ref-entry">
+  <cite>Celeux, G. &amp; Govaert, G. (1992).</cite>
+  A classification EM algorithm for clustering and two stochastic versions.
+  <em>Computational Statistics &amp; Data Analysis</em>, <em>14</em>(3),
+  315–332.
+</div>
+
+<div class="ref-entry">
+  <cite>Dempster, A. P., Laird, N. M. &amp; Rubin, D. B. (1977).</cite>
+  Maximum likelihood from incomplete data via the EM algorithm.
+  <em>Journal of the Royal Statistical Society. Series B</em>, <em>39</em>(1),
+  1–38.
+</div>
+
+<div class="ref-entry">
+  <cite>Grün, B. &amp; Leisch, F. (2008).</cite>
+  FlexMix Version 2: Finite Mixtures with Concomitant Variables and Varying
+  and Constant Parameters.
+  <em>Journal of Statistical Software</em>, <em>28</em>(4), 1–35.
+</div>
+
+<div class="ref-entry">
+  <cite>Hubert, L. &amp; Arabie, P. (1985).</cite>
+  Comparing partitions.
+  <em>Journal of Classification</em>, <em>2</em>(1), 193–218.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. (1987).</cite>
+  On bootstrapping the likelihood ratio test statistic for the number of
+  components in a normal mixture.
+  <em>Journal of the Royal Statistical Society. Series C (Applied Statistics)</em>,
+  <em>36</em>(3), 318–324.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. &amp; Peel, D. (2000).</cite>
+  <em>Finite Mixture Models.</em>
+  John Wiley &amp; Sons. ISBN 0-471-00626-2.
+</div>
+
+<div class="ref-entry">
+  <cite>Scharl, T., Grün, B. &amp; Leisch, F. (2010).</cite>
+  Mixtures of regression models for time course gene expression data:
+  evaluation of initialization and random effects.
+  <em>Bioinformatics</em>, <em>26</em>(3), 370–377.
+  <a href="https://doi.org/10.1093/bioinformatics/btp686"
+     target="_blank" rel="noopener">https://doi.org/10.1093/bioinformatics/btp686</a>
+</div>
+
+<div class="ref-entry">
+  <cite>Shireman, E., Steinley, D. &amp; Brusco, M. J. (2017).</cite>
+  Examining the effect of initialization strategies on the performance of
+  Gaussian mixture modeling.
+  <em>Behavior Research Methods</em>, <em>49</em>(1), 282–293.
+</div>
+
+
+</div>
+</main>
+
+</body>
+</html>
