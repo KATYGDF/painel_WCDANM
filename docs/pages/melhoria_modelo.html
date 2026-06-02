@@ -379,6 +379,7 @@ pre.r-code .op  { color: #89dceb; }
     <li><a href="#modB">Resultados — Módulo B · Critérios penalizados</a></li>
     <li><a href="#modC">Resultados — Módulo C · Bootstrap LRT</a></li>
     <li><a href="#modD">Resultados — Módulo D · Modelo final e estabilidade</a></li>
+    <li><a href="#modE">Avaliação comparativa por método</a></li>
     <li><a href="#conclusoes">Sete conclusões metodológicas</a></li>
     <li><a href="#proximos">Próximos passos</a></li>
     <li><a href="#codigo">Código R</a></li>
@@ -1311,7 +1312,198 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="conclusoes">10 · Sete conclusões metodológicas</h2>
+<h2 id="modE">10 · Avaliação comparativa por método</h2>
+
+<p>
+  Os Módulos A–D evidenciaram que os quatro métodos atingem a mesma
+  log-verossimilhança quando convergem, mas não detalham <em>como</em>
+  cada um classifica as observações. Este módulo encerra a análise com
+  uma comparação cabeça-a-cabeça <strong>no \(k\) verdadeiro
+  (\(k = 4\))</strong>: métricas globais, recuperação paramétrica,
+  diagnóstico por grupo, sobreposição entre soluções e visualização da
+  classificação em uma dimensão.
+</p>
+
+<h3>10.1 · Métricas globais</h3>
+
+<p>
+  A Tabela&nbsp;5 reporta ARI, Acurácia (após pareamento húngaro),
+  Pureza e F1 macro (média não ponderada das F1 por grupo) para os
+  quatro métodos.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab05_metricas_por_metodo.png"
+       alt="Tabela 5 — metricas por metodo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 5.</strong> Métricas de classificação por método em
+    \(k=4\). Random multistart, k-means + EM e SEM + EM produzem
+    resultados praticamente indistinguíveis; CEM + EM não convergiu
+    nesta cardinalidade (colapso documentado nos Módulos A e D).
+  </p>
+</div>
+
+<h3>10.2 · Recuperação paramétrica</h3>
+
+<p>
+  Para além da acurácia de classificação, avalia-se se o modelo recupera
+  os <em>parâmetros geradores</em>: os \(\hat\mu_k\) e \(\hat\pi_k\)
+  estimados, alinhados aos grupos verdadeiros via pareamento húngaro, são
+  comparados aos valores simulados (\(\mu = 2,\ 12,\ 25,\ 50\); \(\pi =
+  0{,}25\) cada).
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab06_recuperacao_parametros.png"
+       alt="Tabela 6 — recuperacao parametrica"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 6.</strong> Recuperação paramétrica (μ e π) por método e
+    grupo. Os erros concentram-se em G3 e G4 — coerente com a sobreposição
+    estrutural entre os dois grupos.
+  </p>
+</div>
+
+<h3>10.3 · Diagnóstico por grupo</h3>
+
+<p>
+  A Tabela&nbsp;7 desagrega o desempenho por grupo verdadeiro,
+  reportando o número de observações reais, o número classificado
+  corretamente, a sensibilidade (recall) e o F1 por classe.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab07_diagnostico_por_grupo.png"
+       alt="Tabela 7 — diagnostico por grupo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 7.</strong> Diagnóstico por grupo verdadeiro. G1
+    (baixo uso) é recuperado com sensibilidade próxima de 1 por todos os
+    métodos; G3 e G4 apresentam quedas significativas, refletindo a
+    sobreposição entre os componentes.
+  </p>
+</div>
+
+<h3>10.4 · ARI cruzado entre métodos</h3>
+
+<p>
+  A matriz da Tabela&nbsp;8 contém o ARI entre cada par de partições
+  produzidas pelos métodos. Valores próximos de 1 indicam soluções
+  equivalentes; valores intermediários indicam divergência sistemática.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/tab08_ari_cruzado.png"
+       alt="Tabela 8 — ARI cruzado"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 8.</strong> ARI cruzado entre as partições de cada par
+    de métodos. ARI próximo de 1 entre random, k-means e SEM+EM confirma
+    que os três produzem essencialmente a mesma partição quando
+    convergem.
+  </p>
+</div>
+
+<h3>10.5 · Densidades ajustadas</h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig07_densidades_por_metodo.png"
+       alt="Densidades ajustadas por metodo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 7.</strong> Histograma dos dados (cinza) com sobreposição
+    das componentes NB ajustadas por cada método. A leitura visual
+    confirma a equivalência entre Random, k-means e SEM+EM, e expõe o
+    colapso do CEM (que, quando converge, frequentemente perde um
+    componente).
+  </p>
+</div>
+
+<h3>10.6 · Classificação por grupo (visualização 1D)</h3>
+
+<p>
+  A Figura&nbsp;8 é o análogo univariado do gráfico
+  "PCA-por-grupo" empregado no caso multivariado. Cada linha destaca um
+  grupo verdadeiro (em cor viva); cada coluna mostra a classificação
+  produzida por um método. A coluna <em>verdadeiro</em> serve como
+  referência. Observações fora do grupo em foco são exibidas em cinza.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig08_classificacao_grid.png"
+       alt="Grid 4x5 — classificacao por grupo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 8.</strong> Strip-plot 1D — quatro linhas (grupos
+    verdadeiros) por cinco colunas (referência + quatro métodos). O
+    confronto entre a coluna <em>verdadeiro</em> e as colunas dos métodos
+    revela a fronteira ambígua entre G3 e G4: nas linhas G3 e G4, os
+    pontos coloridos pelos métodos ocupam regiões parcialmente
+    sobrepostas, ao passo que G1 e G2 mantêm contornos nítidos.
+  </p>
+</div>
+
+<h3>10.7 · Certeza posterior por grupo</h3>
+
+<p>
+  A certeza máxima de classificação \(\max_k \hat\tau_{ik}\) traduz quão
+  confiante o modelo está em cada decisão. Estratificada por grupo
+  verdadeiro, ela revela em quais grupos a sobreposição compromete a
+  classificação.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig09_certeza_por_grupo.png"
+       alt="Certeza posterior por metodo e grupo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 9.</strong> Densidades da certeza posterior máxima
+    \(\max_k \hat\tau_{ik}\) por método (painel) e grupo verdadeiro
+    (cor). G1 e G2 apresentam massa concentrada próxima de 1
+    (classificação confiante); G3 e G4 exibem caudas longas próximas de
+    0,5, evidenciando a zona em que a posterior é genuinamente ambígua.
+  </p>
+</div>
+
+<h3>10.8 · Erro por faixa do número de consultas</h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/univariado_init/fig10_erro_por_faixa.png"
+       alt="Taxa de erro por faixa de consultas"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 10.</strong> Taxa de erro de classificação por
+    intervalo do número de consultas. A faixa 15–34 — região em que as
+    distribuições de G3 e G4 mais se sobrepõem — concentra a maior parte
+    do erro. Faixas extremas (\(\geq 35\) e 0–4) são classificadas com
+    erro próximo de zero.
+  </p>
+</div>
+
+<div class="achado">
+  <span class="tag">Achado E1</span>
+  <strong>As três estratégias que convergem produzem partições
+  essencialmente equivalentes.</strong> O ARI cruzado entre Random,
+  k-means + EM e SEM + EM é próximo de 1 (Tabela 8), corroborando, no
+  nível de classificação por observação, a equivalência já documentada
+  em log-verossimilhança no Módulo A.
+</div>
+
+<div class="achado">
+  <span class="tag">Achado E2</span>
+  <strong>O erro de classificação concentra-se na zona G3↔G4 (15–34
+  consultas).</strong> A Figura 10 mostra que faixas extremas são
+  classificadas com erro próximo de zero, enquanto a zona de
+  sobreposição responde por praticamente todo o erro residual. Isto
+  evidencia o limite inferior <em>irredutível</em> do problema: nenhum
+  método pode classificar corretamente observações na zona de
+  sobreposição estrutural.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="conclusoes">11 · Sete conclusões metodológicas</h2>
 
 <p>
   As conclusões a seguir encontram-se fundamentadas empiricamente nos
@@ -1463,7 +1655,7 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="proximos">11 · Próximos passos</h2>
+<h2 id="proximos">12 · Próximos passos</h2>
 
 <p>
   O presente experimento contempla um único cenário (\(\theta=2{,}5\), quatro
@@ -1502,7 +1694,7 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="codigo">12 · Código R</h2>
+<h2 id="codigo">13 · Código R</h2>
 
 <p>
   O script completo (<code>src/03_analises/04_univariado_init_comparacao.R</code>,
@@ -1787,7 +1979,7 @@ tab_init <span class="op">&lt;-</span> <span class="fn">do.call</span>(rbind, ta
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="referencias">13 · Referências</h2>
+<h2 id="referencias">14 · Referências</h2>
 
 <div class="ref-entry">
   <cite>Baudry, J.-P. (2015).</cite>

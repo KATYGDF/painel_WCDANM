@@ -707,6 +707,502 @@ salvar_fig(fig06, "fig06_modelo_final", largura = 9, altura = 5)
 
 
 # =============================================================================
+# 10b. MODULO E · Avaliacao comparativa por metodo (k = K_TRUE)
+# =============================================================================
+# Avalia os 4 metodos no mesmo k = K_TRUE = 4 (cardinalidade verdadeira),
+# gerando: metricas (ARI/Acuracia/Pureza/F1), recuperacao parametrica,
+# diagnostico por grupo, ARI cruzado, e visualizacoes 1D analogas ao
+# "PCA-by-group" do caso multivariado.
+# =============================================================================
+
+cat("\n", strrep("=", 70), "\n", sep = "")
+cat(sprintf("MODULO E · Avaliacao comparativa por metodo (k = %d)\n", K_TRUE))
+cat(strrep("=", 70), "\n\n", sep = "")
+
+K_AVALIA   <- K_TRUE
+grupo_int  <- as.integer(df$grupo_real)
+ROTULOS_PT <- c("baixo uso", "ambulatorial", "agudo / hospitalar",
+                "padrão atípico")
+G_LABEL    <- sprintf("G%d · %s", 1:4, ROTULOS_PT)
+
+
+# ── Helper: re-rotular estimativas via pareamento hungaro ─────────────────────
+remap_hungarian <- function(real_int, est_int) {
+  est_levels <- sort(unique(est_int))
+  conf <- table(real = real_int,
+                est  = factor(est_int, levels = est_levels))
+  assign_h <- hungarian_match(conf)  # assign_h[g] = coluna de conf p/ grupo real g
+  remap <- setNames(rep(NA_integer_, length(est_levels)), as.character(est_levels))
+  for (g in seq_along(assign_h)) {
+    if (!is.na(assign_h[g]) && assign_h[g] <= length(est_levels)) {
+      remap[as.character(est_levels[assign_h[g]])] <- g
+    }
+  }
+  as.integer(remap[as.character(est_int)])
+}
+
+# ── Helper: metricas para um fit no k = K_TRUE ───────────────────────────────
+metricas_metodo <- function(fit, real_int) {
+  if (is.null(fit)) return(NULL)
+  est     <- as.integer(clusters(fit))
+  est_par <- remap_hungarian(real_int, est)
+
+  ari      <- adj_rand_index(real_int, est)
+  acuracia <- mean(est_par == real_int, na.rm = TRUE)
+  tab      <- table(real_int, est)
+  pureza   <- sum(apply(tab, 2L, max)) / sum(tab)
+
+  k_real <- length(unique(real_int))
+  f1_grp <- vapply(seq_len(k_real), function(g) {
+    tp <- sum(real_int == g & est_par == g, na.rm = TRUE)
+    fp <- sum(real_int != g & est_par == g, na.rm = TRUE)
+    fn <- sum(real_int == g & est_par != g, na.rm = TRUE)
+    if (tp + fp == 0 || tp + fn == 0) return(0)
+    prec <- tp / (tp + fp); rec <- tp / (tp + fn)
+    if (prec + rec == 0) 0 else 2 * prec * rec / (prec + rec)
+  }, numeric(1))
+
+  sens <- vapply(seq_len(k_real), function(g) {
+    n_g <- sum(real_int == g)
+    if (n_g == 0) NA_real_ else sum(est_par == g & real_int == g) / n_g
+  }, numeric(1))
+
+  list(
+    ARI = ari, Acuracia = acuracia, Pureza = pureza,
+    F1_macro = mean(f1_grp), F1_grp = f1_grp, Sens = sens,
+    est = est, est_par = est_par
+  )
+}
+
+# ── Coleta dos fits e metricas no k = K_TRUE para os 4 metodos ───────────────
+fits_E       <- list()
+metricas_E   <- list()
+mapped_assign <- list(verdadeiro = grupo_int)  # adiciona referencia "true"
+
+for (init_nm in names(INITS)) {
+  fit_m <- fits[[init_nm]][[as.character(K_AVALIA)]]
+  fits_E[[init_nm]] <- fit_m
+  if (is.null(fit_m)) {
+    cat(sprintf("  %-8s : FIT INDISPONIVEL (colapsou em k=%d)\n",
+                init_nm, K_AVALIA))
+    metricas_E[[init_nm]] <- NULL
+    mapped_assign[[init_nm]] <- rep(NA_integer_, N)
+    next
+  }
+  m <- metricas_metodo(fit_m, grupo_int)
+  metricas_E[[init_nm]] <- m
+  mapped_assign[[init_nm]] <- m$est_par
+  cat(sprintf("  %-8s : ARI=%.3f | Acur=%.3f | Pureza=%.3f | F1=%.3f\n",
+              init_nm, m$ARI, m$Acuracia, m$Pureza, m$F1_macro))
+}
+
+
+# ── Tabela 5 · Metricas globais por metodo ───────────────────────────────────
+tab05 <- do.call(rbind, lapply(names(INITS), function(nm) {
+  m <- metricas_E[[nm]]
+  if (is.null(m)) {
+    data.frame(metodo = LABEL_INIT[nm],
+               ARI = NA, Acuracia = NA, Pureza = NA, F1_macro = NA,
+               status = "colapsou")
+  } else {
+    data.frame(metodo = LABEL_INIT[nm],
+               ARI = round(m$ARI, 3),
+               Acuracia = round(m$Acuracia, 3),
+               Pureza = round(m$Pureza, 3),
+               F1_macro = round(m$F1_macro, 3),
+               status = "ok")
+  }
+}))
+write.csv(tab05, file.path(RDS_DIR, "tab05_metricas_por_metodo.csv"),
+          row.names = FALSE)
+
+gt05 <- gt(tab05) %>%
+  tab_header(
+    title    = md(sprintf("**Tabela 5.** Métricas de classificação por método (*k* = %d)",
+                          K_AVALIA)),
+    subtitle = md("Pareamento via algoritmo húngaro. F1 macro = média não ponderada das F1 por grupo.")
+  ) %>%
+  cols_label(metodo = "Método", ARI = "ARI", Acuracia = "Acurácia",
+             Pureza = "Pureza", F1_macro = "F1 (macro)",
+             status = "Status") %>%
+  fmt_number(columns = c(ARI, Acuracia, Pureza, F1_macro), decimals = 3) %>%
+  tab_style(style = cell_text(color = "white", weight = "bold"),
+            locations = cells_column_labels(everything())) %>%
+  tab_options(table.font.size = px(12),
+              column_labels.background.color = "#2c3e50",
+              column_labels.border.top.style = "hidden",
+              heading.align = "left")
+
+# Salva via gtsave (mesmo padrao das outras tabelas)
+tryCatch({
+  gtsave(gt05, file.path(IMG_DIR, "tab05_metricas_por_metodo.png"),
+         vwidth = 900, vheight = 320, zoom = 2, expand = 5)
+  message("  -> salvo: tab05_metricas_por_metodo.png")
+}, error = function(e) message("  FALHA tab05: ", conditionMessage(e)))
+
+
+# ── Tabela 6 · Recuperacao parametrica (mu, pi) ──────────────────────────────
+tab06 <- list()
+for (nm in names(INITS)) {
+  m <- metricas_E[[nm]]; fit_m <- fits_E[[nm]]
+  if (is.null(m) || is.null(fit_m)) next
+  # Ordena componentes pelo mu estimado, depois aplica hungarian para o grupo verdadeiro
+  pars_m   <- as.numeric(parameters(fit_m))
+  mus_est  <- exp(pars_m)
+  pesos_est <- as.numeric(prior(fit_m))
+
+  est_levels <- sort(unique(m$est))
+  conf <- table(real = grupo_int,
+                est  = factor(m$est, levels = est_levels))
+  assign_h <- hungarian_match(conf)
+  # assign_h[g] = posicao em est_levels que mapeia para grupo real g
+  mu_alinhado  <- vapply(seq_along(assign_h), function(g) {
+    if (is.na(assign_h[g]) || assign_h[g] > length(mus_est)) NA_real_
+    else mus_est[assign_h[g]]
+  }, numeric(1))
+  pi_alinhado <- vapply(seq_along(assign_h), function(g) {
+    if (is.na(assign_h[g]) || assign_h[g] > length(pesos_est)) NA_real_
+    else pesos_est[assign_h[g]]
+  }, numeric(1))
+
+  for (g in 1:4) {
+    tab06[[length(tab06) + 1]] <- data.frame(
+      metodo  = LABEL_INIT[nm],
+      grupo   = G_LABEL[g],
+      mu_real = MU_TRUE[g],
+      mu_est  = round(mu_alinhado[g], 2),
+      mu_err  = round(mu_alinhado[g] - MU_TRUE[g], 2),
+      pi_real = PI_TRUE[g],
+      pi_est  = round(pi_alinhado[g], 3),
+      pi_err  = round(pi_alinhado[g] - PI_TRUE[g], 3)
+    )
+  }
+}
+tab06 <- do.call(rbind, tab06)
+write.csv(tab06, file.path(RDS_DIR, "tab06_recuperacao_parametros.csv"),
+          row.names = FALSE)
+
+gt06 <- gt(tab06, groupname_col = "metodo") %>%
+  tab_header(
+    title    = md(sprintf("**Tabela 6.** Recuperação paramétrica por método (*k* = %d)",
+                          K_AVALIA)),
+    subtitle = md("μ e π estimados, alinhados aos grupos verdadeiros via algoritmo húngaro. Erro = estimado − verdadeiro.")
+  ) %>%
+  cols_label(grupo = "Grupo",
+             mu_real = md("μ real"), mu_est = md("μ estimado"), mu_err = md("Erro μ"),
+             pi_real = md("π real"), pi_est = md("π estimado"), pi_err = md("Erro π")) %>%
+  fmt_number(columns = c(mu_est, mu_err), decimals = 2) %>%
+  fmt_number(columns = c(pi_real, pi_est, pi_err), decimals = 3) %>%
+  tab_style(style = cell_text(color = "white", weight = "bold"),
+            locations = cells_column_labels(everything())) %>%
+  tab_options(table.font.size = px(11),
+              column_labels.background.color = "#2c3e50",
+              column_labels.border.top.style = "hidden",
+              heading.align = "left",
+              row_group.background.color = "#ecf0f1",
+              row_group.font.weight = "bold")
+
+tryCatch({
+  gtsave(gt06, file.path(IMG_DIR, "tab06_recuperacao_parametros.png"),
+         vwidth = 950, vheight = 700, zoom = 2, expand = 5)
+  message("  -> salvo: tab06_recuperacao_parametros.png")
+}, error = function(e) message("  FALHA tab06: ", conditionMessage(e)))
+
+
+# ── Tabela 7 · Diagnostico por grupo (sensibilidade, F1, n) ──────────────────
+tab07 <- list()
+for (nm in names(INITS)) {
+  m <- metricas_E[[nm]]
+  if (is.null(m)) next
+  for (g in 1:4) {
+    n_real    <- sum(grupo_int == g)
+    n_correto <- sum(m$est_par == g & grupo_int == g, na.rm = TRUE)
+    tab07[[length(tab07) + 1]] <- data.frame(
+      metodo = LABEL_INIT[nm],
+      grupo  = G_LABEL[g],
+      n_real = n_real,
+      n_correto = n_correto,
+      sensibilidade = round(m$Sens[g], 3),
+      F1 = round(m$F1_grp[g], 3)
+    )
+  }
+}
+tab07 <- do.call(rbind, tab07)
+write.csv(tab07, file.path(RDS_DIR, "tab07_diagnostico_por_grupo.csv"),
+          row.names = FALSE)
+
+gt07 <- gt(tab07, groupname_col = "metodo") %>%
+  tab_header(
+    title    = md(sprintf("**Tabela 7.** Diagnóstico por grupo (*k* = %d)", K_AVALIA)),
+    subtitle = md("Sensibilidade = proporção do grupo verdadeiro corretamente classificada.")
+  ) %>%
+  cols_label(grupo = "Grupo", n_real = md("*n* verdadeiro"),
+             n_correto = md("*n* correto"),
+             sensibilidade = "Sensibilidade", F1 = "F1") %>%
+  fmt_number(columns = c(sensibilidade, F1), decimals = 3) %>%
+  tab_style(style = cell_text(color = "white", weight = "bold"),
+            locations = cells_column_labels(everything())) %>%
+  tab_options(table.font.size = px(11),
+              column_labels.background.color = "#2c3e50",
+              column_labels.border.top.style = "hidden",
+              heading.align = "left",
+              row_group.background.color = "#ecf0f1",
+              row_group.font.weight = "bold")
+
+tryCatch({
+  gtsave(gt07, file.path(IMG_DIR, "tab07_diagnostico_por_grupo.png"),
+         vwidth = 800, vheight = 650, zoom = 2, expand = 5)
+  message("  -> salvo: tab07_diagnostico_por_grupo.png")
+}, error = function(e) message("  FALHA tab07: ", conditionMessage(e)))
+
+
+# ── Tabela 8 · ARI cruzado entre metodos ─────────────────────────────────────
+metodos_validos <- names(INITS)[!sapply(metricas_E, is.null)]
+ari_mat <- matrix(NA_real_,
+                  nrow = length(metodos_validos),
+                  ncol = length(metodos_validos),
+                  dimnames = list(LABEL_INIT[metodos_validos],
+                                  LABEL_INIT[metodos_validos]))
+for (i in seq_along(metodos_validos)) {
+  for (j in seq_along(metodos_validos)) {
+    ari_mat[i, j] <- adj_rand_index(
+      metricas_E[[metodos_validos[i]]]$est,
+      metricas_E[[metodos_validos[j]]]$est
+    )
+  }
+}
+tab08 <- data.frame(metodo_i = rownames(ari_mat), round(ari_mat, 3),
+                    check.names = FALSE)
+write.csv(tab08, file.path(RDS_DIR, "tab08_ari_cruzado.csv"), row.names = FALSE)
+
+gt08 <- gt(tab08) %>%
+  tab_header(
+    title    = md(sprintf("**Tabela 8.** ARI cruzado entre métodos (*k* = %d)", K_AVALIA)),
+    subtitle = md("ARI = 1 indica partição idêntica. Valores próximos de 1 indicam métodos com soluções equivalentes.")
+  ) %>%
+  cols_label(metodo_i = "Método") %>%
+  fmt_number(columns = -metodo_i, decimals = 3) %>%
+  tab_style(style = cell_text(color = "white", weight = "bold"),
+            locations = cells_column_labels(everything())) %>%
+  tab_options(table.font.size = px(12),
+              column_labels.background.color = "#2c3e50",
+              column_labels.border.top.style = "hidden",
+              heading.align = "left")
+
+tryCatch({
+  gtsave(gt08, file.path(IMG_DIR, "tab08_ari_cruzado.png"),
+         vwidth = 700, vheight = 280, zoom = 2, expand = 5)
+  message("  -> salvo: tab08_ari_cruzado.png")
+}, error = function(e) message("  FALHA tab08: ", conditionMessage(e)))
+
+
+# ── FIG 7 · Densidades ajustadas por metodo (4 paineis lado a lado) ─────────
+LABEL_PANEL <- c(
+  random  = "Random multistart",
+  kmeans  = "k-means + EM",
+  cem_em  = "CEM + EM",
+  sem_em  = "SEM + EM"
+)
+
+dens_metodos <- list()
+for (nm in names(INITS)) {
+  fit_m <- fits_E[[nm]]
+  if (is.null(fit_m)) next
+  mus_est   <- sort(exp(as.numeric(parameters(fit_m))))
+  ord       <- order(exp(as.numeric(parameters(fit_m))))
+  pesos_est <- as.numeric(prior(fit_m))[ord]
+  grade_x   <- seq(0, quantile(consultas, 0.97), length.out = 300)
+
+  for (h in seq_along(mus_est)) {
+    dens_metodos[[length(dens_metodos) + 1]] <- data.frame(
+      metodo     = LABEL_PANEL[nm],
+      componente = sprintf("C%d (μ=%.1f)", h, mus_est[h]),
+      x          = grade_x,
+      densidade  = pesos_est[h] * dnbinom(round(grade_x), size = THETA_NB,
+                                          mu = mus_est[h])
+    )
+  }
+}
+dens_metodos <- do.call(rbind, dens_metodos)
+dens_metodos$metodo <- factor(dens_metodos$metodo,
+                              levels = LABEL_PANEL[names(LABEL_PANEL) %in%
+                                                   names(fits_E)[!sapply(fits_E, is.null)]])
+
+df_hist <- df[df$consultas <= quantile(consultas, 0.97), ]
+
+fig07 <- ggplot() +
+  geom_histogram(data = df_hist,
+                 aes(x = consultas, y = after_stat(density)),
+                 bins = 50, fill = "grey85", colour = "white", alpha = 0.7) +
+  geom_line(data = dens_metodos,
+            aes(x = x, y = densidade, colour = componente),
+            linewidth = 0.85) +
+  facet_wrap(~ metodo, ncol = 2) +
+  scale_colour_brewer(palette = "Set1") +
+  labs(
+    x = "Número de consultas",
+    y = "Densidade",
+    colour = "Componente estimado",
+    title = sprintf("Densidades ajustadas por método (*k* = %d)", K_AVALIA),
+    subtitle = "Histograma cinza = dados; linhas coloridas = componentes NB estimados. CEM colapsou neste cenário."
+  ) +
+  TEMA + theme(legend.position = "right", plot.title = element_text(face = "bold"))
+
+salvar_fig(fig07, "fig07_densidades_por_metodo", largura = 11, altura = 6)
+
+
+# ── FIG 8 · Grid 4x5 — classificacao por grupo (analogo ao PCA-by-group) ─────
+LABEL_PANEL_FULL <- c(verdadeiro = "verdadeiro", LABEL_PANEL)
+
+grid_data <- do.call(rbind, lapply(seq_len(4), function(g_focus) {
+  do.call(rbind, lapply(names(mapped_assign), function(meth) {
+    data.frame(
+      g_focus_lbl  = G_LABEL[g_focus],
+      method_lbl   = LABEL_PANEL_FULL[meth],
+      consultas    = consultas,
+      in_focus     = !is.na(mapped_assign[[meth]]) &
+                     mapped_assign[[meth]] == g_focus
+    )
+  }))
+}))
+grid_data <- grid_data[grid_data$consultas <= quantile(consultas, 0.97), ]
+grid_data$g_focus_lbl <- factor(grid_data$g_focus_lbl, levels = G_LABEL)
+grid_data$method_lbl  <- factor(grid_data$method_lbl,
+                                levels = unname(LABEL_PANEL_FULL))
+
+# Cor por linha (grupo em foco)
+COR_FOCUS <- setNames(unname(COR_GRUPO[c("baixo_uso",
+                                          "ambulatorial_coordenado",
+                                          "agudo_hospitalar",
+                                          "atipico")]),
+                      G_LABEL)
+
+fig08 <- ggplot(grid_data, aes(x = consultas, y = 0)) +
+  geom_jitter(data = subset(grid_data, !in_focus),
+              colour = "grey85", alpha = 0.20, size = 0.35, height = 0.4) +
+  geom_jitter(data = subset(grid_data, in_focus),
+              aes(colour = g_focus_lbl),
+              alpha = 0.65, size = 0.5, height = 0.4) +
+  facet_grid(g_focus_lbl ~ method_lbl, switch = "y") +
+  scale_colour_manual(values = COR_FOCUS, guide = "none") +
+  scale_y_continuous(limits = c(-1, 1), breaks = NULL) +
+  labs(
+    x = "Número de consultas",
+    y = NULL,
+    title = sprintf("Classificação por grupo — k = %d (univariado)", K_AVALIA),
+    subtitle = "Cada linha destaca um grupo verdadeiro · cor viva = em foco · cinza = demais"
+  ) +
+  TEMA + theme(
+    legend.position = "none",
+    strip.text.y.left = element_text(angle = 0, hjust = 1, face = "bold"),
+    strip.text.x      = element_text(face = "bold", size = 9),
+    panel.spacing.x   = unit(0.3, "lines")
+  )
+
+salvar_fig(fig08, "fig08_classificacao_grid", largura = 14, altura = 7)
+
+
+# ── FIG 9 · Certeza posterior (max tau) por metodo e grupo verdadeiro ────────
+cert_data <- list()
+for (nm in names(INITS)) {
+  fit_m <- fits_E[[nm]]
+  if (is.null(fit_m)) next
+  post <- posterior(fit_m)
+  max_tau <- apply(post, 1L, max)
+  cert_data[[length(cert_data) + 1]] <- data.frame(
+    metodo       = LABEL_PANEL[nm],
+    grupo_real   = G_LABEL[grupo_int],
+    max_tau      = max_tau
+  )
+}
+cert_data <- do.call(rbind, cert_data)
+cert_data$metodo     <- factor(cert_data$metodo,
+                               levels = LABEL_PANEL[names(LABEL_PANEL) %in%
+                                                    names(fits_E)[!sapply(fits_E, is.null)]])
+cert_data$grupo_real <- factor(cert_data$grupo_real, levels = G_LABEL)
+
+fig09 <- ggplot(cert_data, aes(x = max_tau, fill = grupo_real, colour = grupo_real)) +
+  geom_density(alpha = 0.30, linewidth = 0.7) +
+  geom_vline(xintercept = 0.9, linetype = "dotted", colour = "grey40") +
+  facet_wrap(~ metodo, ncol = 2) +
+  scale_fill_manual(values = setNames(unname(COR_GRUPO[c("baixo_uso",
+                                                           "ambulatorial_coordenado",
+                                                           "agudo_hospitalar",
+                                                           "atipico")]),
+                                        G_LABEL),
+                    name = "Grupo verdadeiro") +
+  scale_colour_manual(values = setNames(unname(COR_GRUPO[c("baixo_uso",
+                                                             "ambulatorial_coordenado",
+                                                             "agudo_hospitalar",
+                                                             "atipico")]),
+                                          G_LABEL),
+                      name = "Grupo verdadeiro") +
+  scale_x_continuous(limits = c(0.25, 1), breaks = seq(0.3, 1, 0.2)) +
+  labs(
+    x = expression(max[k] ~ hat(tau)[ik]),
+    y = "Densidade",
+    title = "Certeza máxima de classificação por método e grupo verdadeiro",
+    subtitle = "Linha pontilhada = limiar 0,90. G3 e G4 tendem a ter certeza menor (zona de sobreposição)."
+  ) +
+  TEMA + theme(plot.title = element_text(face = "bold"))
+
+salvar_fig(fig09, "fig09_certeza_por_grupo", largura = 11, altura = 6)
+
+
+# ── FIG 10 · Taxa de erro por faixa do numero de consultas ──────────────────
+faixas    <- c(0, 5, 15, 35, Inf)
+faixa_lbl <- c("0–4", "5–14", "15–34", "≥ 35")
+faixa_i   <- cut(consultas, breaks = faixas, right = FALSE, labels = faixa_lbl)
+
+erro_data <- list()
+for (nm in names(INITS)) {
+  m <- metricas_E[[nm]]
+  if (is.null(m)) next
+  err <- m$est_par != grupo_int
+  for (fx in faixa_lbl) {
+    idx <- faixa_i == fx & !is.na(faixa_i)
+    if (sum(idx) == 0) next
+    erro_data[[length(erro_data) + 1]] <- data.frame(
+      metodo = LABEL_PANEL[nm],
+      faixa  = fx,
+      n      = sum(idx),
+      err    = mean(err[idx], na.rm = TRUE)
+    )
+  }
+}
+erro_data <- do.call(rbind, erro_data)
+erro_data$faixa  <- factor(erro_data$faixa, levels = faixa_lbl)
+erro_data$metodo <- factor(erro_data$metodo,
+                           levels = LABEL_PANEL[names(LABEL_PANEL) %in%
+                                                 names(fits_E)[!sapply(fits_E, is.null)]])
+
+fig10 <- ggplot(erro_data, aes(x = faixa, y = err, fill = metodo)) +
+  geom_col(position = position_dodge(width = 0.75), width = 0.7) +
+  geom_text(aes(label = sprintf("%.1f%%", 100 * err)),
+            position = position_dodge(width = 0.75),
+            vjust = -0.3, size = 3) +
+  scale_fill_manual(values = setNames(unname(COR_INIT[names(LABEL_PANEL)]),
+                                       LABEL_PANEL),
+                    name = "Método") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     expand = expansion(mult = c(0, 0.12))) +
+  labs(
+    x = "Faixa do número de consultas",
+    y = "Taxa de erro",
+    title = "Erro de classificação por faixa do número de consultas",
+    subtitle = "Zona de sobreposição G3↔G4 (faixa 15–34) concentra os maiores erros."
+  ) +
+  TEMA + theme(plot.title = element_text(face = "bold"))
+
+salvar_fig(fig10, "fig10_erro_por_faixa", largura = 11, altura = 5.5)
+
+
+cat("\nModulo E concluido.\n")
+cat(sprintf("  Tabelas:  tab05 (metricas) · tab06 (parametros) · tab07 (por grupo) · tab08 (ARI cruzado)\n"))
+cat(sprintf("  Figuras:  fig07 (densidades) · fig08 (grid 4x5) · fig09 (certeza) · fig10 (erro/faixa)\n"))
+
+
+# =============================================================================
 # 11. TABELAS FORMATADAS (gt → PNG + CSV)
 # =============================================================================
 cat("\n", strrep("=", 70), "\n", sep = "")
