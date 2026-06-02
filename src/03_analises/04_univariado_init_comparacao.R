@@ -37,9 +37,29 @@ suppressPackageStartupMessages({
 FLXMRnegbin <- countreg::FLXMRnegbin
 
 
-# ── 1. Diretorios ─────────────────────────────────────────────────────────────
-IMG_DIR <- "docs/assets/img/univariado_init"
-RDS_DIR <- "src/03_analises/rds/univariado_init"
+# ── 1. Raiz do projeto + diretorios ──────────────────────────────────────────
+# Detecta a raiz do projeto procurando o arquivo-marcador (poster_figures.R).
+# Garante que IMG_DIR e RDS_DIR caiam sempre na pasta correta,
+# independentemente do diretorio de trabalho onde o script foi invocado.
+encontrar_raiz <- function(marcador = "poster_figures.R",
+                            inicio = getwd(), max_subir = 6L) {
+  dir_atual <- normalizePath(inicio, winslash = "/", mustWork = FALSE)
+  for (i in seq_len(max_subir)) {
+    if (file.exists(file.path(dir_atual, marcador))) return(dir_atual)
+    pai <- dirname(dir_atual)
+    if (pai == dir_atual) break  # chegou na raiz do sistema de arquivos
+    dir_atual <- pai
+  }
+  stop("Nao encontrei a raiz do projeto (procurando por '", marcador,
+       "'). Rode setwd() para a raiz e tente novamente.")
+}
+
+PROJ_ROOT <- encontrar_raiz()
+setwd(PROJ_ROOT)
+cat("Raiz do projeto: ", PROJ_ROOT, "\n", sep = "")
+
+IMG_DIR <- file.path(PROJ_ROOT, "docs/assets/img/univariado_init")
+RDS_DIR <- file.path(PROJ_ROOT, "src/03_analises/rds/univariado_init")
 dir.create(IMG_DIR, recursive = TRUE, showWarnings = FALSE)
 dir.create(RDS_DIR, recursive = TRUE, showWarnings = FALSE)
 
