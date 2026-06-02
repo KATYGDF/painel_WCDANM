@@ -207,6 +207,130 @@ blockquote.cit cite {
   margin: 0 0.15rem;
 }
 
+/* ── Bloco de pseudo-codigo (algoritmo) ─────────────────────── */
+pre.algo {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-left: 3px solid #6a737d;
+  border-radius: 4px;
+  padding: 0.9rem 1.1rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 1rem 0;
+  color: #24292f;
+}
+
+/* ── Bloco de codigo R (tema escuro) ────────────────────────── */
+pre.r-code {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 2;
+  margin: 1.2rem 0;
+}
+pre.r-code .com { color: #6c7086; font-style: italic; }
+pre.r-code .kw  { color: #cba6f7; }
+pre.r-code .fn  { color: #89b4fa; }
+pre.r-code .num { color: #fab387; }
+pre.r-code .str { color: #a6e3a1; }
+pre.r-code .op  { color: #89dceb; }
+
+/* ── Sub-secao por metodo ───────────────────────────────────── */
+.metodo-bloco {
+  margin: 2rem 0 2.5rem;
+  padding: 1.1rem 1.3rem 0.5rem;
+  background: #fafbfc;
+  border-radius: 6px;
+  border-top: 3px solid var(--accent, #4a7c59);
+}
+.metodo-bloco h3 {
+  margin-top: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.metodo-bloco h3 .num-met {
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.75rem;
+  background: var(--accent, #4a7c59);
+  color: white;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+}
+.metodo-bloco h4 {
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #666);
+  margin: 1.2rem 0 0.4rem;
+}
+
+/* ── Tabela de prós/contras (2 colunas) ─────────────────────── */
+.pros-cons {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin: 0.6rem 0 1.2rem;
+}
+.pros-cons th {
+  text-align: left;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface, #f8f7f4);
+  border-bottom: 2px solid var(--border, #ddd);
+}
+.pros-cons th.col-pro { color: #2d5a40; }
+.pros-cons th.col-con { color: #922b21; }
+.pros-cons td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+  width: 50%;
+}
+.pros-cons tr:last-child td { border-bottom: none; }
+
+/* ── Tabela de sintese (estrelas) ───────────────────────────── */
+.sintese-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin: 1.5rem 0;
+}
+.sintese-table th, .sintese-table td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: middle;
+}
+.sintese-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.sintese-table th:first-child { text-align: left; }
+.sintese-table td:first-child {
+  font-weight: 600;
+  color: var(--ink, #1a1a1a);
+}
+.sintese-table td:not(:first-child) { text-align: center; }
+.sintese-table .stars { color: #f5b800; font-size: 1.05rem; letter-spacing: 0.04em; }
+.sintese-table .obs { color: var(--muted, #777); font-size: 0.78rem; display: block; }
+.sintese-table tr.linha-uso td { background: #fef9e7; font-style: italic; font-size: 0.85rem; }
+
 </style>
 </head>
 <body>
@@ -255,6 +379,7 @@ blockquote.cit cite {
     <li><a href="#modD">Resultados — Módulo D · Modelo final e estabilidade</a></li>
     <li><a href="#conclusoes">Sete conclusões metodológicas</a></li>
     <li><a href="#proximos">Próximos passos</a></li>
+    <li><a href="#codigo">Código R</a></li>
     <li><a href="#referencias">Referências</a></li>
   </ol>
 </div>
@@ -458,6 +583,290 @@ blockquote.cit cite {
   <em>SEM</em> escapa de ótimos locais via estocasticidade.
   Se houver diferenças relevantes entre elas, deveriam aparecer em cenários
   difíceis como este.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- 4.1 — Detalhamento de cada estratégia                       -->
+<!-- ══════════════════════════════════════════════════════════ -->
+
+<div class="metodo-bloco">
+  <h3><span class="num-met">M1</span> Random multistart</h3>
+
+  <h4>Intuição</h4>
+  <p>
+    O EM é um otimizador <strong>local</strong>: ele garante chegar a um
+    máximo da log-verossimilhança <em>próximo</em> do ponto onde foi
+    iniciado, mas não garante que seja o máximo global. Para misturas com
+    componentes sobrepostos, a superfície de verossimilhança tem múltiplas
+    modas — e o EM pode parar em qualquer uma delas. A solução mais simples
+    e geral é <strong>rodar EM várias vezes a partir de pontos aleatórios
+    diferentes</strong> e ficar com o melhor. Com sorte, pelo menos um dos
+    arranques cai na bacia de atração do máximo global.
+  </p>
+
+  <h4>Algoritmo</h4>
+<pre class="algo">Para r = 1, 2, ..., 20:
+  1. Sorteie uma partição inicial z⁽⁰⁾ uniforme:
+     para cada i ∈ {1,...,n}, atribua z_i ∈ {1,...,g} com prob. 1/g
+  2. Inicialize μ_h, π_h a partir dessa partição (M-step inicial)
+  3. Itere o EM completo:
+        E-step:  τ_ih = π_h · NB(x_i | μ_h, θ) / Σ_l π_l · NB(x_i | μ_l, θ)
+        M-step:  π_h = (1/n) Σ_i τ_ih
+                 μ_h = Σ_i τ_ih · x_i / Σ_i τ_ih
+     até |ℓ⁽ᵗ⁾ − ℓ⁽ᵗ⁻¹⁾| &lt; 1e-7  ou  t = 500
+  4. Guarde (ajuste_r, ℓ_r)
+
+Retorne o ajuste com maior ℓ_r.</pre>
+
+  <h4>Prós e contras</h4>
+  <table class="pros-cons">
+    <thead>
+      <tr>
+        <th class="col-pro">✓ Prós</th>
+        <th class="col-con">✗ Contras</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Funciona em <strong>qualquer modelo</strong> (NB, Gaussiano,
+          regressão, etc.).</td>
+        <td>É <strong>o mais caro</strong> — 20× o custo de uma EM única.</td>
+      </tr>
+      <tr>
+        <td>Não pressupõe nada sobre a geometria dos dados.</td>
+        <td>Pode falhar se nenhum dos 20 starts cair na bacia certa.</td>
+      </tr>
+      <tr>
+        <td>É a referência metodológica clássica (baseline).</td>
+        <td>Shireman et al. (2017): mesmo com 30 starts,
+          <em>p<sub>max</sub></em> ≈ 0,55.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="achado">
+    <strong>No nosso experimento.</strong> Atingiu a maior log-verossimilhança
+    para todo <em>g</em> — mas a um custo enorme: 80 s para <em>g</em>=3,
+    99 s para <em>g</em>=4, contra 1,6 s do k-means para o mesmo resultado.
+    É a evidência empírica de que neste problema o EM não está preso —
+    então o gasto da exploração é desnecessário.
+  </div>
+</div>
+
+
+<div class="metodo-bloco">
+  <h3><span class="num-met">M2</span> k-means + EM</h3>
+
+  <h4>Intuição</h4>
+  <p>
+    Em vez de partir de pontos aleatórios, <strong>usa um cluster geométrico
+    rápido como ponto de partida informado</strong>. O k-means é uma
+    heurística de minimização de soma de quadrados intra-cluster,
+    computacionalmente trivial. Se os componentes verdadeiros da mistura
+    forem grosseiramente separáveis no espaço Euclidiano, o k-means já
+    entrega uma partição "quase certa", e o EM só precisa refinar.
+  </p>
+  <p>
+    A transformação \(\log(1+x)\) é importante: contagens cruas têm
+    variância proporcional à média (comportamento Poisson-like), então
+    valores grandes dominam a distância Euclidiana. O <code>log1p</code>
+    aproxima homocedasticidade — sem ele, o k-means viraria essencialmente
+    um teste para "está acima ou abaixo de tal valor", desprezando a
+    estrutura dos componentes pequenos.
+  </p>
+
+  <h4>Algoritmo</h4>
+<pre class="algo">1. Aplique k-means nos dados log-transformados:
+     z⁽⁰⁾ = kmeans(log(1 + x),
+                   centers = g,
+                   nstart  = 25,        # 25 reinícios internos do próprio k-means
+                   iter.max = 100)$cluster
+
+2. Use z⁽⁰⁾ como partição inicial do EM completo (uma única execução):
+     iterar E-step / M-step até convergência
+
+3. Retorne o ajuste único.</pre>
+
+  <h4>Prós e contras</h4>
+  <table class="pros-cons">
+    <thead>
+      <tr>
+        <th class="col-pro">✓ Prós</th>
+        <th class="col-con">✗ Contras</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>~50× mais rápido</strong> que random multistart.</td>
+        <td>Pressupõe geometria <strong>esférica e equi-tamanho</strong> —
+          viés se a mistura tiver componentes muito assimétricos.</td>
+      </tr>
+      <tr>
+        <td>Determinístico (dada a semente).</td>
+        <td>Pode falhar quando componentes se sobrepõem fortemente no
+          espaço euclidiano.</td>
+      </tr>
+      <tr>
+        <td>Boa partida quando há separação geométrica clara.</td>
+        <td>A geometria do k-means não casa naturalmente com a forma da
+          NB (cauda longa).</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="achado">
+    <strong>No nosso experimento.</strong> O <strong>grande vencedor
+    pragmático</strong>. Atingiu exatamente a mesma log-verossimilhança do
+    random multistart em todos os <em>g</em>, mas em ~1,6 s em vez de
+    ~80 s. Isso indica que, neste problema, o EM já é bem comportado — e
+    a sofisticação da exploração random não compra qualidade extra.
+  </div>
+</div>
+
+
+<div class="metodo-bloco">
+  <h3><span class="num-met">M3</span> CEM + EM (Classification EM)</h3>
+
+  <h4>Intuição</h4>
+  <p>
+    O EM padrão faz <strong>atribuição soft</strong>: cada observação
+    contribui para todos os componentes proporcionalmente à sua
+    probabilidade posterior. O CEM faz <strong>atribuição dura</strong>:
+    cada observação é atribuída ao componente mais provável, e
+    <em>só ele</em> aprende com aquela observação.
+  </p>
+  <p>
+    Isso muda o que está sendo otimizado: o EM maximiza a
+    log-verossimilhança <em>observada</em> dos dados; o CEM maximiza a
+    log-verossimilhança <em>completa</em> (assumindo as atribuições como
+    conhecidas). Tipicamente, <strong>CEM converge mais rápido</strong> e
+    produz componentes <em>mais separados</em> — mas pode colapsar
+    componentes pequenos.
+  </p>
+
+  <h4>Algoritmo</h4>
+<pre class="algo">Para r = 1, 2, ..., 20:
+  1. Partição inicial aleatória z⁽⁰⁾
+  2. Itere o CEM:
+        E-step (hard):  ẑ_i = argmax_h τ_ih       # atribuição DURA
+        M-step:         π_h, μ_h estimados usando SÓ as obs com ẑ_i = h
+     até partição estabilizar  ou  t = 100
+  3. Guarde (ajuste_r, ℓ_r)
+
+Escolha o melhor CEM (maior ℓ_r).
+Refine com EM completo (classify = "weighted").
+Retorne o ajuste refinado.</pre>
+
+  <h4>Prós e contras</h4>
+  <table class="pros-cons">
+    <thead>
+      <tr>
+        <th class="col-pro">✓ Prós</th>
+        <th class="col-con">✗ Contras</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Convergência <strong>mais rápida</strong> por iteração.</td>
+        <td><strong>Frágil para componentes pequenos</strong>: se &lt; ~5%
+          das observações caem num componente em uma iteração, ele
+          colapsa.</td>
+      </tr>
+      <tr>
+        <td>Produz componentes bem separados (útil em alguns contextos).</td>
+        <td>Sob sobredispersão alta, a atribuição dura é arbitrária para
+          obs na zona de sobreposição.</td>
+      </tr>
+      <tr>
+        <td>Matematicamente bem definido (Celeux &amp; Govaert, 1992).</td>
+        <td><strong>Tende a subestimar <em>g</em></strong> quando há
+          sobreposição real.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerta">
+    <strong>No nosso experimento.</strong> <em>Falhou em 3 das 5
+    cardinalidades</em> (<em>g</em> = 4, 5, 6). O motivo: com θ = 2,5,
+    G3 e G4 se sobrepõem tanto que a atribuição dura é praticamente um
+    sorteio, e qualquer flutuação leva ao colapso do componente menor —
+    o CEM não consegue manter 4 componentes vivos no mesmo ajuste.
+    Confirma a fragilidade conhecida do método em contagens sobredispersas.
+  </div>
+</div>
+
+
+<div class="metodo-bloco">
+  <h3><span class="num-met">M4</span> SEM + EM (Stochastic EM)</h3>
+
+  <h4>Intuição</h4>
+  <p>
+    O SEM resolve o problema do CEM (colapso por atribuição dura)
+    <strong>introduzindo aleatoriedade</strong>: em vez de escolher o
+    componente mais provável, ele <strong>sorteia</strong> o componente
+    de cada observação proporcionalmente à sua probabilidade posterior.
+    Cada iteração resulta em uma partição diferente — o método se torna
+    uma cadeia de Markov no espaço de parâmetros.
+  </p>
+  <p>
+    A vantagem teórica: a aleatoriedade dá ao algoritmo um mecanismo para
+    <strong>escapar de máximos locais</strong> — se o EM ficaria preso
+    num ótimo local pobre, o sorteio estocástico tende, com o tempo, a
+    deslocá-lo para regiões de maior verossimilhança.
+  </p>
+
+  <h4>Algoritmo</h4>
+<pre class="algo">Para r = 1, 2, ..., 20:
+  1. Partição inicial aleatória z⁽⁰⁾
+  2. Itere o SEM:
+        E-step (stochastic):  ẑ_i ~ Multinomial(τ_i1, ..., τ_ig)
+        M-step:               π_h, μ_h estimados com ẑ sorteado
+     até log-verossimilhança estabilizar  ou  t = 100
+  3. Guarde o melhor ponto da trajetória
+
+Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
+
+  <p style="font-size:0.86rem; color:var(--muted, #666); margin:0.4rem 0 0.8rem;">
+    <em>Diferença crucial em relação ao CEM:</em> o SEM <strong>não converge
+    para um ponto fixo</strong> — ele oscila numa distribuição estacionária.
+    Na prática, usa-se o ponto da trajetória com maior log-verossimilhança
+    (ou a média dos últimos passos).
+  </p>
+
+  <h4>Prós e contras</h4>
+  <table class="pros-cons">
+    <thead>
+      <tr>
+        <th class="col-pro">✓ Prós</th>
+        <th class="col-con">✗ Contras</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Aleatoriedade ajuda a <strong>escapar de ótimos locais</strong>.</td>
+        <td>Convergência mais ruidosa que CEM ou EM.</td>
+      </tr>
+      <tr>
+        <td>Adequado quando há suspeita de múltiplos máximos locais.</td>
+        <td>Ainda sujeito ao colapso de componentes pequenos (sorteio pode
+          dar zero por azar).</td>
+      </tr>
+      <tr>
+        <td>Dá uma noção empírica de incerteza dos parâmetros.</td>
+        <td>Mais lento que CEM por causa do ruído.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alerta">
+    <strong>No nosso experimento.</strong> <em>Falhou em g = 5</em>
+    (componente colapsou no sorteio). Para <em>g</em> ∈ {2, 3, 4, 6}
+    chegou ao mesmo máximo dos outros métodos, mas com custo intermediário
+    (~25 s vs 1,6 s do k-means). Confirma que neste problema
+    <em>não há</em> múltiplos ótimos locais relevantes para fugir — então
+    a estocasticidade do SEM não compra benefício, só acrescenta variância.
+  </div>
 </div>
 
 
@@ -699,8 +1108,8 @@ blockquote.cit cite {
   <strong>Alerta metodológico:</strong> o ICL é frequentemente recomendado
   como alternativa ao BIC quando há sobreposição entre componentes. <em>O
   experimento aqui mostra exatamente o oposto:</em> quando a sobreposição é a
-  estrutura real do problema (e não um artefato), o ICL é catastroficamente
-  conservador. Use ICL apenas quando houver razão substantiva para acreditar
+  estrutura real do problema (e não um artefato), o ICL é muito conservador. 
+  Use ICL apenas quando houver razão substantiva para acreditar
   em componentes <em>bem separados</em>.
 </div>
 
@@ -886,7 +1295,7 @@ blockquote.cit cite {
 
 <div class="alerta">
   <span class="tag">Conclusão 5</span>
-  <strong>ICL é catastroficamente conservador em cenários sobrepostos.</strong>
+  <strong>ICL é muito conservador em cenários sobrepostos.</strong>
   ICL escolheu \(g=2\), duas categorias abaixo da verdade. A penalidade por
   entropia da classificação cresce monotonicamente com a sobreposição.
   ICL é apropriado quando se sabe que os componentes são bem separados —
@@ -910,6 +1319,75 @@ blockquote.cit cite {
   altamente estável. Mas está estavelmente <em>errado</em>: funde G3 e G4.
   Estabilidade de partição mede consistência de reamostragem, não acerto da
   cardinalidade.
+</div>
+
+<h3>Síntese comparativa das estratégias de inicialização</h3>
+
+<p>
+  A tabela abaixo consolida o veredito empírico para cada estratégia em três
+  dimensões — <em>qualidade da solução</em>, <em>velocidade</em> e
+  <em>robustez</em> — e indica em que cenário cada uma é a escolha
+  preferencial.
+</p>
+
+<table class="sintese-table">
+  <thead>
+    <tr>
+      <th>Critério</th>
+      <th>random</th>
+      <th>k-means</th>
+      <th>CEM + EM</th>
+      <th>SEM + EM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Qualidade da solução</td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★</span> <span class="obs">colapsa</span></td>
+      <td><span class="stars">★★</span> <span class="obs">instável</span></td>
+    </tr>
+    <tr>
+      <td>Velocidade</td>
+      <td><span class="stars">★</span></td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★★</span></td>
+      <td><span class="stars">★★</span></td>
+    </tr>
+    <tr>
+      <td>Determinismo</td>
+      <td><span class="stars">★</span></td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★★</span></td>
+      <td><span class="stars">★</span></td>
+    </tr>
+    <tr>
+      <td>Robustez a sobredispersão</td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★★★</span></td>
+      <td><span class="stars">★</span></td>
+      <td><span class="stars">★★</span></td>
+    </tr>
+    <tr class="linha-uso">
+      <td>Quando usar</td>
+      <td>"default seguro"</td>
+      <td><strong>escolha prática</strong></td>
+      <td>grupos bem separados, <em>n</em> alto</td>
+      <td>suspeita de múltiplos ótimos locais</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="achado">
+  <strong>Veredito.</strong> Quando a paisagem de verossimilhança é
+  bem-comportada (caso comum para misturas NB com <em>n</em> alto e
+  θ moderado), <strong>k-means + EM</strong> é a escolha que domina:
+  mesma qualidade da solução, fração do custo computacional, totalmente
+  determinístico. <em>Random multistart</em> permanece como apólice de
+  seguro caso haja suspeita de ótimos locais. <em>CEM</em> e <em>SEM</em>
+  são úteis em nichos específicos (componentes muito separados ou
+  múltiplos máximos), mas frágeis em contagens sobredispersas.
 </div>
 
 
@@ -950,7 +1428,291 @@ blockquote.cit cite {
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="referencias">12 · Referências</h2>
+<h2 id="codigo">12 · Código R</h2>
+
+<p>
+  O script completo (<code>src/03_analises/04_univariado_init_comparacao.R</code>,
+  896 linhas) é apresentado abaixo em quatro blocos que correspondem aos
+  módulos descritos nesta página. Os blocos auxiliares (geração de gráficos
+  e tabelas formatadas via <code>gt</code>) foram omitidos por brevidade,
+  pois sua função é estritamente de apresentação.
+</p>
+
+<h3>12.1 · Configuração do experimento</h3>
+
+<p>
+  Parâmetros da simulação, diretórios de saída e dependências.
+</p>
+
+<pre class="r-code"><span class="com"># ── Dependências ──────────────────────────────────────────────────────────────</span>
+<span class="kw">library</span>(dplyr); <span class="kw">library</span>(tidyr); <span class="kw">library</span>(ggplot2)
+<span class="kw">library</span>(flexmix); <span class="kw">library</span>(gt); <span class="kw">library</span>(patchwork)
+FLXMRnegbin <span class="op">&lt;-</span> countreg::FLXMRnegbin
+
+<span class="com"># ── Diretórios (resolvidos a partir da raiz do projeto) ───────────────────────</span>
+PROJ_ROOT <span class="op">&lt;-</span> <span class="fn">encontrar_raiz</span>()  <span class="com"># sobe a árvore até achar poster_figures.R</span>
+<span class="fn">setwd</span>(PROJ_ROOT)
+IMG_DIR <span class="op">&lt;-</span> <span class="fn">file.path</span>(PROJ_ROOT, <span class="str">"docs/assets/img/univariado_init"</span>)
+RDS_DIR <span class="op">&lt;-</span> <span class="fn">file.path</span>(PROJ_ROOT, <span class="str">"src/03_analises/rds/univariado_init"</span>)
+<span class="fn">dir.create</span>(IMG_DIR, recursive <span class="op">=</span> <span class="kw">TRUE</span>, showWarnings <span class="op">=</span> <span class="kw">FALSE</span>)
+<span class="fn">dir.create</span>(RDS_DIR, recursive <span class="op">=</span> <span class="kw">TRUE</span>, showWarnings <span class="op">=</span> <span class="kw">FALSE</span>)
+
+<span class="com"># ── Parâmetros do experimento ─────────────────────────────────────────────────</span>
+<span class="fn">set.seed</span>(<span class="num">1234</span>)
+N         <span class="op">&lt;-</span> <span class="num">5000</span>
+PI_TRUE   <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="num">0.25</span>, <span class="num">0.25</span>, <span class="num">0.25</span>, <span class="num">0.25</span>)
+MU_TRUE   <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="num">2</span>, <span class="num">12</span>, <span class="num">25</span>, <span class="num">50</span>)
+THETA_NB  <span class="op">&lt;-</span> <span class="num">2.5</span>           <span class="com"># sobredispersão alta → grupos sobrepostos</span>
+K_TRUE    <span class="op">&lt;-</span> <span class="num">4</span>
+K_GRID    <span class="op">&lt;-</span> <span class="num">2</span>:<span class="num">6</span>            <span class="com"># cardinalidades a testar</span>
+NREP      <span class="op">&lt;-</span> <span class="num">20</span>             <span class="com"># reinícios por estratégia</span>
+BLRT_B    <span class="op">&lt;-</span> <span class="num">99</span>             <span class="com"># replicações bootstrap LRT</span>
+BLRT_NREP <span class="op">&lt;-</span> <span class="num">3</span>              <span class="com"># reinícios por ajuste bootstrap</span>
+BOOT_B    <span class="op">&lt;-</span> <span class="num">100</span>            <span class="com"># replicações bootstrap de estabilidade</span>
+
+<span class="com"># ── Simulação dos dados (univariado: só consultas) ────────────────────────────</span>
+grupo_real <span class="op">&lt;-</span> <span class="fn">sample</span>(<span class="num">1</span>:<span class="num">4</span>, size <span class="op">=</span> N, replace <span class="op">=</span> <span class="kw">TRUE</span>, prob <span class="op">=</span> PI_TRUE)
+consultas  <span class="op">&lt;-</span> <span class="fn">rnbinom</span>(n <span class="op">=</span> N, size <span class="op">=</span> THETA_NB, mu <span class="op">=</span> MU_TRUE[grupo_real])
+
+df <span class="op">&lt;-</span> <span class="fn">data.frame</span>(
+  grupo_real <span class="op">=</span> <span class="fn">factor</span>(grupo_real, levels <span class="op">=</span> <span class="num">1</span>:<span class="num">4</span>,
+                      labels <span class="op">=</span> <span class="fn">c</span>(<span class="str">"baixo_uso"</span>, <span class="str">"ambulatorial_coordenado"</span>,
+                                 <span class="str">"agudo_hospitalar"</span>, <span class="str">"atipico"</span>)),
+  consultas  <span class="op">=</span> consultas
+)
+</pre>
+
+<h3>12.2 · As quatro estratégias de inicialização</h3>
+
+<p>
+  Núcleo do experimento. Cada estratégia é uma função que recebe o número
+  de componentes <em>k</em> e retorna o melhor ajuste obtido pela respectiva
+  política de exploração. A função interna <code>fit_um()</code> encapsula a
+  chamada ao <code>flexmix</code> — assim os quatro métodos diferem apenas
+  no argumento <code>classify_mode</code> (modo do E-step) e no número de
+  reinícios.
+</p>
+
+<pre class="r-code"><span class="com"># ── Ajuste único (núcleo compartilhado pelas 4 estratégias) ───────────────────</span>
+fit_um <span class="op">&lt;-</span> <span class="kw">function</span>(cluster_init, k_val, classify_mode <span class="op">=</span> <span class="str">"weighted"</span>,
+                   seed <span class="op">=</span> <span class="num">42</span>, iter_max <span class="op">=</span> <span class="num">500</span>,
+                   tolerance <span class="op">=</span> <span class="num">1e-7</span>, minprior <span class="op">=</span> <span class="num">0.01</span>) {
+  <span class="fn">set.seed</span>(seed)
+  ctrl <span class="op">&lt;-</span> <span class="fn">list</span>(iter.max <span class="op">=</span> iter_max, tolerance <span class="op">=</span> tolerance,
+               minprior <span class="op">=</span> minprior, classify <span class="op">=</span> classify_mode)
+  args <span class="op">&lt;-</span> <span class="fn">list</span>(
+    formula <span class="op">=</span> consultas <span class="op">~</span> <span class="num">1</span>, data <span class="op">=</span> df, k <span class="op">=</span> k_val,
+    model <span class="op">=</span> <span class="fn">FLXMRnegbin</span>(theta <span class="op">=</span> THETA_NB), control <span class="op">=</span> ctrl
+  )
+  <span class="kw">if</span> (!<span class="fn">is.null</span>(cluster_init)) args<span class="op">$</span>cluster <span class="op">&lt;-</span> cluster_init
+  <span class="fn">tryCatch</span>(<span class="fn">suppressWarnings</span>(<span class="fn">do.call</span>(flexmix, args)),
+           error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+}
+
+<span class="com"># ── M1 · Random multistart ────────────────────────────────────────────────────</span>
+<span class="com"># nrep ajustes EM partindo de partições aleatórias; retorna o melhor logLik.</span>
+init_random <span class="op">&lt;-</span> <span class="kw">function</span>(k_val, nrep <span class="op">=</span> NREP, seed <span class="op">=</span> <span class="num">100</span>) {
+  best <span class="op">&lt;-</span> <span class="kw">NULL</span>; best_ll <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+    fit_i <span class="op">&lt;-</span> <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> <span class="fn">sample.int</span>(k_val, N, replace <span class="op">=</span> <span class="kw">TRUE</span>),
+                    k_val <span class="op">=</span> k_val, classify_mode <span class="op">=</span> <span class="str">"weighted"</span>,
+                    seed <span class="op">=</span> seed <span class="op">+</span> i)
+    <span class="kw">if</span> (!<span class="fn">is.null</span>(fit_i) <span class="op">&amp;&amp;</span> fit_i@k <span class="op">==</span> k_val) {
+      ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_i))
+      <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) <span class="op">&amp;&amp;</span> ll <span class="op">&gt;</span> best_ll) { best_ll <span class="op">&lt;-</span> ll; best <span class="op">&lt;-</span> fit_i }
+    }
+  }
+  best
+}
+
+<span class="com"># ── M2 · k-means + EM ─────────────────────────────────────────────────────────</span>
+<span class="com"># k-means em log(1+x) gera a partição inicial; refina com EM completo (1 run).</span>
+init_kmeans <span class="op">&lt;-</span> <span class="kw">function</span>(k_val, seed <span class="op">=</span> <span class="num">200</span>) {
+  <span class="fn">set.seed</span>(seed)
+  <span class="kw">if</span> (k_val <span class="op">==</span> 1L) <span class="kw">return</span>(<span class="fn">fit_um</span>(<span class="kw">NULL</span>, 1L, seed <span class="op">=</span> seed))
+  km <span class="op">&lt;-</span> <span class="fn">kmeans</span>(<span class="fn">log1p</span>(df<span class="op">$</span>consultas),
+               centers <span class="op">=</span> k_val, nstart <span class="op">=</span> <span class="num">25</span>, iter.max <span class="op">=</span> <span class="num">100</span>)
+  <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> km<span class="op">$</span>cluster, k_val <span class="op">=</span> k_val, seed <span class="op">=</span> seed)
+}
+
+<span class="com"># ── M3 · CEM + EM ─────────────────────────────────────────────────────────────</span>
+<span class="com"># Classification EM (E-step duro) seguido de refinamento com EM completo.</span>
+init_cem_em <span class="op">&lt;-</span> <span class="kw">function</span>(k_val, nrep <span class="op">=</span> NREP, seed <span class="op">=</span> <span class="num">300</span>) {
+  best_cem <span class="op">&lt;-</span> <span class="kw">NULL</span>; best_ll <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+    fit_i <span class="op">&lt;-</span> <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> <span class="fn">sample.int</span>(k_val, N, replace <span class="op">=</span> <span class="kw">TRUE</span>),
+                    k_val <span class="op">=</span> k_val, classify_mode <span class="op">=</span> <span class="str">"hard"</span>,    <span class="com"># &lt;- CEM</span>
+                    seed <span class="op">=</span> seed <span class="op">+</span> i,
+                    iter_max <span class="op">=</span> <span class="num">100</span>, tolerance <span class="op">=</span> <span class="num">1e-5</span>)
+    <span class="kw">if</span> (!<span class="fn">is.null</span>(fit_i) <span class="op">&amp;&amp;</span> fit_i@k <span class="op">==</span> k_val) {
+      ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_i))
+      <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) <span class="op">&amp;&amp;</span> ll <span class="op">&gt;</span> best_ll) { best_ll <span class="op">&lt;-</span> ll; best_cem <span class="op">&lt;-</span> fit_i }
+    }
+  }
+  <span class="kw">if</span> (<span class="fn">is.null</span>(best_cem)) <span class="kw">return</span>(<span class="kw">NULL</span>)
+  <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> <span class="fn">clusters</span>(best_cem), k_val <span class="op">=</span> k_val,
+         classify_mode <span class="op">=</span> <span class="str">"weighted"</span>, seed <span class="op">=</span> seed)   <span class="com"># refinamento EM</span>
+}
+
+<span class="com"># ── M4 · SEM + EM ─────────────────────────────────────────────────────────────</span>
+<span class="com"># Stochastic EM (E-step amostra) seguido de refinamento com EM completo.</span>
+init_sem_em <span class="op">&lt;-</span> <span class="kw">function</span>(k_val, nrep <span class="op">=</span> NREP, seed <span class="op">=</span> <span class="num">400</span>) {
+  best_sem <span class="op">&lt;-</span> <span class="kw">NULL</span>; best_ll <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+    fit_i <span class="op">&lt;-</span> <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> <span class="fn">sample.int</span>(k_val, N, replace <span class="op">=</span> <span class="kw">TRUE</span>),
+                    k_val <span class="op">=</span> k_val, classify_mode <span class="op">=</span> <span class="str">"random"</span>,  <span class="com"># &lt;- SEM</span>
+                    seed <span class="op">=</span> seed <span class="op">+</span> i,
+                    iter_max <span class="op">=</span> <span class="num">100</span>, tolerance <span class="op">=</span> <span class="num">1e-5</span>)
+    <span class="kw">if</span> (!<span class="fn">is.null</span>(fit_i) <span class="op">&amp;&amp;</span> fit_i@k <span class="op">==</span> k_val) {
+      ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_i))
+      <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) <span class="op">&amp;&amp;</span> ll <span class="op">&gt;</span> best_ll) { best_ll <span class="op">&lt;-</span> ll; best_sem <span class="op">&lt;-</span> fit_i }
+    }
+  }
+  <span class="kw">if</span> (<span class="fn">is.null</span>(best_sem)) <span class="kw">return</span>(<span class="kw">NULL</span>)
+  <span class="fn">fit_um</span>(cluster_init <span class="op">=</span> <span class="fn">clusters</span>(best_sem), k_val <span class="op">=</span> k_val,
+         classify_mode <span class="op">=</span> <span class="str">"weighted"</span>, seed <span class="op">=</span> seed)
+}
+</pre>
+
+<h3>12.3 · Critérios penalizados e Bootstrap LRT</h3>
+
+<p>
+  <code>extrair_metricas()</code> calcula AIC, BIC, ICL e AIC3 a partir de um
+  ajuste do <code>flexmix</code>. <code>simular_nb_mistura()</code> gera
+  amostras paramétricas sob o modelo ajustado (necessário para o
+  bootstrap). <code>blrt_passo()</code> executa o teste de razão de
+  verossimilhança bootstrap para um par (<em>k</em>, <em>k</em>+1).
+</p>
+
+<pre class="r-code"><span class="com"># ── Critérios penalizados a partir de um fit ──────────────────────────────────</span>
+extrair_metricas <span class="op">&lt;-</span> <span class="kw">function</span>(fit) {
+  <span class="kw">if</span> (<span class="fn">is.null</span>(fit)) <span class="kw">return</span>(<span class="kw">NULL</span>)
+  ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit))
+  np <span class="op">&lt;-</span> <span class="fn">attr</span>(<span class="fn">logLik</span>(fit), <span class="str">"df"</span>)
+  <span class="fn">list</span>(
+    k_efetivo <span class="op">=</span> fit@k,
+    logLik    <span class="op">=</span> <span class="fn">round</span>(ll, <span class="num">2</span>),
+    np        <span class="op">=</span> np,
+    AIC       <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> <span class="num">2</span> <span class="op">*</span> np, <span class="num">2</span>),
+    BIC       <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> np <span class="op">*</span> <span class="fn">log</span>(N), <span class="num">2</span>),
+    ICL       <span class="op">=</span> <span class="fn">round</span>(<span class="fn">ICL</span>(fit), <span class="num">2</span>),
+    AIC3      <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> <span class="num">3</span> <span class="op">*</span> np, <span class="num">2</span>)
+  )
+}
+
+<span class="com"># ── Bootstrap paramétrico sob H0: k0 componentes ──────────────────────────────</span>
+simular_nb_mistura <span class="op">&lt;-</span> <span class="kw">function</span>(fit, n_sim, theta_fixo <span class="op">=</span> THETA_NB) {
+  pesos <span class="op">&lt;-</span> <span class="fn">prior</span>(fit); pars <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">parameters</span>(fit)); k <span class="op">&lt;-</span> fit@k
+  log_mus <span class="op">&lt;-</span> pars; thetas <span class="op">&lt;-</span> <span class="fn">rep</span>(theta_fixo, k)
+  comp <span class="op">&lt;-</span> <span class="fn">sample.int</span>(k, size <span class="op">=</span> n_sim, replace <span class="op">=</span> <span class="kw">TRUE</span>, prob <span class="op">=</span> pesos)
+  y <span class="op">&lt;-</span> <span class="fn">integer</span>(n_sim)
+  <span class="kw">for</span> (h <span class="kw">in</span> <span class="fn">seq_len</span>(k)) {
+    idx <span class="op">&lt;-</span> <span class="fn">which</span>(comp <span class="op">==</span> h)
+    <span class="kw">if</span> (<span class="fn">length</span>(idx)) y[idx] <span class="op">&lt;-</span> <span class="fn">rnbinom</span>(<span class="fn">length</span>(idx),
+                                          size <span class="op">=</span> thetas[h],
+                                          mu <span class="op">=</span> <span class="fn">exp</span>(log_mus[h]))
+  }
+  y
+}
+
+<span class="com"># ── BLRT: H0: k vs H1: k+1 ────────────────────────────────────────────────────</span>
+<span class="com"># Distribuição nula obtida empiricamente por reamostragem paramétrica.</span>
+blrt_passo <span class="op">&lt;-</span> <span class="kw">function</span>(fit_k0, fit_k1, B <span class="op">=</span> BLRT_B, nrep <span class="op">=</span> BLRT_NREP, seed <span class="op">=</span> <span class="num">1000</span>) {
+  <span class="fn">set.seed</span>(seed)
+  k0 <span class="op">&lt;-</span> fit_k0@k; k1 <span class="op">&lt;-</span> fit_k1@k
+  lrt_obs <span class="op">&lt;-</span> <span class="num">2</span> <span class="op">*</span> (<span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k1)) <span class="op">-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k0)))
+
+  ll_best_k <span class="op">&lt;-</span> <span class="kw">function</span>(df_b, k_val) {
+    best <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+      m <span class="op">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">suppressWarnings</span>(<span class="fn">flexmix</span>(
+        consultas <span class="op">~</span> <span class="num">1</span>, data <span class="op">=</span> df_b, k <span class="op">=</span> k_val,
+        model <span class="op">=</span> <span class="fn">FLXMRnegbin</span>(theta <span class="op">=</span> THETA_NB),
+        control <span class="op">=</span> <span class="fn">list</span>(iter.max <span class="op">=</span> <span class="num">200</span>, minprior <span class="op">=</span> <span class="num">0.01</span>, tolerance <span class="op">=</span> <span class="num">1e-6</span>)
+      )), error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+      <span class="kw">if</span> (!<span class="fn">is.null</span>(m) <span class="op">&amp;&amp;</span> m@k <span class="op">==</span> k_val) {
+        ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(m))
+        <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) <span class="op">&amp;&amp;</span> ll <span class="op">&gt;</span> best) best <span class="op">&lt;-</span> ll
+      }
+    }
+    <span class="kw">if</span> (<span class="fn">is.infinite</span>(best)) NA_real_ <span class="kw">else</span> best
+  }
+
+  lrt_b <span class="op">&lt;-</span> <span class="fn">vapply</span>(<span class="fn">seq_len</span>(B), <span class="kw">function</span>(b) {
+    y_b <span class="op">&lt;-</span> <span class="fn">simular_nb_mistura</span>(fit_k0, N)
+    df_b <span class="op">&lt;-</span> <span class="fn">data.frame</span>(consultas <span class="op">=</span> y_b)
+    ll0 <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(df_b, k0); ll1 <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(df_b, k1)
+    <span class="kw">if</span> (<span class="fn">anyNA</span>(<span class="fn">c</span>(ll0, ll1))) NA_real_ <span class="kw">else</span> <span class="num">2</span> <span class="op">*</span> (ll1 <span class="op">-</span> ll0)
+  }, <span class="fn">numeric</span>(<span class="num">1</span>))
+
+  lrt_v <span class="op">&lt;-</span> lrt_b[!<span class="fn">is.na</span>(lrt_b)]
+  pval <span class="op">&lt;-</span> (<span class="fn">sum</span>(lrt_v <span class="op">&gt;=</span> lrt_obs) <span class="op">+</span> <span class="num">1</span>) <span class="op">/</span> (<span class="fn">length</span>(lrt_v) <span class="op">+</span> <span class="num">1</span>)
+  <span class="fn">list</span>(k0 <span class="op">=</span> k0, k1 <span class="op">=</span> k1, lrt_obs <span class="op">=</span> <span class="fn">round</span>(lrt_obs, <span class="num">2</span>),
+       pval <span class="op">=</span> <span class="fn">round</span>(pval, <span class="num">4</span>), B_valido <span class="op">=</span> <span class="fn">length</span>(lrt_v), lrt_boot <span class="op">=</span> lrt_v)
+}
+</pre>
+
+<h3>12.4 · Loop principal — grade Inicialização × <em>k</em></h3>
+
+<p>
+  O laço que materializa o experimento factorial: para cada combinação
+  <em>estratégia × g</em>, ajusta o modelo, extrai métricas e armazena o
+  fit. O resultado é o objeto <code>fits</code> (lista aninhada de ajustes)
+  e a tabela <code>tab_init</code> usada para gerar a Figura 2 e a
+  Tabela 1 da página.
+</p>
+
+<pre class="r-code"><span class="com"># ── Lista das 4 estratégias ───────────────────────────────────────────────────</span>
+INITS <span class="op">&lt;-</span> <span class="fn">list</span>(
+  random <span class="op">=</span> init_random,
+  kmeans <span class="op">=</span> init_kmeans,
+  cem_em <span class="op">=</span> init_cem_em,
+  sem_em <span class="op">=</span> init_sem_em
+)
+
+fits     <span class="op">&lt;-</span> <span class="fn">setNames</span>(<span class="fn">vector</span>(<span class="str">"list"</span>, <span class="fn">length</span>(INITS)), <span class="fn">names</span>(INITS))
+tab_init <span class="op">&lt;-</span> <span class="fn">list</span>()
+
+<span class="kw">for</span> (init_nm <span class="kw">in</span> <span class="fn">names</span>(INITS)) {
+  fits[[init_nm]] <span class="op">&lt;-</span> <span class="fn">setNames</span>(<span class="fn">vector</span>(<span class="str">"list"</span>, <span class="fn">length</span>(K_GRID)),
+                              <span class="fn">as.character</span>(K_GRID))
+  <span class="kw">for</span> (k_val <span class="kw">in</span> K_GRID) {
+    <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="str">"  %-8s k=%d ... "</span>, init_nm, k_val))
+    t0 <span class="op">&lt;-</span> <span class="fn">proc.time</span>()[<span class="str">"elapsed"</span>]
+    fit_kv <span class="op">&lt;-</span> INITS[[init_nm]](k_val)               <span class="com"># &lt;- ajusta usando a estratégia</span>
+    dt <span class="op">&lt;-</span> <span class="fn">proc.time</span>()[<span class="str">"elapsed"</span>] <span class="op">-</span> t0
+    fits[[init_nm]][[<span class="fn">as.character</span>(k_val)]] <span class="op">&lt;-</span> fit_kv
+    m <span class="op">&lt;-</span> <span class="fn">extrair_metricas</span>(fit_kv)               <span class="com"># &lt;- coleta AIC/BIC/ICL/AIC3</span>
+    <span class="kw">if</span> (<span class="fn">is.null</span>(m)) {
+      <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="str">"FALHOU (%.1fs)\n"</span>, dt))
+      tab_init[[<span class="fn">length</span>(tab_init) <span class="op">+</span> <span class="num">1</span>]] <span class="op">&lt;-</span> <span class="fn">data.frame</span>(
+        init <span class="op">=</span> init_nm, k <span class="op">=</span> k_val, k_efetivo <span class="op">=</span> NA, logLik <span class="op">=</span> NA, np <span class="op">=</span> NA,
+        AIC <span class="op">=</span> NA, BIC <span class="op">=</span> NA, ICL <span class="op">=</span> NA, AIC3 <span class="op">=</span> NA, tempo_s <span class="op">=</span> <span class="fn">round</span>(dt, <span class="num">1</span>))
+    } <span class="kw">else</span> {
+      <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="str">"logLik=%.1f | BIC=%.1f | %.1fs\n"</span>, m<span class="op">$</span>logLik, m<span class="op">$</span>BIC, dt))
+      tab_init[[<span class="fn">length</span>(tab_init) <span class="op">+</span> <span class="num">1</span>]] <span class="op">&lt;-</span> <span class="fn">data.frame</span>(
+        init <span class="op">=</span> init_nm, k <span class="op">=</span> k_val,
+        k_efetivo <span class="op">=</span> m<span class="op">$</span>k_efetivo, logLik <span class="op">=</span> m<span class="op">$</span>logLik, np <span class="op">=</span> m<span class="op">$</span>np,
+        AIC <span class="op">=</span> m<span class="op">$</span>AIC, BIC <span class="op">=</span> m<span class="op">$</span>BIC, ICL <span class="op">=</span> m<span class="op">$</span>ICL, AIC3 <span class="op">=</span> m<span class="op">$</span>AIC3,
+        tempo_s <span class="op">=</span> <span class="fn">round</span>(dt, <span class="num">1</span>))
+    }
+  }
+}
+
+tab_init <span class="op">&lt;-</span> <span class="fn">do.call</span>(rbind, tab_init)
+<span class="fn">saveRDS</span>(fits, <span class="fn">file.path</span>(RDS_DIR, <span class="str">"fits.rds"</span>))
+<span class="fn">write.csv</span>(tab_init, <span class="fn">file.path</span>(RDS_DIR, <span class="str">"tab01_inicializacoes.csv"</span>),
+          row.names <span class="op">=</span> <span class="kw">FALSE</span>)
+
+<span class="com"># A partir daqui o script: identifica melhor init por k, plota Figura 2,</span>
+<span class="com"># aplica BLRT sequencial (Módulo C), avalia estabilidade (Módulo D)</span>
+<span class="com"># e gera as 4 tabelas formatadas com o pacote `gt`.</span>
+<span class="com"># Ver script completo em src/03_analises/04_univariado_init_comparacao.R</span>
+</pre>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">13 · Referências</h2>
 
 <div class="ref-entry">
   <cite>Biernacki, C., Celeux, G. &amp; Govaert, G. (2000).</cite>
