@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Melhoria do Modelo — Inicialização + BLRT — SimSaúde</title>
+<title>Teste Univariado 1 — Mistura NB com médias espaçadas — SimSaúde</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/main.css">
@@ -346,7 +346,7 @@ pre.r-code .op  { color: #89dceb; }
     <li><a href="construcao_progressiva.html">Construção</a></li>
     <li><a href="fundamentacao_em.html">Fundamentação EM</a></li>
     <li><a href="analises.html">Análises</a></li>
-    <li><a href="melhoria_modelo.html" class="active">Melhoria do Modelo</a></li>
+    <li><a href="teste_univariado_1.html" class="active">Teste Univariado 1</a></li>
   </ul>
   <div class="sidebar-footer">Katy Garcia de Freitas · 2026</div>
 </nav>
@@ -354,17 +354,42 @@ pre.r-code .op  { color: #89dceb; }
 <main class="main">
 <div class="prose">
 
-<h1>Melhoria do Modelo — Inicialização do EM e Bootstrap LRT</h1>
+<h1>
+  Teste Univariado 1
+  <span style="display:block; font-size:1.2rem; font-weight:500;
+               color:var(--muted, #666); margin-top:0.4rem;
+               font-family: var(--ff-serif, 'Source Serif 4', serif);">
+    Mistura de Binomial Negativa univariada com médias bem espaçadas e
+    dispersão constante: avaliação de estratégias de inicialização do EM
+    e critérios de seleção do número de componentes via biblioteca
+    <code style="font-size:0.95em; background:#eef; padding:0.05rem 0.35rem;
+                  border-radius:3px;">flexmix</code>
+  </span>
+</h1>
+
 <p class="lead">
-  Em regimes de sobredispersão elevada com grupos latentes sobrepostos, os
-  critérios penalizados clássicos (AIC, BIC, ICL) <strong>subestimam
-  sistematicamente</strong> o número de componentes. Este capítulo
-  documenta o experimento controlado que identifica o <em>Bootstrap
-  Likelihood Ratio Test</em> como o único critério capaz de recuperar a
-  cardinalidade verdadeira no referido cenário, e demonstra que — sob as
-  condições investigadas — a estratégia de inicialização do EM
-  <strong>não afeta materialmente a qualidade da solução</strong>,
-  incidindo apenas sobre o custo computacional.
+  Primeiro de uma série de testes univariados controlados sobre a
+  recuperação de mistura finita de Binomial Negativa. Esta configuração
+  inicial fixa <strong>médias bem espaçadas</strong>
+  (\(\mu = 2,\ 12,\ 25,\ 50\)), <strong>dispersão constante</strong>
+  (\(\theta = 2{,}5\), comum a todos os componentes) e <strong>pesos
+  iguais</strong> (\(\pi_k = 0{,}25\)). Sob este regime, comparam-se
+  quatro estratégias de inicialização do algoritmo EM — Random multistart,
+  k-means + EM, CEM + EM e SEM + EM — e cinco critérios de seleção do
+  número de componentes — AIC, BIC, ICL, AIC3 e o Bootstrap Likelihood
+  Ratio Test. Toda a implementação utiliza a biblioteca
+  <code>flexmix</code> em R.
+</p>
+
+<p class="lead" style="font-size:1rem; color:var(--muted, #666);
+                       border-left:3px solid var(--accent, #4a7c59);
+                       padding-left:1rem; margin-top:1rem;">
+  <strong>Pergunta investigada:</strong> em regimes de sobredispersão
+  elevada com grupos latentes parcialmente sobrepostos, os critérios
+  penalizados clássicos (AIC, BIC, ICL) subestimam sistematicamente o
+  número de componentes? Em caso afirmativo, qual critério recupera a
+  cardinalidade verdadeira, e qual estratégia de inicialização produz
+  o melhor desempenho?
 </p>
 
 <div class="toc">

@@ -1,0 +1,1232 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleção de k e BLRT — SimSaúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+
+<!-- MathJax 3 -->
+<script>
+MathJax = {
+  tex: {
+    inlineMath:  [['\\(', '\\)']],
+    displayMath: [['$$', '$$']],
+    tags: 'none'
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<style>
+
+/* ── Equação em bloco ───────────────────────────────────────── */
+.eq {
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.2rem;
+  background: var(--surface, #f8f7f4);
+  border-left: 3px solid var(--accent, #4a7c59);
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+/* ── Código R (tema escuro) ─────────────────────────────────── */
+pre.r-code {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  tab-size: 2;
+  margin: 1.5rem 0;
+}
+pre.r-code .com { color: #6c7086; font-style: italic; }
+pre.r-code .kw  { color: #cba6f7; }
+pre.r-code .fn  { color: #89b4fa; }
+pre.r-code .st  { color: #a6e3a1; }
+pre.r-code .nu  { color: #fab387; }
+
+/* ── Código de output do console ────────────────────────────── */
+pre.r-output {
+  background: #f4f4f4;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.81rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 0.5rem 0 1.5rem;
+}
+
+/* ── Tabela de parâmetros ───────────────────────────────────── */
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 1.2rem 0;
+}
+.param-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.5rem 0.8rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  text-align: left;
+}
+.param-table td {
+  padding: 0.45rem 0.8rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+}
+.param-table tr:last-child td { border-bottom: none; }
+.param-table .num {
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  text-align: right;
+}
+
+/* ── Navegação interna ──────────────────────────────────────── */
+.toc {
+  background: var(--surface, #f8f7f4);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.toc ol { margin: 0.4rem 0 0 1.2rem; padding: 0; }
+.toc li { margin: 0.3rem 0; }
+.toc a  { color: var(--accent, #4a7c59); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+/* ── Nota em bloco ──────────────────────────────────────────── */
+.nota {
+  background: #fffbf0;
+  border-left: 3px solid #e6a817;
+  padding: 0.7rem 1rem;
+  font-size: 0.87rem;
+  color: var(--muted, #666);
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+
+/* ── Citação direta ─────────────────────────────────────────── */
+blockquote.cit {
+  margin: 1.2rem 0;
+  padding: 0.75rem 1.2rem;
+  border-left: 3px solid var(--accent, #4a7c59);
+  background: var(--surface, #f8f7f4);
+  font-style: italic;
+  font-size: 0.91rem;
+  line-height: 1.6;
+  color: var(--ink, #1a1a1a);
+}
+blockquote.cit cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--muted, #666);
+}
+
+/* ── Referências ────────────────────────────────────────────── */
+.ref-group { margin-bottom: 2rem; }
+.ref-entry {
+  padding: 0.55rem 0 0.55rem 1.1rem;
+  border-left: 2px solid var(--border, #ddd);
+  margin-bottom: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.ref-entry cite {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink, #1a1a1a);
+}
+
+/* ── Tabela de resultados ───────────────────────────────────── */
+.res-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin: 1.2rem 0;
+}
+.res-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  text-align: left;
+}
+.res-table td {
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: middle;
+}
+.res-table tr:last-child td { border-bottom: none; }
+.res-table .num {
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  text-align: right;
+}
+.res-table tr.best td   { background: #f0f7f2; }
+.res-table tr.best .num { font-weight: 600; }
+.res-table tr.sep td    { border-top: 2px solid var(--border, #ccc); }
+.res-table tr.desat td  { color: #aaa; }
+.res-table tr.desat .num { color: #bbb; }
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="../index.html" class="sidebar-brand">SimSaúde</a>
+  <p class="sidebar-subtitle">Modelagem de Heterogeneidade<br>em Saúde Suplementar</p>
+  <ul class="sidebar-nav">
+    <li><a href="../index.html">Início</a></li>
+    <li><a href="estudo.html">O Estudo</a></li>
+    <li><a href="simulacao.html">Simulação</a></li>
+    <li><a href="eda_simsaude.html">EDA</a></li>
+    <li><a href="construcao_progressiva.html">Construção</a></li>
+    <li><a href="fundamentacao_em.html">Fundamentação EM</a></li>
+    <li><a href="analises.html">Análises</a></li>
+    <li><a href="selecao_k_blrt.html" class="active">Seleção de <em>k</em> e BLRT</a></li>
+  </ul>
+  <div class="sidebar-footer">Katy Garcia de Freitas · 2026</div>
+</nav>
+
+<main class="main">
+<div class="prose">
+
+<h1>Seleção do número de componentes</h1>
+<p class="lead">Por que BIC e ICL não bastam — e como o BLRT preenche essa lacuna · experimento controlado com mistura NB, k = 4, theta = 2,5</p>
+
+<div class="toc">
+  <strong>Nesta página</strong>
+  <ol>
+    <li><a href="#problema">O problema de identificar \(k\)</a></li>
+    <li><a href="#criterios">Critérios de informação: BIC e ICL</a></li>
+    <li><a href="#regularidade">A quebra do LRT clássico em misturas</a></li>
+    <li><a href="#blrt">O BLRT: Bootstrap Likelihood Ratio Test</a></li>
+    <li><a href="#fluxo">Fluxo de seleção adotado nesta tese</a></li>
+    <li><a href="#metricas">Métricas de validade interna</a></li>
+    <li><a href="#estabilidade">Estabilidade via bootstrap ARI</a></li>
+    <li><a href="#experimento">Experimento controlado: resultados</a></li>
+    <li><a href="#codigo">Código R</a></li>
+    <li><a href="#referencias">Referências</a></li>
+  </ol>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="problema">1 · O problema de identificar \(k\)</h2>
+
+<p>
+  Em um modelo de mistura finita com \(k\) componentes Binomial Negativa, a densidade de cada
+  observação \(y_i\) é:
+</p>
+
+<div class="eq">
+  $$f(y_i \mid \boldsymbol{\Psi}) = \sum_{g=1}^{k} \pi_g \; f_{\text{NB}}(y_i \mid \mu_g, \theta_g)$$
+</div>
+
+<p>
+  Dado que \(k\) é desconhecido, o problema de seleção consiste em escolher o valor que melhor
+  representa a estrutura real da população — nem pequeno demais (fundindo grupos distintos) nem
+  grande demais (fragmentando grupos reais em artefatos do ajuste).
+</p>
+
+<p>
+  A dificuldade central é que a log-verossimilhança cresce monotonicamente com \(k\): adicionar
+  uma componente sempre melhora o ajuste, mesmo que o grupo extra não corresponda a nenhuma
+  estrutura real. Qualquer critério precisa portanto penalizar a complexidade — e a questão é
+  <em>como</em> fazê-lo corretamente.
+</p>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="criterios">2 · Critérios de informação: BIC e ICL</h2>
+
+<h3>BIC — Bayesian Information Criterion</h3>
+
+<p>
+  O BIC (Schwarz, 1978) é o critério mais utilizado em modelos de mistura. Para um modelo com
+  \(p\) parâmetros livres ajustado a \(n\) observações:
+</p>
+
+<div class="eq">
+  $$\text{BIC} = -2\,\ell(\hat{\boldsymbol{\Psi}}) + p \cdot \log(n)$$
+</div>
+
+<p>
+  A penalidade \(p \cdot \log(n)\) cresce com a amostra, tornando o BIC consistente em contextos
+  regulares. Nylund, Asparouhov e Muthén (2007) demonstraram por simulação extensiva que o BIC
+  supera o AIC para seleção de \(k\) — mas com ressalva importante:
+</p>
+
+<blockquote class="cit">
+  "The BIC performed well across conditions, but there were notable exceptions. When class
+  separation was low and sample sizes were small, BIC tended to underestimate the number
+  of classes."
+  <cite>Nylund, Asparouhov &amp; Muthén (2007, p. 554) · <em>Structural Equation Modeling</em>, 14(4), 535–569</cite>
+</blockquote>
+
+<p>
+  O mecanismo é aritmético: quando dois grupos se sobrepõem muito, o ganho em log-verossimilhança
+  ao distingui-los é pequeno. Se esse ganho for menor que a penalidade \(\log(n)\) por parâmetro
+  adicional, o BIC prefere o modelo mais simples — mesmo que o grupo extra seja real.
+</p>
+
+<h3>ICL — Integrated Complete-data Likelihood</h3>
+
+<p>
+  O ICL (Biernacki, Celeux &amp; Govaert, 2000) adiciona ao BIC uma penalidade baseada na entropia
+  das probabilidades posteriores:
+</p>
+
+<div class="eq">
+  $$\text{ICL} = \text{BIC} - 2 \sum_{i=1}^{n} \sum_{g=1}^{k} \hat{z}_{ig} \log \hat{z}_{ig}$$
+</div>
+
+<p>
+  Quando as probabilidades posteriores são próximas de 0 ou 1 (classificação clara), o segundo
+  termo é pequeno e ICL ≈ BIC. Quando há sobreposição intensa, \(\hat{z}_{ig} \approx 1/k\) para
+  muitos indivíduos, a entropia é máxima e o ICL penaliza fortemente.
+</p>
+
+<blockquote class="cit">
+  "The ICL criterion favors models for which a partition of the data based on MAP classification is
+  well-defined. It therefore tends to select models with well-separated components."
+  <cite>Biernacki, Celeux &amp; Govaert (2000, p. 720) · <em>IEEE Trans. Pattern Anal. Mach. Intell.</em>, 22(7), 719–725</cite>
+</blockquote>
+
+<p>
+  Na prática, o ICL <em>subestima \(k\) sistematicamente</em> quando os grupos se sobrepõem.
+  Para dados de utilização em saúde, o ICL funciona melhor como indicador do grau de sobreposição
+  do que como seletor de \(k\).
+</p>
+
+<div class="nota">
+  <strong>Evidência nesta tese:</strong> na simulação com \(k=4\), \(\theta=2{,}5\) (alta superdispersão),
+  o BIC apontou \(k=3\) e o ICL atingiu mínimo em \(k=2\) (42 227), crescendo monotonicamente
+  até \(k=8\) (51 198) — nenhum \(k > 2\) produzia separação suficiente para o ICL.
+  Ambos subestimaram \(k=4\), cada um por motivo diferente.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="regularidade">3 · A quebra do LRT clássico em misturas</h2>
+
+<p>
+  A solução natural para testar \(k\) versus \(k+1\) seria o teste da razão de
+  verossimilhança (LRT):
+</p>
+
+<div class="eq">
+  $$\Lambda = -2\left[\ell(\hat{\boldsymbol{\Psi}}_{k}) - \ell(\hat{\boldsymbol{\Psi}}_{k+1})\right]$$
+</div>
+
+<p>
+  Em condições regulares, \(\Lambda \xrightarrow{d} \chi^2_\nu\) sob \(H_0\), com \(\nu\)
+  graus de liberdade iguais à diferença no número de parâmetros. O problema é que, para misturas,
+  as condições de regularidade do teorema de Wilks <strong>não valem</strong>.
+</p>
+
+<p>
+  Sob \(H_0: k = k_0\), o parâmetro de mistura da componente extra é identificável apenas na
+  fronteira do espaço paramétrico (onde \(\pi_{k+1} = 0\)), e os pesos das componentes estão
+  na fronteira do simplex. Isso viola duas condições do teorema de Wilks: que o verdadeiro
+  parâmetro seja interior ao espaço e que o modelo seja identificável sob \(H_0\).
+</p>
+
+<blockquote class="cit">
+  "When testing for the number of components in a finite mixture model, the usual asymptotic
+  theory for the likelihood ratio statistic does not apply, and so its null distribution cannot
+  be taken to be chi-squared."
+  <cite>McLachlan &amp; Peel (2000, p. 194) · <em>Finite Mixture Models</em>. Wiley</cite>
+</blockquote>
+
+<p>
+  A consequência é grave: p-valores de \(\chi^2\) para o LRT em misturas produzem taxas de
+  erro tipo I incontroláveis. A distribuição real do LRT sob \(H_0\) é mais pesada na cauda
+  direita — os testes clássicos são liberais demais.
+</p>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="blrt">4 · O BLRT: Bootstrap Likelihood Ratio Test</h2>
+
+<p>
+  Se a distribuição assintótica do LRT não pode ser derivada analiticamente, ela pode ser
+  aproximada empiricamente — simulando qual seria a distribuição do LRT se \(H_0\) fosse
+  verdadeira. Essa é a ideia do BLRT, proposto por McLachlan (1987) e sistemizado para análise
+  de classes latentes por Nylund et al. (2007).
+</p>
+
+<h3>O algoritmo em cinco passos</h3>
+
+<p><strong>Passo 1.</strong> Ajustar o modelo com \(k_0\) componentes (\(H_0\)) e com
+\(k_1 = k_0 + 1\) componentes (\(H_1\)) aos dados originais. Calcular:</p>
+
+<div class="eq">
+  $$\Lambda_\text{obs} = -2\left[\ell(\hat{\boldsymbol{\Psi}}_{k_0}) - \ell(\hat{\boldsymbol{\Psi}}_{k_1})\right]$$
+</div>
+
+<p><strong>Passo 2.</strong> Para \(b = 1, \ldots, B\): simular \(n\) observações a partir
+do modelo ajustado com \(k_0\) componentes — assumindo que o modelo nulo é o gerador
+verdadeiro. Isso preserva a estrutura dos dados mas força \(k = k_0\).</p>
+
+<p><strong>Passo 3.</strong> Para cada dataset bootstrap \(b\), ajustar ambos os modelos
+(\(k_0\) e \(k_1\)) e calcular \(\Lambda^{(b)}\). A coleção
+\(\{\Lambda^{(1)}, \ldots, \Lambda^{(B)}\}\) é a distribuição empírica do LRT sob \(H_0\).</p>
+
+<p><strong>Passo 4.</strong> Calcular o p-valor empírico com a correção de Davison &amp; Hinkley
+(1997) para evitar p-valor exato zero:</p>
+
+<div class="eq">
+  $$p = \frac{\#\{b : \Lambda^{(b)} \geq \Lambda_\text{obs}\} + 1}{B + 1}$$
+</div>
+
+<p><strong>Passo 5.</strong> Aplicar sequencialmente: testar \(k_0 = 1\) vs \(k_1 = 2\);
+se rejeitar \(H_0\), testar \(k_0 = 2\) vs \(k_1 = 3\); e assim por diante. O primeiro
+\(k_0\) para o qual \(H_0\) não é rejeitada é o \(k\) escolhido.</p>
+
+<h3>Por que o BLRT funciona onde o BIC falha</h3>
+
+<p>
+  O BIC usa uma penalidade fixa \(\log(n)\) por parâmetro — derivada de uma aproximação
+  assintótica que pressupõe regularidade. O BLRT, ao simular a distribuição nula diretamente
+  do modelo ajustado, captura a geometria real da superfície de verossimilhança naquele problema.
+  Se o ganho de \(k_0\) para \(k_1\) for pequeno em escala absoluta mas improvável sob
+  \(H_0\), o BLRT o detecta; o BIC não.
+</p>
+
+<blockquote class="cit">
+  "The bootstrap LRT was the best-performing test across all simulation conditions examined.
+  It showed consistently low Type I error rates and high power to detect the correct number
+  of classes, outperforming BIC, AIC, and the Lo-Mendell-Rubin adjusted LRT in conditions
+  with class overlap."
+  <cite>Nylund, Asparouhov &amp; Muthén (2007, p. 562) · <em>Structural Equation Modeling</em>, 14(4), 535–569</cite>
+</blockquote>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="fluxo">5 · Fluxo de seleção adotado nesta tese</h2>
+
+<p>
+  Nenhum critério isolado é suficiente. O protocolo combina critérios de informação, teste formal
+  e métricas de validade interna, seguindo Nylund et al. (2007) e Nagin (2005):
+</p>
+
+<table class="res-table">
+  <thead>
+    <tr>
+      <th>Etapa</th>
+      <th>Critério</th>
+      <th>O que mede</th>
+      <th>Limitação conhecida</th>
+      <th>Referência</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><strong>BIC</strong></td>
+      <td>Ajuste penalizado por parcimônia</td>
+      <td>Subestima \(k\) com sobreposição elevada</td>
+      <td>Schwarz (1978)</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><strong>ICL</strong></td>
+      <td>BIC + penalidade de sobreposição</td>
+      <td>Sinaliza sobreposição, não \(k\)</td>
+      <td>Biernacki et al. (2000)</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><strong>AIC3</strong></td>
+      <td>Penalidade intermediária (\(3p\))</td>
+      <td>Empírico; melhor que AIC em amostras medianas</td>
+      <td>Bozdogan (1994)</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>BLRT</strong></td>
+      <td>Teste formal \(H_0: k_0\) vs \(H_1: k_0+1\)</td>
+      <td>Computacionalmente custoso; \(B \geq 199\)</td>
+      <td>McLachlan (1987); Nylund et al. (2007)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>EN</strong></td>
+      <td>Entropia normalizada das posteriores</td>
+      <td>Comparação apenas dentro do mesmo \(k\)</td>
+      <td>Celeux &amp; Soromenho (1996)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>AvePP</strong></td>
+      <td>Certeza média de classificação por componente</td>
+      <td>Limiar 0,70 é convencional</td>
+      <td>Nagin (2005)</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>ARI bootstrap</strong></td>
+      <td>Estabilidade a perturbações amostrais</td>
+      <td>Sensível ao número de replicações</td>
+      <td>Hubert &amp; Arabie (1985)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="nota">
+  <strong>Regra de decisão:</strong> o \(k\) é escolhido como o mais votado entre BIC, ICL,
+  AIC3 e BLRT. Em caso de empate, o BLRT tem precedência — é o único com controle formal de
+  erro tipo I. A decisão final é condicionada a EN \(\geq 0{,}80\) e
+  AvePP\(_{\min} \geq 0{,}70\).
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="metricas">6 · Métricas de validade interna</h2>
+
+<h3>Entropia normalizada (EN)</h3>
+
+<p>
+  A forma normalizada de Celeux &amp; Soromenho (1996) escala a entropia de Shannon para
+  \([0,1]\) independentemente de \(k\):
+</p>
+
+<div class="eq">
+  $$\text{EN} = 1 - \frac{-\displaystyle\sum_{i=1}^{n}\sum_{g=1}^{k} \hat{z}_{ig}\,\log \hat{z}_{ig}}{n \cdot \log k}$$
+</div>
+
+<p>
+  EN = 1 indica classificação MAP perfeita (\(\hat{z}_{ig} \in \{0,1\}\));
+  EN = 0 indica probabilidades uniformes (máxima sobreposição). Limiar recomendado: EN \(\geq 0{,}80\).
+</p>
+
+<h3>AvePP — Probabilidade posterior média por componente</h3>
+
+<div class="eq">
+  $$\text{AvePP}_g = \frac{1}{|\mathcal{C}_g|} \sum_{i \in \mathcal{C}_g} \hat{z}_{ig}
+  \qquad \mathcal{C}_g = \{i : \hat{g}_i = g\}$$
+</div>
+
+<p>
+  Nagin (2005) recomenda AvePP \(> 0{,}70\) por componente. Valores menores indicam que a
+  componente está absorvendo indivíduos de outras — sinal de sobreposição excessiva ou \(k\)
+  superestimado.
+</p>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="estabilidade">7 · Estabilidade via bootstrap ARI</h2>
+
+<p>
+  Um \(k\) que satisfaça BIC/BLRT e as métricas de validade interna ainda pode ser instável:
+  perturbações amostrais pequenas podem produzir soluções muito diferentes. O bootstrap de
+  estabilidade quantifica isso:
+</p>
+
+<ol>
+  <li>Amostrar com reposição \(B\) vezes de \(y_1, \ldots, y_n\).</li>
+  <li>Para cada réplica, ajustar o modelo com o \(k\) escolhido.</li>
+  <li>Calcular o ARI entre a classificação MAP da réplica e a classificação MAP original.</li>
+</ol>
+
+<p>
+  O <em>Adjusted Rand Index</em> (Hubert &amp; Arabie, 1985) mede concordância entre duas partições
+  corrigindo pelo acaso: ARI = 1 para concordância perfeita, ARI ≈ 0 para concordância aleatória.
+  Critério adotado: ARI médio \(\geq 0{,}80\).
+</p>
+
+<div class="nota">
+  ARI médio \(< 0{,}80\) não implica que \(k\) está errado. Pode indicar que os grupos
+  existem mas se sobrepõem tanto que a classificação MAP é sensível ao conjunto de treinamento —
+  esperado em dados de utilização em saúde com \(\theta\) pequeno. O modelo mantém valor
+  descritivo; a classificação individual deve ser tratada com cautela.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="experimento">8 · Experimento controlado: resultados</h2>
+
+<p>
+  Para testar os critérios em ambiente com verdade conhecida, simulamos \(n = 5.000\)
+  observações de uma mistura com quatro componentes Binomial Negativa (\(\theta\) fixo = 2,5):
+</p>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th>Grupo</th>
+      <th>Label clínico</th>
+      <th class="num">\(\pi_g\)</th>
+      <th class="num">\(\mu_g\)</th>
+      <th class="num">\(\theta\)</th>
+      <th class="num">Var(\(Y_g\))</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>G1</td><td>Baixo uso</td>
+      <td class="num">0,25</td><td class="num">2</td><td class="num">2,5</td><td class="num">3,6</td>
+    </tr>
+    <tr>
+      <td>G2</td><td>Ambulatorial / coordenado</td>
+      <td class="num">0,25</td><td class="num">12</td><td class="num">2,5</td><td class="num">69,6</td>
+    </tr>
+    <tr>
+      <td>G3</td><td>Agudo / hospitalar</td>
+      <td class="num">0,25</td><td class="num">25</td><td class="num">2,5</td><td class="num">275,0</td>
+    </tr>
+    <tr>
+      <td>G4</td><td>Atípico</td>
+      <td class="num">0,25</td><td class="num">50</td><td class="num">2,5</td><td class="num">1 050,0</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Com \(\theta = 2{,}5\), a variância de G3 é \(\mu + \mu^2/\theta = 25 + 625/2{,}5 = 275\)
+  (DP ≈ 16,6). As distribuições de G3 e G4 se sobrepõem substancialmente — é o principal
+  desafio para critérios baseados em penalidade fixa.
+</p>
+
+<pre class="r-output">LogLik-oráculo (parâmetros verdadeiros): −20 486,4</pre>
+
+<h3>Passo 1 — stepFlexmix k = 1:8 (\(\theta\) fixo = 2,5, nrep = 10)</h3>
+
+<pre class="r-output">  iter converged k k0    logLik      AIC      BIC      ICL
+1    2      TRUE 1  1 -22788.00 45578.00 45584.52 45584.52
+2   39      TRUE 2  2 -20638.72 41283.44 41302.99 42227.28
+3   52      TRUE 3  3 -20485.27 40980.54 41013.13 43903.92
+4   33      TRUE 4  4 -20483.84 40981.68 41027.30 46135.69
+5   44      TRUE 5  5 -20483.87 40985.73 41044.39 47947.52
+6   39      TRUE 6  6 -20483.84 40989.68 41061.37 49296.67
+7   56      TRUE 7  7 -20483.83 40993.66 41078.38 50239.56
+8   60      TRUE 8  8 -20483.87 40997.74 41095.50 51198.07</pre>
+
+<p>
+  A logLik praticamente estabiliza em \(k = 4\): o oráculo (\(-20\,486{,}4\)) é atingido
+  nesse ponto, mas o ganho de logLik de k = 3 para k = 4 é apenas \(\Delta = 1{,}4\)
+  unidades — pequeno em escala absoluta, porém real.
+</p>
+
+<h3>Passo 2 — Critérios de informação</h3>
+
+<table class="res-table">
+  <thead>
+    <tr>
+      <th class="num">k</th>
+      <th class="num">logLik</th>
+      <th class="num">np</th>
+      <th class="num">BIC</th>
+      <th class="num">ICL</th>
+      <th class="num">AIC3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">1</td><td class="num">−22 788,0</td><td class="num">1</td>
+      <td class="num">45 584,5</td><td class="num">45 584,5</td><td class="num">45 579,0</td>
+    </tr>
+    <tr>
+      <td class="num">2</td><td class="num">−20 638,7</td><td class="num">3</td>
+      <td class="num">41 303,0</td><td class="num"><strong>42 227,3 ★</strong></td><td class="num">41 286,4</td>
+    </tr>
+    <tr class="best">
+      <td class="num">3</td><td class="num">−20 485,3</td><td class="num">5</td>
+      <td class="num"><strong>41 013,1 ★</strong></td><td class="num">43 903,9</td><td class="num"><strong>40 985,5 ★</strong></td>
+    </tr>
+    <tr>
+      <td class="num">4</td><td class="num">−20 483,8</td><td class="num">7</td>
+      <td class="num">41 027,3</td><td class="num">46 135,7</td><td class="num">40 988,7</td>
+    </tr>
+    <tr>
+      <td class="num">5</td><td class="num">−20 483,9</td><td class="num">9</td>
+      <td class="num">41 044,4</td><td class="num">47 947,5</td><td class="num">40 994,7</td>
+    </tr>
+    <tr class="desat">
+      <td class="num">6–8</td><td class="num">≈ −20 483,8</td><td class="num">↑</td>
+      <td class="num">↑</td><td class="num">↑</td><td class="num">↑</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Os critérios divergem e nenhum identifica k = 4:
+  <strong>BIC → k = 3</strong>, <strong>ICL → k = 2</strong>, <strong>AIC3 → k = 3</strong>.
+  O ICL cresce monotonicamente a partir de k = 2 — nenhum k &gt; 2 produz separação
+  suficiente neste cenário de alta superdispersão, tornando o ICL informativamente inútil
+  como seletor de k.
+</p>
+
+<p>
+  O mecanismo do BIC é aritmético: o ganho de logLik de k = 3 para k = 4 é
+  \(\Delta\ell = 1{,}4\), inferior à penalidade \(\log(5000) \approx 8{,}5\) por dois
+  parâmetros adicionais. O quarto grupo é real, mas a variância NB elevada torna a
+  separação G3–G4 tênue demais para o BIC detectar.
+</p>
+
+<h3>Passo 3 — BLRT sequencial</h3>
+
+<p>
+  Testando k = 1 até k = 4 sequencialmente, com B = 99 replicações bootstrap e
+  nrep = 3 reinícios por replicação (\(\theta\) fixo = 2,5):
+</p>
+
+<table class="res-table">
+  <thead>
+    <tr>
+      <th>Teste</th>
+      <th class="num">\(\Lambda_\text{obs}\)</th>
+      <th class="num">p-valor</th>
+      <th class="num">B válido</th>
+      <th>Decisão</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>k = 1 vs k = 2</td>
+      <td class="num">4 298,6</td>
+      <td class="num">0,010</td>
+      <td class="num">99</td>
+      <td>Rejeita H₀</td>
+    </tr>
+    <tr>
+      <td>k = 2 vs k = 3</td>
+      <td class="num">306,9</td>
+      <td class="num">0,010</td>
+      <td class="num">99</td>
+      <td>Rejeita H₀</td>
+    </tr>
+    <tr>
+      <td>k = 3 vs k = 4</td>
+      <td class="num">2,9</td>
+      <td class="num">0,040</td>
+      <td class="num">99</td>
+      <td>Rejeita H₀</td>
+    </tr>
+    <tr class="best">
+      <td><strong>k = 4 vs k = 5</strong></td>
+      <td class="num">≈ 0,0</td>
+      <td class="num">0,700</td>
+      <td class="num">99</td>
+      <td><strong>Não rejeita → k = 4</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  O terceiro teste (k = 3 vs k = 4) é o mais revelador: \(\Lambda_\text{obs} = 2{,}9\)
+  é modesto em escala absoluta, mas estatisticamente improvável sob H₀ (p = 0,04).
+  O BIC ignorou esse ganho por ser menor que \(\log(n)\); o BLRT, ao simular a distribuição
+  nula empiricamente, detectou que ele é sistematicamente maior do que o esperado quando
+  o gerador tem apenas 3 componentes.
+</p>
+
+<div class="nota">
+  <strong>k escolhido pelo BLRT: 4 componentes</strong> — correto, dado que a simulação
+  foi gerada com k = 4 verdadeiro.
+</div>
+
+<h3>Confronto: k = 3 (BIC) vs k = 4 (BLRT / verdadeiro)</h3>
+
+<p>
+  Comparamos os dois modelos extraídos de <code>fx_full</code> quanto à recuperação dos
+  parâmetros e à qualidade de classificação em relação ao gabarito simulado.
+  O pareamento entre componentes estimados e grupos verdadeiros é feito pelo
+  <strong>algoritmo húngaro</strong>, que maximiza a acurácia global sob a melhor
+  correspondência possível.
+</p>
+
+<div class="nota">
+  <strong>Acurácia global vs. sensibilidade por grupo.</strong>
+  A acurácia global é \(\sum_g \text{TP}_g / n\). A métrica por grupo —
+  denominada aqui <em>sensibilidade</em> ou <em>acurácia marginal</em> —
+  é \(\text{sens}_g = \text{TP}_g / n_g\), onde \(n_g\) é o total de observações
+  verdadeiras do grupo g. Ela responde: "de todos os beneficiários que realmente
+  pertencem ao grupo G, quantos foram corretamente identificados?" Essa é a
+  definição de <em>recall</em> por classe — distinta da acurácia, que incluiria
+  verdadeiros negativos e não faz sentido marginalizada por grupo em problemas
+  multiclasse.
+</div>
+
+<table class="res-table">
+  <thead>
+    <tr>
+      <th>Métrica</th>
+      <th class="num">k = 3 (BIC)</th>
+      <th class="num">k = 4 (BLRT)</th>
+      <th>Referência</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>\(\hat{\mu}\) estimados (ord.)</td>
+      <td class="num">2,31 · 15,56 · 45,55</td>
+      <td class="num"><strong>2,22 · 12,06 · 25,27 · 49,74</strong></td>
+      <td>Verdadeiro: 2 · 12 · 25 · 50</td>
+    </tr>
+    <tr>
+      <td>Desvio \(\hat{\mu} - \mu\)</td>
+      <td class="num">— (k incorreto)</td>
+      <td class="num">+0,22 · +0,06 · +0,27 · −0,26</td>
+      <td>≈ 0 ideal</td>
+    </tr>
+    <tr>
+      <td>EN (entropia norm.)</td>
+      <td class="num">0,518</td>
+      <td class="num">0,405</td>
+      <td>≥ 0,80 recom.</td>
+    </tr>
+    <tr>
+      <td>AvePP mín.</td>
+      <td class="num">0,703</td>
+      <td class="num">0,465</td>
+      <td>≥ 0,70 recom.</td>
+    </tr>
+    <tr>
+      <td>% obs. MAP &gt; 0,9</td>
+      <td class="num">25,6%</td>
+      <td class="num">9,2%</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>Acurácia global (húngaro)</strong></td>
+      <td class="num">59,6%</td>
+      <td class="num"><strong>62,7%</strong></td>
+      <td>100% = perfeita</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  O modelo k = 3 apresenta EN e AvePP mínimo <em>aparentemente superiores</em> —
+  precisamente porque fundiu dois grupos em um componente mais "coeso". Essa é a
+  armadilha do k-errado: <strong>melhor coesão interna, pior correspondência com a
+  realidade clínica</strong>.
+</p>
+
+<h4>Sensibilidade por grupo — k = 3 (BIC)</h4>
+
+<p>
+  Pareamento húngaro: G1 → comp. 2 · G2 → comp. 1 · <strong>G3 → sem componente</strong> · G4 → comp. 3
+</p>
+
+<pre class="r-output">  Matriz apos pareamento hungaro (col = grupo mapeado):
+                         G1    G2   G3   G4
+  baixo_uso            1171   68    0    0
+  ambulatorial_coord    275  879    0   68
+  agudo_hosp.            90  699    0  482
+  atipico                19  317    0  932
+
+  Acuracia global: 59,6%  [2982 / 5000]
+
+  Sensibilidade por grupo (recall — acuracia marginal):
+    G1 (baixo_uso)            : 94,5%  [1171 / 1239]
+    G2 (ambulatorial_coord.)  : 71,9%  [ 879 / 1222]
+    G3 (agudo_hospitalar)     :  0,0%  [SEM COMPONENTE — k insuficiente]
+    G4 (atipico)              : 73,5%  [ 932 / 1268]</pre>
+
+<p>
+  Com k = 3, o grupo G3 (agudo_hospitalar, \(\mu = 25\)) fica inteiramente sem componente
+  — sua sensibilidade é 0%. O algoritmo húngaro preferiu mapear G4 ao componente 3
+  porque minimiza a perda total: as 932 observações de G4 nesse componente valem mais
+  do que as 482 de G3.
+</p>
+
+<h4>Sensibilidade por grupo — k = 4 (BLRT)</h4>
+
+<p>
+  Pareamento húngaro: G1 → comp. 2 · G2 → comp. 1 · G3 → comp. 4 · G4 → comp. 3
+</p>
+
+<pre class="r-output">  Matriz apos pareamento hungaro (col = grupo mapeado):
+                         G1    G2    G3   G4
+  baixo_uso            1171   68     0    0
+  ambulatorial_coord    275  654   279   14
+  agudo_hosp.            90  365   542  274
+  atipico                19  133   348  768
+
+  Acuracia global: 62,7%  [3135 / 5000]
+
+  Sensibilidade por grupo (recall — acuracia marginal):
+    G1 (baixo_uso)            : 94,5%  [1171 / 1239]
+    G2 (ambulatorial_coord.)  : 53,5%  [ 654 / 1222]
+    G3 (agudo_hospitalar)     : 42,6%  [ 542 / 1271]
+    G4 (atipico)              : 60,6%  [ 768 / 1268]</pre>
+
+<p>
+  Com k = 4, todos os grupos têm componente própria. G1 (baixo uso) é bem separado
+  pela grande distância em \(\mu\). G2–G4 têm sensibilidades entre 42–61%:
+  a sobreposição é intrínseca à NB com \(\theta = 2{,}5\), e reflete a realidade
+  clínica de populações com alto grau de heterogeneidade contínua.
+</p>
+
+<div class="nota">
+  <strong>Consequência clínica de k = 3:</strong> o subgrupo atípico (G4, \(\mu = 50\))
+  é identificado com sensibilidade de 73,5% — razoável. Mas G3 (agudo_hospitalar,
+  \(\mu = 25\)) tem sensibilidade 0%: todos os 1.271 beneficiários desse grupo são
+  incorretamente rotulados. Com k = 4 (BLRT), G3 é identificado com 42,6% e G4
+  com 60,6% — nenhum grupo é invisível.
+</div>
+
+<h3>Decisão consolidada e tabela de reporte</h3>
+
+<p>
+  A votação entre os quatro critérios elege k = 3 por maioria (BIC = 3, AIC3 = 3 vs.
+  ICL = 2, BLRT = 4). Este resultado ilustra o limite do protocolo de votação simples:
+  três critérios deficientes no cenário de alta superdispersão superam o único com
+  controle formal de erro. A tese adota o <strong>BLRT como critério de desempate</strong>
+  e referência principal.
+</p>
+
+<table class="res-table">
+  <thead>
+    <tr>
+      <th class="num">k</th>
+      <th class="num">logLik</th>
+      <th class="num">BIC</th>
+      <th class="num">ICL</th>
+      <th class="num">AIC3</th>
+      <th class="num">BLRT p</th>
+      <th class="num">EN</th>
+      <th class="num">AvePP mín.</th>
+      <th class="num">%&gt;0,9</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">1</td><td class="num">−22 788,0</td>
+      <td class="num">45 584,5</td><td class="num">45 584,5</td><td class="num">45 579,0</td>
+      <td class="num">0,010 *</td><td class="num">1,000</td><td class="num">1,000</td><td class="num">100,0%</td><td></td>
+    </tr>
+    <tr>
+      <td class="num">2</td><td class="num">−20 638,7</td>
+      <td class="num">41 303,0</td><td class="num">42 227,3</td><td class="num">41 286,4</td>
+      <td class="num">0,010 *</td><td class="num">0,721</td><td class="num">0,891</td><td class="num">73,6%</td><td></td>
+    </tr>
+    <tr class="best">
+      <td class="num">3</td><td class="num">−20 485,3</td>
+      <td class="num">41 013,1</td><td class="num">43 903,9</td><td class="num">40 985,5</td>
+      <td class="num">0,040 *</td><td class="num">0,518</td><td class="num">0,703</td><td class="num">25,6%</td>
+      <td>← BIC · AIC3</td>
+    </tr>
+    <tr class="sep">
+      <td class="num"><strong>4</strong></td><td class="num">−20 483,8</td>
+      <td class="num">41 027,3</td><td class="num">46 135,7</td><td class="num">40 988,7</td>
+      <td class="num">0,700</td><td class="num">0,405</td><td class="num">0,465</td><td class="num">9,2%</td>
+      <td><strong>← BLRT ✓ verdadeiro</strong></td>
+    </tr>
+    <tr class="desat">
+      <td class="num">5</td><td class="num">−20 483,9</td>
+      <td class="num">41 044,4</td><td class="num">47 947,5</td><td class="num">40 994,7</td>
+      <td class="num">—</td><td class="num">0,360</td><td class="num">0,306</td><td class="num">7,6%</td><td></td>
+    </tr>
+    <tr class="desat">
+      <td class="num">6–8</td><td class="num">≈ −20 483,8</td>
+      <td class="num">↑</td><td class="num">↑</td><td class="num">↑</td>
+      <td class="num">—</td><td class="num">↓</td><td class="num">↓</td><td class="num">↓</td><td></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="nota" style="margin-top:0.5rem">
+  ★ = mínimo do critério (melhor). * = rejeita H₀ (p ≤ 0,05). Linha realçada = eleito por maioria
+  de votos (k = 3). Linha com borda = eleito pelo BLRT e verdadeiro (k = 4).
+</p>
+
+<h3>Passo 5 — Bootstrap de estabilidade</h3>
+
+<p>
+  Executado para k = 3 (k mais votado), com B = 100 reamostras e nrep = 3 reinícios:
+</p>
+
+<pre class="r-output">  B_valido = 100 / 100  |  1 052s
+  ARI médio = 0,890  |  IC 95% = [0,775 ; 1,000]
+  Estrutura ESTÁVEL (ARI médio ≥ 0,80)</pre>
+
+<p>
+  ARI médio de 0,89 confirma estabilidade amostral da solução k = 3. Entretanto, estabilidade
+  não implica correção: k = 3 é <em>estavelmente errado</em> — a fusão de G3 + G4 se
+  reproduz consistentemente porque é o ótimo local dominante para esse k. A estabilidade
+  bootstrapped de k = 4 (correto) seria igualmente alta, porém esse teste não foi executado
+  porque a votação elegeu k = 3.
+</p>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="codigo">9 · Código R</h2>
+
+<h3>Parâmetros e simulação</h3>
+
+<pre class="r-code"><span class="kw">set.seed</span>(<span class="nu">1234</span>)
+n         <span class="kw">&lt;-</span> <span class="nu">5000</span>
+pi_grupos <span class="kw">&lt;-</span> <span class="fn">c</span>(<span class="nu">0.25</span>, <span class="nu">0.25</span>, <span class="nu">0.25</span>, <span class="nu">0.25</span>)
+mu_grupos <span class="kw">&lt;-</span> <span class="fn">c</span>(<span class="nu">2</span>, <span class="nu">12</span>, <span class="nu">25</span>, <span class="nu">50</span>)
+theta_nb  <span class="kw">&lt;-</span> <span class="nu">2.5</span>   <span class="com"># theta fixo em todos os modelos</span>
+
+grupo_real <span class="kw">&lt;-</span> <span class="fn">sample</span>(<span class="nu">1</span>:<span class="nu">4</span>, size = n, replace = <span class="kw">TRUE</span>, prob = pi_grupos)
+consultas  <span class="kw">&lt;-</span> <span class="fn">rnbinom</span>(n = n, size = theta_nb, mu = mu_grupos[grupo_real])</pre>
+
+<h3>Log-verossimilhança oráculo</h3>
+
+<pre class="r-code"><span class="com"># Teto teórico: logLik calculada com os parâmetros verdadeiros</span>
+ll_obs <span class="kw">&lt;-</span> <span class="kw">function</span>(y, mus, thetas, pis) {
+  k  <span class="kw">&lt;-</span> <span class="fn">length</span>(mus)
+  lp <span class="kw">&lt;-</span> <span class="fn">sapply</span>(<span class="nu">1</span>:k, <span class="kw">function</span>(h)
+    <span class="fn">log</span>(pis[h]) + <span class="fn">dnbinom</span>(y, size = thetas[h], mu = mus[h], log = <span class="kw">TRUE</span>))
+  m <span class="kw">&lt;-</span> <span class="fn">apply</span>(lp, <span class="nu">1</span>, max)
+  m + <span class="fn">log</span>(<span class="fn">rowSums</span>(<span class="fn">exp</span>(lp - m)))   <span class="com"># log-sum-exp estável</span>
+}
+ll_oraculo <span class="kw">&lt;-</span> <span class="fn">sum</span>(<span class="fn">ll_obs</span>(consultas,
+  mus = mu_grupos, thetas = <span class="fn">rep</span>(theta_nb, <span class="nu">4</span>), pis = pi_grupos))</pre>
+
+<h3>Passo 1 — stepFlexmix k = 1:8</h3>
+
+<pre class="r-code"><span class="fn">set.seed</span>(<span class="nu">42</span>)
+fx_full <span class="kw">&lt;-</span> <span class="fn">suppressWarnings</span>(<span class="fn">stepFlexmix</span>(
+  consultas ~ <span class="nu">1</span>,
+  data    = df,
+  k       = <span class="nu">1</span>:<span class="nu">8</span>,
+  nrep    = <span class="nu">10</span>,
+  model   = <span class="fn">FLXMRnegbin</span>(theta = theta_nb),   <span class="com"># theta fixo</span>
+  control = <span class="fn">list</span>(iter.max = <span class="nu">500</span>, minprior = <span class="nu">0.01</span>, tolerance = <span class="nu">1e-7</span>)
+))</pre>
+
+<h3>Passo 2 — Critérios de informação</h3>
+
+<pre class="r-code">tab_crit <span class="kw">&lt;-</span> <span class="fn">do.call</span>(rbind, <span class="fn">lapply</span>(<span class="nu">1</span>:<span class="nu">8</span>, <span class="kw">function</span>(g) {
+  mod <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">getModel</span>(fx_full, which = <span class="fn">as.character</span>(g)),
+                  error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+  <span class="kw">if</span> (<span class="fn">is.null</span>(mod)) <span class="kw">return</span>(<span class="kw">NULL</span>)
+  ll <span class="kw">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(mod))
+  np <span class="kw">&lt;-</span> <span class="fn">attr</span>(<span class="fn">logLik</span>(mod), <span class="st">"df"</span>)
+  N  <span class="kw">&lt;-</span> <span class="fn">nrow</span>(df)
+  <span class="fn">data.frame</span>(
+    k    = g, k_ef = mod@k,
+    logLik = <span class="fn">round</span>(ll, <span class="nu">1</span>), np = np,
+    BIC  = <span class="fn">round</span>(-<span class="nu">2</span> * ll + np * <span class="fn">log</span>(N), <span class="nu">1</span>),
+    ICL  = <span class="fn">round</span>(<span class="fn">ICL</span>(mod), <span class="nu">1</span>),
+    AIC3 = <span class="fn">round</span>(-<span class="nu">2</span> * ll + <span class="nu">3</span> * np, <span class="nu">1</span>)
+  )
+}))</pre>
+
+<h3>Passo 3 — Função BLRT (passo único)</h3>
+
+<pre class="r-code"><span class="com"># ll_melhor_k: melhor logLik com EXATAMENTE k componentes.</span>
+<span class="com"># Usa flexmix() direto — stepFlexmix + getModel falha quando</span>
+<span class="com"># k_efetivo != k_solicitado (colapso por minprior), zerando B_valid.</span>
+ll_melhor_k <span class="kw">&lt;-</span> <span class="kw">function</span>(df_b, k, modelo_b, nrep) {
+  best <span class="kw">&lt;-</span> -<span class="kw">Inf</span>
+  <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+    m <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(
+      <span class="fn">suppressWarnings</span>(<span class="fn">flexmix</span>(consultas ~ <span class="nu">1</span>, data = df_b, k = k,
+        model = modelo_b,
+        control = <span class="fn">list</span>(iter.max = <span class="nu">200</span>, minprior = <span class="nu">0.01</span>, tolerance = <span class="nu">1e-6</span>))),
+      error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+    <span class="kw">if</span> (!<span class="fn">is.null</span>(m) && m@k == k) {
+      ll <span class="kw">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(m))
+      <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) && ll > best) best <span class="kw">&lt;-</span> ll
+    }
+  }
+  <span class="kw">if</span> (<span class="fn">is.infinite</span>(best)) <span class="kw">NA_real_</span> <span class="kw">else</span> best
+}
+
+blrt_passo <span class="kw">&lt;-</span> <span class="kw">function</span>(fit_k0, fit_k1, n_obs, B = BLRT_B,
+                       nrep = BLRT_NREP, theta_fixo = <span class="kw">NULL</span>, seed = <span class="kw">NULL</span>) {
+  <span class="kw">if</span> (!<span class="fn">is.null</span>(seed)) <span class="fn">set.seed</span>(seed)
+  k0      <span class="kw">&lt;-</span> fit_k0@k;  k1 <span class="kw">&lt;-</span> fit_k1@k
+  lrt_obs <span class="kw">&lt;-</span> <span class="nu">2</span> * (<span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k1)) - <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k0)))
+  modelo_b <span class="kw">&lt;-</span> <span class="fn">FLXMRnegbin</span>(theta = theta_fixo)
+
+  lrt_b <span class="kw">&lt;-</span> <span class="fn">vapply</span>(<span class="fn">seq_len</span>(B), <span class="kw">function</span>(b) {
+    y_b  <span class="kw">&lt;-</span> <span class="fn">simular_nb_mistura</span>(fit_k0, n_obs, theta_fixo = theta_fixo)
+    df_b <span class="kw">&lt;-</span> <span class="fn">data.frame</span>(consultas = y_b)
+    ll0  <span class="kw">&lt;-</span> <span class="fn">ll_melhor_k</span>(df_b, k0, modelo_b, nrep)
+    ll1  <span class="kw">&lt;-</span> <span class="fn">ll_melhor_k</span>(df_b, k1, modelo_b, nrep)
+    <span class="kw">if</span> (<span class="fn">anyNA</span>(<span class="fn">c</span>(ll0, ll1))) <span class="kw">NA_real_</span> <span class="kw">else</span> <span class="nu">2</span> * (ll1 - ll0)
+  }, <span class="fn">numeric</span>(<span class="nu">1</span>))
+
+  lrt_v <span class="kw">&lt;-</span> lrt_b[!<span class="fn">is.na</span>(lrt_b)]
+  pval  <span class="kw">&lt;-</span> (<span class="fn">sum</span>(lrt_v >= lrt_obs) + <span class="nu">1</span>) / (<span class="fn">length</span>(lrt_v) + <span class="nu">1</span>)
+  <span class="fn">list</span>(k0=k0, k1=k1, lrt_obs=<span class="fn">round</span>(lrt_obs,<span class="nu">2</span>),
+       pval=<span class="fn">round</span>(pval,<span class="nu">4</span>), B_valid=<span class="fn">length</span>(lrt_v), lrt_boot=lrt_v)
+}</pre>
+
+<h3>Passo 3 — Loop sequencial BLRT</h3>
+
+<pre class="r-code"><span class="com"># Testa pelo menos até k=4 vs k=5 para cobrir o k verdadeiro.</span>
+k_max_blrt <span class="kw">&lt;-</span> <span class="fn">max</span>(k_bic, k_icl, <span class="nu">4L</span>) + <span class="nu">1L</span>
+k_seq      <span class="kw">&lt;-</span> <span class="fn">seq_len</span>(k_max_blrt - <span class="nu">1L</span>)
+
+resultados_blrt  <span class="kw">&lt;-</span> <span class="fn">list</span>()
+k_blrt_escolhido <span class="kw">&lt;-</span> <span class="kw">NA_integer_</span>
+
+<span class="kw">for</span> (k0 <span class="kw">in</span> k_seq) {
+  k1     <span class="kw">&lt;-</span> k0 + <span class="nu">1L</span>
+  fit_k0 <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">getModel</span>(fx_full, which = <span class="fn">as.character</span>(k0)),
+                     error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+  fit_k1 <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">getModel</span>(fx_full, which = <span class="fn">as.character</span>(k1)),
+                     error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+  <span class="kw">if</span> (<span class="fn">is.null</span>(fit_k0) || <span class="fn">is.null</span>(fit_k1)) <span class="kw">next</span>
+
+  res <span class="kw">&lt;-</span> <span class="fn">blrt_passo</span>(fit_k0, fit_k1, n_obs,
+                    B = BLRT_B, nrep = BLRT_NREP,
+                    theta_fixo = theta_nb, seed = <span class="nu">100L</span> + k0)
+  resultados_blrt[[<span class="fn">as.character</span>(k0)]] <span class="kw">&lt;-</span> res
+
+  <span class="kw">if</span> (<span class="fn">is.na</span>(k_blrt_escolhido) && res$pval > <span class="nu">0.05</span>) {
+    k_blrt_escolhido <span class="kw">&lt;-</span> k0  <span class="com"># primeiro k0 em que H0 não é rejeitada</span>
+  }
+}</pre>
+
+<h3>Confronto k = 3 vs k = 4 — algoritmo húngaro e sensibilidade</h3>
+
+<pre class="r-code"><span class="com"># Algoritmo húngaro: pareamento ótimo componentes -> grupos.</span>
+<span class="com"># conf_mat: nr x nc (linhas = grupos reais, colunas = componentes).</span>
+<span class="com"># Retorna assignment[g] = coluna de conf_mat para grupo g (NA se sem componente).</span>
+<span class="com"># Implementação em base R (permutação exaustiva, k ≤ 8 → 40320 perms, trivial).</span>
+hungarian_match <span class="kw">&lt;-</span> <span class="kw">function</span>(conf_mat) {
+  nr <span class="kw">&lt;-</span> <span class="fn">nrow</span>(conf_mat); nc <span class="kw">&lt;-</span> <span class="fn">ncol</span>(conf_mat)
+  k  <span class="kw">&lt;-</span> <span class="fn">max</span>(nr, nc)
+  sq <span class="kw">&lt;-</span> <span class="fn">matrix</span>(<span class="nu">0L</span>, k, k)
+  sq[<span class="fn">seq_len</span>(nr), <span class="fn">seq_len</span>(nc)] <span class="kw">&lt;-</span> conf_mat
+  perms  <span class="kw">&lt;-</span> <span class="fn">perms_all</span>(k)
+  scores <span class="kw">&lt;-</span> <span class="fn">apply</span>(perms, <span class="nu">1L</span>, <span class="kw">function</span>(p) <span class="fn">sum</span>(<span class="fn">diag</span>(sq[, p, drop = <span class="kw">FALSE</span>])))
+  a      <span class="kw">&lt;-</span> <span class="fn">as.integer</span>(perms[<span class="fn">which.max</span>(scores), ])
+  <span class="fn">ifelse</span>(a[<span class="fn">seq_len</span>(nr)] <= nc, a[<span class="fn">seq_len</span>(nr)], <span class="kw">NA_integer_</span>)
+}
+
+<span class="com"># Extrai modelos de fx_full e avalia com Hungarian + sensibilidade</span>
+fit3 <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">getModel</span>(fx_full, which = <span class="st">"3"</span>), error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+fit4 <span class="kw">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">getModel</span>(fx_full, which = <span class="st">"4"</span>), error = <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+
+avaliar_modelo <span class="kw">&lt;-</span> <span class="kw">function</span>(nome, fit) {
+  k      <span class="kw">&lt;-</span> fit@k;  k_true <span class="kw">&lt;-</span> <span class="fn">nlevels</span>(df$grupo_real)
+  conf   <span class="kw">&lt;-</span> <span class="fn">table</span>(real = df$grupo_real,
+                   est  = <span class="fn">factor</span>(<span class="fn">clusters</span>(fit), levels = <span class="fn">seq_len</span>(k)))
+
+  <span class="com"># Algoritmo húngaro</span>
+  assgn  <span class="kw">&lt;-</span> <span class="fn">hungarian_match</span>(conf)    <span class="com"># assgn[g] = coluna de conf para grupo g</span>
+
+  <span class="com"># Matriz pareada: colunas reordenadas para alinhar com grupos verdadeiros</span>
+  cm <span class="kw">&lt;-</span> <span class="fn">matrix</span>(<span class="nu">0L</span>, k_true, k_true,
+               dimnames = <span class="fn">list</span>(real = <span class="fn">rownames</span>(conf),
+                                grupo_map = <span class="fn">rownames</span>(conf)))
+  <span class="kw">for</span> (g <span class="kw">in</span> <span class="fn">seq_len</span>(k_true))
+    <span class="kw">if</span> (!<span class="fn">is.na</span>(assgn[g])) cm[, g] <span class="kw">&lt;-</span> <span class="fn">as.integer</span>(conf[, assgn[g]])
+
+  <span class="com"># Acurácia global</span>
+  acc <span class="kw">&lt;-</span> <span class="nu">100</span> * <span class="fn">sum</span>(<span class="fn">diag</span>(cm)) / <span class="fn">sum</span>(cm)
+
+  <span class="com"># Sensibilidade por grupo: sens_g = TP_g / n_g (recall por classe)</span>
+  n_g  <span class="kw">&lt;-</span> <span class="fn">rowSums</span>(cm);  tp_g <span class="kw">&lt;-</span> <span class="fn">diag</span>(cm)
+  sens <span class="kw">&lt;-</span> <span class="fn">ifelse</span>(<span class="fn">is.na</span>(assgn), <span class="nu">0</span>, <span class="nu">100</span> * tp_g / n_g)
+
+  <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="st">"\n[%s]  acuracia=%.1f%%  EN=%.3f  AvePP_min=%.3f\n"</span>,
+              nome, acc, <span class="fn">metricas_validacao</span>(fit)$EN,
+              <span class="fn">metricas_validacao</span>(fit)$AvePP_min))
+  <span class="fn">print</span>(cm)
+  <span class="kw">for</span> (g <span class="kw">in</span> <span class="fn">seq_len</span>(k_true))
+    <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="st">"  G%d: %5.1f%%  [%d/%d]\n"</span>, g, sens[g], tp_g[g], n_g[g]))
+  <span class="fn">invisible</span>(<span class="fn">list</span>(conf=conf, cm=cm, acc=acc, sens=sens, assgn=assgn))
+}</pre>
+
+<div class="nota">
+  <strong>Detalhe de implementação crítico:</strong> o helper <code>ll_melhor_k()</code>
+  usa <code>flexmix()</code> diretamente, não <code>stepFlexmix() + getModel()</code>.
+  O motivo: <code>stepFlexmix</code> pode colapsar uma componente (<code>minprior</code>)
+  e retornar <code>k_efetivo &lt; k_solicitado</code>;
+  nesse caso <code>getModel(m, which = "4")</code> lança erro, fazendo todos os B
+  replicados retornarem <code>NA</code> (<code>B_valid = 0</code>), com p-valor
+  espúrio de 1,0. A guarda <code>m@k == k</code> descarta replicados colapsados
+  e evita o falso não-rejeito.
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">10 · Referências</h2>
+
+<div class="ref-group">
+  <div class="ref-entry">
+    <cite>Nylund, K.L., Asparouhov, T., &amp; Muthén, B.O. (2007).</cite>
+    Deciding on the number of classes in latent class analysis and growth mixture modeling:
+    A Monte Carlo simulation study.
+    <em>Structural Equation Modeling</em>, 14(4), 535–569.
+    — <em>Referência primária para BLRT e comparação com BIC/ICL/AIC.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>McLachlan, G.J., &amp; Peel, D. (2000).</cite>
+    <em>Finite Mixture Models</em>. Wiley.
+    — <em>Demonstração da quebra do teorema de Wilks em misturas.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>McLachlan, G.J. (1987).</cite>
+    On bootstrapping the likelihood ratio test statistic for the number of components
+    in a normal mixture.
+    <em>Applied Statistics</em>, 36(3), 318–324.
+    — <em>Proposta original do BLRT.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Biernacki, C., Celeux, G., &amp; Govaert, G. (2000).</cite>
+    Assessing a mixture model for clustering with the integrated completed likelihood.
+    <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, 22(7), 719–725.
+    — <em>Definição e propriedades do ICL.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Schwarz, G. (1978).</cite>
+    Estimating the dimension of a model.
+    <em>The Annals of Statistics</em>, 6(2), 461–464.
+    — <em>Derivação do BIC.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Celeux, G., &amp; Soromenho, G. (1996).</cite>
+    An entropy criterion for assessing the number of clusters in a mixture model.
+    <em>Journal of Classification</em>, 13(2), 195–212.
+    — <em>Entropia normalizada EN.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Nagin, D.S. (2005).</cite>
+    <em>Group-Based Modeling of Development</em>. Harvard University Press.
+    — <em>AvePP e limiares de classificação.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Hubert, L., &amp; Arabie, P. (1985).</cite>
+    Comparing partitions.
+    <em>Journal of Classification</em>, 2(1), 193–218.
+    — <em>Adjusted Rand Index.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Bozdogan, H. (1994).</cite>
+    Mixture-model cluster analysis using model selection criteria and a new informational
+    measure of complexity.
+    <em>Proceedings of the 1st US/Japan Conference on the Frontiers of Statistical Modeling</em>, 2, 69–113.
+    — <em>AIC3 e penalidades informacionais intermediárias.</em>
+  </div>
+  <div class="ref-entry">
+    <cite>Davison, A.C., &amp; Hinkley, D.V. (1997).</cite>
+    <em>Bootstrap Methods and Their Application</em>. Cambridge University Press.
+    — <em>Correção \((R+1)/(B+1)\) para p-valores bootstrap.</em>
+  </div>
+</div>
+
+</div><!-- /prose -->
+</main>
+
+</body>
+</html>
+
