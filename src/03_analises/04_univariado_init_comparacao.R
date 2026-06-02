@@ -349,41 +349,52 @@ INITS <- list(
   sem_em = init_sem_em
 )
 
-# fits[[init_name]][[k_char]] <- fit_obj
-fits <- setNames(vector("list", length(INITS)), names(INITS))
-tab_init <- list()
+# Cache: se fits.rds + tab_init.rds existem, pula o loop pesado.
+fits_cache_path <- file.path(RDS_DIR, "fits.rds")
+tab_init_cache  <- file.path(RDS_DIR, "tab_init.rds")
+USE_CACHE_A <- file.exists(fits_cache_path) && file.exists(tab_init_cache)
 
-for (init_nm in names(INITS)) {
-  fits[[init_nm]] <- setNames(vector("list", length(K_GRID)),
-                              as.character(K_GRID))
-  for (k_val in K_GRID) {
-    cat(sprintf("  %-8s k=%d ... ", init_nm, k_val))
-    t0 <- proc.time()["elapsed"]
-    fit_kv <- INITS[[init_nm]](k_val)
-    dt <- proc.time()["elapsed"] - t0
-    fits[[init_nm]][[as.character(k_val)]] <- fit_kv
-    m <- extrair_metricas(fit_kv)
-    if (is.null(m)) {
-      cat(sprintf("FALHOU (%.1fs)\n", dt))
-      tab_init[[length(tab_init) + 1]] <- data.frame(
-        init = init_nm, k = k_val, k_efetivo = NA, logLik = NA, np = NA,
-        AIC = NA, BIC = NA, ICL = NA, AIC3 = NA, tempo_s = round(dt, 1)
-      )
-    } else {
-      cat(sprintf("logLik=%.1f | BIC=%.1f | %.1fs\n",
-                  m$logLik, m$BIC, dt))
-      tab_init[[length(tab_init) + 1]] <- data.frame(
-        init = init_nm, k = k_val,
-        k_efetivo = m$k_efetivo, logLik = m$logLik, np = m$np,
-        AIC = m$AIC, BIC = m$BIC, ICL = m$ICL, AIC3 = m$AIC3,
-        tempo_s = round(dt, 1)
-      )
+if (USE_CACHE_A) {
+  cat("  [cache] carregando fits e tab_init de RDS — pulando ajuste\n")
+  fits     <- readRDS(fits_cache_path)
+  tab_init <- readRDS(tab_init_cache)
+} else {
+  fits     <- setNames(vector("list", length(INITS)), names(INITS))
+  tab_init <- list()
+
+  for (init_nm in names(INITS)) {
+    fits[[init_nm]] <- setNames(vector("list", length(K_GRID)),
+                                as.character(K_GRID))
+    for (k_val in K_GRID) {
+      cat(sprintf("  %-8s k=%d ... ", init_nm, k_val))
+      t0 <- proc.time()["elapsed"]
+      fit_kv <- INITS[[init_nm]](k_val)
+      dt <- proc.time()["elapsed"] - t0
+      fits[[init_nm]][[as.character(k_val)]] <- fit_kv
+      m <- extrair_metricas(fit_kv)
+      if (is.null(m)) {
+        cat(sprintf("FALHOU (%.1fs)\n", dt))
+        tab_init[[length(tab_init) + 1]] <- data.frame(
+          init = init_nm, k = k_val, k_efetivo = NA, logLik = NA, np = NA,
+          AIC = NA, BIC = NA, ICL = NA, AIC3 = NA, tempo_s = round(dt, 1)
+        )
+      } else {
+        cat(sprintf("logLik=%.1f | BIC=%.1f | %.1fs\n",
+                    m$logLik, m$BIC, dt))
+        tab_init[[length(tab_init) + 1]] <- data.frame(
+          init = init_nm, k = k_val,
+          k_efetivo = m$k_efetivo, logLik = m$logLik, np = m$np,
+          AIC = m$AIC, BIC = m$BIC, ICL = m$ICL, AIC3 = m$AIC3,
+          tempo_s = round(dt, 1)
+        )
+      }
     }
   }
+  tab_init <- do.call(rbind, tab_init)
+  saveRDS(fits, fits_cache_path)
+  saveRDS(tab_init, tab_init_cache)
 }
 
-tab_init <- do.call(rbind, tab_init)
-saveRDS(fits, file.path(RDS_DIR, "fits.rds"))
 write.csv(tab_init, file.path(RDS_DIR, "tab01_inicializacoes.csv"),
           row.names = FALSE)
 
@@ -493,27 +504,42 @@ for (i in seq_len(nrow(melhor_por_k))) {
 # BLRT testa k = 2, 3, 4, 5 contra k+1
 k_blrt_range <- intersect(K_GRID[-length(K_GRID)],
                           as.integer(names(melhor_fits)))
-resultados_blrt <- list()
-k_blrt_escolhido <- NA_integer_
 
-cat(sprintf("Configuracao: B=%d bootstrap | nrep=%d reinicios por ajuste\n",
-            BLRT_B, BLRT_NREP))
+blrt_cache_path <- file.path(RDS_DIR, "resultados_blrt.rds")
 
-for (k0 in k_blrt_range) {
-  k1 <- k0 + 1L
-  fit_k0 <- melhor_fits[[as.character(k0)]]
-  fit_k1 <- melhor_fits[[as.character(k1)]]
-  if (is.null(fit_k0) || is.null(fit_k1)) next
-  cat(sprintf("  BLRT k=%d vs k=%d ... ", k0, k1))
-  t0 <- proc.time()["elapsed"]
-  res <- blrt_passo(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP,
-                    seed = 1000 + k0)
-  dt <- proc.time()["elapsed"] - t0
-  cat(sprintf("LRT=%.1f | p=%.4f | B_validos=%d | %.0fs\n",
-              res$lrt_obs, res$pval, res$B_valido, dt))
-  resultados_blrt[[as.character(k0)]] <- res
-  if (is.na(k_blrt_escolhido) && res$pval > 0.05)
-    k_blrt_escolhido <- k0
+if (file.exists(blrt_cache_path)) {
+  cat("  [cache] carregando resultados_blrt de RDS — pulando ", BLRT_B,
+      " replicacoes bootstrap por par\n", sep = "")
+  resultados_blrt  <- readRDS(blrt_cache_path)
+  k_blrt_escolhido <- NA_integer_
+  for (k0 in sort(as.integer(names(resultados_blrt)))) {
+    if (is.na(k_blrt_escolhido) && resultados_blrt[[as.character(k0)]]$pval > 0.05)
+      k_blrt_escolhido <- k0
+  }
+} else {
+  resultados_blrt  <- list()
+  k_blrt_escolhido <- NA_integer_
+
+  cat(sprintf("Configuracao: B=%d bootstrap | nrep=%d reinicios por ajuste\n",
+              BLRT_B, BLRT_NREP))
+
+  for (k0 in k_blrt_range) {
+    k1 <- k0 + 1L
+    fit_k0 <- melhor_fits[[as.character(k0)]]
+    fit_k1 <- melhor_fits[[as.character(k1)]]
+    if (is.null(fit_k0) || is.null(fit_k1)) next
+    cat(sprintf("  BLRT k=%d vs k=%d ... ", k0, k1))
+    t0 <- proc.time()["elapsed"]
+    res <- blrt_passo(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP,
+                      seed = 1000 + k0)
+    dt <- proc.time()["elapsed"] - t0
+    cat(sprintf("LRT=%.1f | p=%.4f | B_validos=%d | %.0fs\n",
+                res$lrt_obs, res$pval, res$B_valido, dt))
+    resultados_blrt[[as.character(k0)]] <- res
+    if (is.na(k_blrt_escolhido) && res$pval > 0.05)
+      k_blrt_escolhido <- k0
+  }
+  saveRDS(resultados_blrt, blrt_cache_path)
 }
 
 if (is.na(k_blrt_escolhido))
@@ -582,31 +608,39 @@ fit_final <- melhor_fits[[as.character(k_final)]]
 init_final <- melhor_por_k$init[melhor_por_k$k == k_final]
 cat(sprintf("Inicializacao do modelo final: %s\n", init_final))
 
-# Bootstrap de estabilidade (nao-paramétrico)
-cat(sprintf("\nBootstrap de estabilidade (B=%d) ... ", BOOT_B))
-t0_boot <- proc.time()["elapsed"]
-set.seed(7777)
-cl_ref <- clusters(fit_final)
-ari_vec <- vapply(seq_len(BOOT_B), function(b) {
-  idx <- sample.int(N, replace = TRUE)
-  df_b <- data.frame(consultas = consultas[idx])
-  m_best <- NULL; ll_best <- -Inf
-  for (i in seq_len(BLRT_NREP)) {
-    m_i <- tryCatch(suppressWarnings(flexmix(
-      consultas ~ 1, data = df_b, k = k_final,
-      model = FLXMRnegbin(theta = THETA_NB),
-      control = list(iter.max = 200, minprior = 0.01, tolerance = 1e-6)
-    )), error = function(e) NULL)
-    if (!is.null(m_i) && m_i@k == k_final) {
-      ll <- as.numeric(logLik(m_i))
-      if (!is.na(ll) && ll > ll_best) { ll_best <- ll; m_best <- m_i }
+# Bootstrap de estabilidade (nao-paramétrico) — com cache
+ari_boot_cache <- file.path(RDS_DIR, "ari_boot.rds")
+
+if (file.exists(ari_boot_cache)) {
+  cat(sprintf("\n[cache] carregando ari_vec (B=%d) de RDS\n", BOOT_B))
+  ari_vec <- readRDS(ari_boot_cache)
+} else {
+  cat(sprintf("\nBootstrap de estabilidade (B=%d) ... ", BOOT_B))
+  t0_boot <- proc.time()["elapsed"]
+  set.seed(7777)
+  cl_ref <- clusters(fit_final)
+  ari_vec <- vapply(seq_len(BOOT_B), function(b) {
+    idx <- sample.int(N, replace = TRUE)
+    df_b <- data.frame(consultas = consultas[idx])
+    m_best <- NULL; ll_best <- -Inf
+    for (i in seq_len(BLRT_NREP)) {
+      m_i <- tryCatch(suppressWarnings(flexmix(
+        consultas ~ 1, data = df_b, k = k_final,
+        model = FLXMRnegbin(theta = THETA_NB),
+        control = list(iter.max = 200, minprior = 0.01, tolerance = 1e-6)
+      )), error = function(e) NULL)
+      if (!is.null(m_i) && m_i@k == k_final) {
+        ll <- as.numeric(logLik(m_i))
+        if (!is.na(ll) && ll > ll_best) { ll_best <- ll; m_best <- m_i }
+      }
     }
-  }
-  if (is.null(m_best)) NA_real_
-  else adj_rand_index(cl_ref[idx], clusters(m_best))
-}, numeric(1))
-dt_boot <- proc.time()["elapsed"] - t0_boot
-cat(sprintf("%.0fs\n", dt_boot))
+    if (is.null(m_best)) NA_real_
+    else adj_rand_index(cl_ref[idx], clusters(m_best))
+  }, numeric(1))
+  dt_boot <- proc.time()["elapsed"] - t0_boot
+  cat(sprintf("%.0fs\n", dt_boot))
+  saveRDS(ari_vec, ari_boot_cache)
+}
 
 ari_valid <- ari_vec[!is.na(ari_vec)]
 ari_med <- if (length(ari_valid)) mean(ari_valid) else NA
@@ -957,7 +991,9 @@ tryCatch({
 
 
 # ── Tabela 8 · ARI cruzado entre metodos ─────────────────────────────────────
-metodos_validos <- names(INITS)[!sapply(metricas_E, is.null)]
+# IMPORTANTE: metricas_E[[init_nm]] <- NULL APAGA o elemento da lista em R,
+# entao names(metricas_E) ja contem apenas os metodos que convergiram.
+metodos_validos <- names(metricas_E)
 ari_mat <- matrix(NA_real_,
                   nrow = length(metodos_validos),
                   ncol = length(metodos_validos),
