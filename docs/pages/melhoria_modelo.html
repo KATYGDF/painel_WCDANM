@@ -1134,21 +1134,30 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 </ul>
 
 <div class="alerta">
-  <strong>Implicação metodológica:</strong> o ICL é, com frequência,
-  recomendado na literatura como alternativa ao BIC em situações de
-  sobreposição entre componentes. <em>Os resultados aqui obtidos indicam
-  o oposto:</em> quando a sobreposição constitui a estrutura real do
-  problema — e não um artefato decorrente de erro de especificação — o
-  ICL apresenta excessivo conservadorismo. Conforme estabelecido por
-  Biernacki, Celeux &amp; Govaert (2000) e reafirmado em revisão recente
-  por Celeux, Frühwirth-Schnatter &amp; Robert (2019, cap. 7), o ICL é
-  apropriado quando o objetivo é <em>classificação</em> e os componentes
-  podem ser supostos bem separados; em <em>modelagem de densidade</em>
-  com sobreposição admissível, recomendam-se o BIC ou o Bootstrap LRT.
-  Baudry (2015) demonstrou formalmente que o ICL é consistente para o
-  número de <em>clusters bem separados</em>, e não para o número de
-  <em>componentes da mistura</em> — objetos estatisticamente distintos
-  quando há sobreposição.
+  <strong>Implicação metodológica:</strong> o ICL é frequentemente
+  recomendado quando há sobreposição entre componentes, mas os
+  resultados aqui obtidos sugerem cautela com essa recomendação.
+  <p style="margin-top:0.7rem;">
+    A explicação envolve uma distinção conceitual importante:
+    <strong>componente da mistura</strong> (objeto <em>generativo</em> —
+    uma das distribuições NB que produziu os dados) é diferente de
+    <strong>cluster bem separado</strong> (objeto <em>descritivo</em> —
+    um grupo visualmente distinguível). Quando há sobreposição forte,
+    esses dois números <em>não coincidem</em>: no problema em análise,
+    há 4 componentes verdadeiros, mas apenas 3 clusters distinguíveis,
+    pois G3 e G4 se confundem.
+  </p>
+  <p style="margin-top:0.7rem;">
+    Biernacki, Celeux &amp; Govaert (2000) e Celeux, Frühwirth-Schnatter
+    &amp; Robert (2019, cap. 7) estabelecem que o ICL é apropriado para
+    a primeira pergunta — <em>"em quantos clusters distinguíveis posso
+    separar essas observações?"</em> — e, portanto, pressupõe
+    componentes bem separados. Baudry (2015) demonstrou formalmente que
+    o ICL é consistente para o <strong>número de clusters</strong>, não
+    para o <strong>número de componentes</strong>. Para a pergunta
+    generativa — <em>"quantas distribuições produziram esses dados?"</em>
+    — recomendam-se o BIC ou o Bootstrap LRT.
+  </p>
 </div>
 
 <blockquote class="cit">
