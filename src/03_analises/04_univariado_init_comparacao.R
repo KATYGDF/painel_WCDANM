@@ -1417,12 +1417,23 @@ cat("  fig03_criterios_por_k.png          (AIC/BIC/ICL/AIC3 vs k)\n")
 cat("  fig04_blrt_distribuicoes.png       (bootstrap LRT, multi-painel)\n")
 cat("  fig05_estabilidade_ari.png         (bootstrap ARI)\n")
 cat("  fig06_modelo_final.png             (modelo ajustado vs dados)\n")
+cat("  fig07_densidades_por_metodo.png    (densidades NB por metodo)        [Modulo E]\n")
+cat("  fig08_classificacao_grid.png       (grid 4x5 analogo PCA-por-grupo)  [Modulo E]\n")
+cat("  fig09_certeza_por_grupo.png        (max tau por grupo/metodo)        [Modulo E]\n")
+cat("  fig10_erro_por_faixa.png           (taxa de erro por faixa)          [Modulo E]\n")
 cat("Tabelas (PNG + CSV em RDS_DIR):\n")
 cat("  tab01_inicializacoes               (init × k: logLik/BIC/ICL/AIC/tempo)\n")
 cat("  tab02_criterios_por_k              (k vs todos os criterios)\n")
 cat("  tab03_blrt                         (BLRT sequencial)\n")
 cat("  tab04_modelo_final                 (sensibilidade por grupo)\n")
-cat(sprintf("\nk_final = %d  |  init = %s  |  acuracia = %s\n",
+cat("  tab05_metricas_por_metodo          (ARI/Acur/Pureza/F1 por metodo)   [Modulo E]\n")
+cat("  tab06_recuperacao_parametros       (mu, pi estimados vs verdade)     [Modulo E]\n")
+cat("  tab07_diagnostico_por_grupo        (sens/F1 por metodo x grupo)      [Modulo E]\n")
+cat("  tab08_ari_cruzado                  (matriz ARI entre metodos)        [Modulo E]\n")
+cat(sprintf("\nk_final (consenso) = %d  |  init = %s  |  acuracia = %s\n",
             k_final, init_final,
             ifelse(is.na(acc_global), "n/a", sprintf("%.1f%%", 100 * acc_global))))
+cat(sprintf("Avaliacao em k = K_TRUE = %d (Modulo E): %d/4 metodos convergiram\n",
+            K_TRUE, sum(!sapply(metricas_E, is.null) &
+                        sapply(metricas_E, function(x) !is.null(x)))))
 cat(strrep("=", 70), "\n", sep = "")
