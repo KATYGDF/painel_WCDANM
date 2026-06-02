@@ -356,13 +356,15 @@ pre.r-code .op  { color: #89dceb; }
 
 <h1>Melhoria do Modelo — Inicialização do EM e Bootstrap LRT</h1>
 <p class="lead">
-  Quando a sobredispersão é alta e os grupos latentes se sobrepõem, os critérios
-  penalizados clássicos (AIC, BIC, ICL) <strong>subestimam sistematicamente</strong>
-  o número de componentes. Esta página documenta o experimento controlado que
-  identifica o <em>Bootstrap LRT</em> como o único critério capaz de recuperar
-  a cardinalidade verdadeira nesse cenário, e mostra que — neste caso específico —
-  a escolha da inicialização do EM <strong>não importa para a qualidade da
-  solução</strong>, apenas para o custo computacional.
+  Em regimes de sobredispersão elevada com grupos latentes sobrepostos, os
+  critérios penalizados clássicos (AIC, BIC, ICL) <strong>subestimam
+  sistematicamente</strong> o número de componentes. Este capítulo
+  documenta o experimento controlado que identifica o <em>Bootstrap
+  Likelihood Ratio Test</em> como o único critério capaz de recuperar a
+  cardinalidade verdadeira no referido cenário, e demonstra que — sob as
+  condições investigadas — a estratégia de inicialização do EM
+  <strong>não afeta materialmente a qualidade da solução</strong>,
+  incidindo apenas sobre o custo computacional.
 </p>
 
 <div class="toc">
@@ -399,12 +401,13 @@ pre.r-code .op  { color: #89dceb; }
 </p>
 
 <p>
-  É exatamente esse cenário que isolamos aqui em um experimento univariado
-  controlado: apenas a variável <em>consultas</em>, com quatro grupos cujas
-  médias (\(\mu_1 = 2,\ \mu_2 = 12,\ \mu_3 = 25,\ \mu_4 = 50\)) estão
-  espaçadas, mas a dispersão é grande o suficiente
-  (\(\theta = 2{,}5\)) para que G3 (agudo, \(\mu=25\)) e G4 (atípico,
-  \(\mu=50\)) sejam quase indistinguíveis nos dados observados.
+  Este é precisamente o cenário isolado pelo experimento univariado
+  controlado apresentado a seguir: restringe-se a variável <em>consultas</em>,
+  com quatro grupos cujas médias (\(\mu_1 = 2,\ \mu_2 = 12,\ \mu_3 = 25,\
+  \mu_4 = 50\)) encontram-se espaçadas, ainda que a dispersão seja
+  suficientemente elevada (\(\theta = 2{,}5\)) para tornar G3 (agudo,
+  \(\mu=25\)) e G4 (atípico, \(\mu=50\)) quase indistinguíveis nos dados
+  observados.
 </p>
 
 <div class="teoria">
@@ -418,19 +421,20 @@ pre.r-code .op  { color: #89dceb; }
 </div>
 
 <p>
-  A pergunta empírica desta página é dupla:
+  O experimento aborda duas questões empíricas:
 </p>
 
 <ol>
   <li>
-    <strong>Importa a inicialização?</strong> Diferentes pontos de partida do
-    algoritmo EM (random, k-means, CEM, SEM) levam a soluções diferentes em
-    cenário de sobreposição? Em caso positivo, qual é a melhor?
+    <strong>Sobre a inicialização.</strong> Diferentes pontos de partida do
+    algoritmo EM (random, k-means, CEM, SEM) conduzem a soluções distintas
+    em cenários de sobreposição? Em caso afirmativo, qual estratégia
+    apresenta o melhor desempenho?
   </li>
   <li>
-    <strong>Importa o critério de seleção?</strong> AIC, BIC, ICL, AIC3 e
-    <em>Bootstrap LRT</em> — qual deles recupera o número correto de grupos
-    \(g=4\)?
+    <strong>Sobre o critério de seleção.</strong> Dentre AIC, BIC, ICL,
+    AIC3 e <em>Bootstrap LRT</em>, qual recupera corretamente o número
+    verdadeiro de grupos \(g=4\)?
   </li>
 </ol>
 
@@ -593,16 +597,17 @@ pre.r-code .op  { color: #89dceb; }
 <div class="metodo-bloco">
   <h3><span class="num-met">M1</span> Random multistart</h3>
 
-  <h4>Intuição</h4>
+  <h4>Fundamentação</h4>
   <p>
-    O EM é um otimizador <strong>local</strong>: ele garante chegar a um
-    máximo da log-verossimilhança <em>próximo</em> do ponto onde foi
-    iniciado, mas não garante que seja o máximo global. Para misturas com
-    componentes sobrepostos, a superfície de verossimilhança tem múltiplas
-    modas — e o EM pode parar em qualquer uma delas. A solução mais simples
-    e geral é <strong>rodar EM várias vezes a partir de pontos aleatórios
-    diferentes</strong> e ficar com o melhor. Com sorte, pelo menos um dos
-    arranques cai na bacia de atração do máximo global.
+    O algoritmo EM constitui um otimizador <strong>local</strong>: garante
+    a convergência para um máximo da log-verossimilhança na vizinhança do
+    ponto de partida, sem assegurar, porém, que se trate do máximo global.
+    Em misturas com componentes sobrepostos, a superfície de verossimilhança
+    apresenta múltiplas modas, podendo o EM convergir para qualquer uma
+    delas. A estratégia mais simples e geral consiste em <strong>executar o
+    EM repetidas vezes a partir de pontos aleatórios distintos</strong>,
+    retendo-se o ajuste de maior log-verossimilhança. Espera-se que pelo
+    menos um dos arranques se aproxime da bacia de atração do máximo global.
   </p>
 
   <h4>Algoritmo</h4>
@@ -646,11 +651,13 @@ Retorne o ajuste com maior ℓ_r.</pre>
   </table>
 
   <div class="achado">
-    <strong>No nosso experimento.</strong> Atingiu a maior log-verossimilhança
-    para todo <em>g</em> — mas a um custo enorme: 80 s para <em>g</em>=3,
-    99 s para <em>g</em>=4, contra 1,6 s do k-means para o mesmo resultado.
-    É a evidência empírica de que neste problema o EM não está preso —
-    então o gasto da exploração é desnecessário.
+    <strong>Resultado observado.</strong> A estratégia atingiu a maior
+    log-verossimilhança para todo <em>g</em>, ao custo computacional de
+    80 s para <em>g</em>=3 e 99 s para <em>g</em>=4, em comparação aos
+    1,6 s requeridos pelo k-means para resultado equivalente. Evidencia-se
+    empiricamente que, no problema em análise, o EM não permanece retido
+    em ótimos locais, tornando o esforço de exploração adicional
+    desnecessário.
   </div>
 </div>
 
@@ -658,22 +665,24 @@ Retorne o ajuste com maior ℓ_r.</pre>
 <div class="metodo-bloco">
   <h3><span class="num-met">M2</span> k-means + EM</h3>
 
-  <h4>Intuição</h4>
+  <h4>Fundamentação</h4>
   <p>
-    Em vez de partir de pontos aleatórios, <strong>usa um cluster geométrico
-    rápido como ponto de partida informado</strong>. O k-means é uma
-    heurística de minimização de soma de quadrados intra-cluster,
-    computacionalmente trivial. Se os componentes verdadeiros da mistura
-    forem grosseiramente separáveis no espaço Euclidiano, o k-means já
-    entrega uma partição "quase certa", e o EM só precisa refinar.
+    Em substituição aos pontos aleatórios, <strong>emprega-se uma partição
+    geométrica obtida por k-means como ponto de partida informado</strong>.
+    O k-means é uma heurística de minimização da soma de quadrados
+    intra-cluster, computacionalmente eficiente. Quando os componentes
+    verdadeiros da mistura admitem separação aproximada no espaço
+    Euclidiano, o k-means fornece uma partição inicial próxima da solução
+    de máxima verossimilhança, restando ao EM a etapa de refinamento.
   </p>
   <p>
-    A transformação \(\log(1+x)\) é importante: contagens cruas têm
-    variância proporcional à média (comportamento Poisson-like), então
-    valores grandes dominam a distância Euclidiana. O <code>log1p</code>
-    aproxima homocedasticidade — sem ele, o k-means viraria essencialmente
-    um teste para "está acima ou abaixo de tal valor", desprezando a
-    estrutura dos componentes pequenos.
+    A transformação \(\log(1+x)\) é metodologicamente relevante: contagens
+    brutas exibem variância proporcional à média (comportamento de tipo
+    Poisson), de modo que valores elevados dominam a distância Euclidiana.
+    A aplicação de <code>log1p</code> aproxima a homocedasticidade — sem
+    ela, o k-means tenderia a operar essencialmente como um discriminador
+    binário "acima vs. abaixo de um limiar", desprezando a estrutura dos
+    componentes de menor magnitude.
   </p>
 
   <h4>Algoritmo</h4>
@@ -716,11 +725,13 @@ Retorne o ajuste com maior ℓ_r.</pre>
   </table>
 
   <div class="achado">
-    <strong>No nosso experimento.</strong> O <strong>grande vencedor
-    pragmático</strong>. Atingiu exatamente a mesma log-verossimilhança do
-    random multistart em todos os <em>g</em>, mas em ~1,6 s em vez de
-    ~80 s. Isso indica que, neste problema, o EM já é bem comportado — e
-    a sofisticação da exploração random não compra qualidade extra.
+    <strong>Resultado observado.</strong> A estratégia apresentou o
+    <strong>melhor desempenho prático</strong>. Atingiu exatamente a mesma
+    log-verossimilhança do random multistart em todos os valores de
+    <em>g</em>, em aproximadamente 1,6 s, contra 80 s do random multistart.
+    Constata-se que, no problema em análise, o EM exibe comportamento
+    regular, de modo que a sofisticação da exploração aleatória não confere
+    ganho adicional em qualidade.
   </div>
 </div>
 
@@ -728,21 +739,22 @@ Retorne o ajuste com maior ℓ_r.</pre>
 <div class="metodo-bloco">
   <h3><span class="num-met">M3</span> CEM + EM (Classification EM)</h3>
 
-  <h4>Intuição</h4>
+  <h4>Fundamentação</h4>
   <p>
-    O EM padrão faz <strong>atribuição soft</strong>: cada observação
-    contribui para todos os componentes proporcionalmente à sua
-    probabilidade posterior. O CEM faz <strong>atribuição dura</strong>:
-    cada observação é atribuída ao componente mais provável, e
-    <em>só ele</em> aprende com aquela observação.
+    O EM padrão realiza <strong>atribuição probabilística (soft)</strong>:
+    cada observação contribui para todos os componentes proporcionalmente
+    à respectiva probabilidade posterior. O CEM, por sua vez, realiza
+    <strong>atribuição dura (hard)</strong>: cada observação é alocada ao
+    componente de máxima probabilidade posterior, e apenas este componente
+    incorpora a observação no passo M.
   </p>
   <p>
-    Isso muda o que está sendo otimizado: o EM maximiza a
-    log-verossimilhança <em>observada</em> dos dados; o CEM maximiza a
-    log-verossimilhança <em>completa</em> (assumindo as atribuições como
-    conhecidas). Tipicamente, <strong>CEM converge mais rápido</strong> e
-    produz componentes <em>mais separados</em> — mas pode colapsar
-    componentes pequenos.
+    Modifica-se, com isso, o objetivo da otimização: o EM maximiza a
+    log-verossimilhança <em>observada</em> dos dados, enquanto o CEM
+    maximiza a log-verossimilhança <em>completa</em>, supondo conhecidas
+    as atribuições. Em geral, o <strong>CEM apresenta convergência mais
+    rápida</strong> e produz componentes <em>mais bem separados</em>,
+    embora seja suscetível ao colapso de componentes de menor cardinalidade.
   </p>
 
   <h4>Algoritmo</h4>
@@ -787,12 +799,14 @@ Retorne o ajuste refinado.</pre>
   </table>
 
   <div class="alerta">
-    <strong>No nosso experimento.</strong> <em>Falhou em 3 das 5
-    cardinalidades</em> (<em>g</em> = 4, 5, 6). O motivo: com θ = 2,5,
-    G3 e G4 se sobrepõem tanto que a atribuição dura é praticamente um
-    sorteio, e qualquer flutuação leva ao colapso do componente menor —
-    o CEM não consegue manter 4 componentes vivos no mesmo ajuste.
-    Confirma a fragilidade conhecida do método em contagens sobredispersas.
+    <strong>Resultado observado.</strong> A estratégia <em>não convergiu
+    em três das cinco cardinalidades testadas</em> (<em>g</em> = 4, 5, 6).
+    A causa reside na sobreposição entre G3 e G4 sob \(\theta = 2{,}5\),
+    que torna a atribuição dura essencialmente arbitrária: flutuações
+    marginais conduzem ao colapso do componente de menor cardinalidade, e
+    o CEM não consegue sustentar quatro componentes simultaneamente no
+    mesmo ajuste. O resultado confirma a fragilidade conhecida do método
+    em dados de contagem com sobredispersão elevada.
   </div>
 </div>
 
@@ -800,20 +814,22 @@ Retorne o ajuste refinado.</pre>
 <div class="metodo-bloco">
   <h3><span class="num-met">M4</span> SEM + EM (Stochastic EM)</h3>
 
-  <h4>Intuição</h4>
+  <h4>Fundamentação</h4>
   <p>
-    O SEM resolve o problema do CEM (colapso por atribuição dura)
-    <strong>introduzindo aleatoriedade</strong>: em vez de escolher o
-    componente mais provável, ele <strong>sorteia</strong> o componente
-    de cada observação proporcionalmente à sua probabilidade posterior.
-    Cada iteração resulta em uma partição diferente — o método se torna
-    uma cadeia de Markov no espaço de parâmetros.
+    O SEM aborda a limitação do CEM (colapso por atribuição dura) mediante
+    a <strong>introdução de aleatoriedade no passo E</strong>: em vez de
+    selecionar o componente de maior probabilidade posterior,
+    <strong>amostra-se</strong> o componente de cada observação
+    proporcionalmente à respectiva posterior. Cada iteração produz uma
+    partição distinta, configurando o procedimento como uma cadeia de
+    Markov no espaço de parâmetros.
   </p>
   <p>
-    A vantagem teórica: a aleatoriedade dá ao algoritmo um mecanismo para
-    <strong>escapar de máximos locais</strong> — se o EM ficaria preso
-    num ótimo local pobre, o sorteio estocástico tende, com o tempo, a
-    deslocá-lo para regiões de maior verossimilhança.
+    A vantagem teórica reside na capacidade de <strong>evadir máximos
+    locais</strong>: caso o EM determinístico convergisse para um ótimo
+    local de qualidade inferior, a amostragem estocástica tende, ao longo
+    das iterações, a deslocar a cadeia para regiões de maior
+    verossimilhança.
   </p>
 
   <h4>Algoritmo</h4>
@@ -860,12 +876,14 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
   </table>
 
   <div class="alerta">
-    <strong>No nosso experimento.</strong> <em>Falhou em g = 5</em>
-    (componente colapsou no sorteio). Para <em>g</em> ∈ {2, 3, 4, 6}
-    chegou ao mesmo máximo dos outros métodos, mas com custo intermediário
-    (~25 s vs 1,6 s do k-means). Confirma que neste problema
-    <em>não há</em> múltiplos ótimos locais relevantes para fugir — então
-    a estocasticidade do SEM não compra benefício, só acrescenta variância.
+    <strong>Resultado observado.</strong> A estratégia <em>não convergiu
+    em \(g = 5\)</em> (colapso de componente devido à amostragem). Para
+    <em>g</em> ∈ {2, 3, 4, 6}, alcançou o mesmo máximo de
+    log-verossimilhança das demais estratégias, em custo intermediário
+    (~25 s contra 1,6 s do k-means). Constata-se que, neste problema,
+    <em>não existem</em> múltiplos ótimos locais relevantes a serem
+    evadidos — de modo que a estocasticidade do SEM não confere benefício
+    adicional, contribuindo apenas com variância indesejada.
   </div>
 </div>
 
@@ -985,46 +1003,51 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h3>Análise da Figura 2</h3>
 
 <p>
-  Três fatos saltam aos olhos:
+  Observam-se três aspectos relevantes:
 </p>
 
 <ol>
   <li>
-    <strong>As quatro estratégias se sobrepõem.</strong> Para cada \(g\),
-    a log-verossimilhança máxima atingida é praticamente idêntica nas quatro
-    inicializações (diferenças \(< 0{,}4\) unidades, dentro de ruído numérico).
-    Isto significa que o EM <em>não fica preso em ótimos locais</em> neste
-    problema — todos os pontos de partida convergem para a mesma solução.
+    <strong>Equivalência entre as estratégias.</strong> Para cada valor de
+    \(g\), a log-verossimilhança máxima é praticamente idêntica nas quatro
+    inicializações (diferenças \(< 0{,}4\) unidades, compatíveis com ruído
+    numérico). Conclui-se que o EM <em>não fica retido em ótimos locais</em>
+    no problema em análise: todos os pontos de partida convergem para a
+    mesma solução.
   </li>
   <li>
-    <strong>O ganho de \(g=3\) para \(g=4\) é minúsculo</strong> (1,4 unidades de
-    log-verossimilhança com \(n=5\,000\)). É essa magnitude que vai
-    determinar o destino de cada critério penalizado: BIC penaliza
-    \(\log(5000)/2 \approx 4{,}26\) por parâmetro, e \(g=3 \to g=4\) adiciona
-    2 parâmetros (1 média + 1 peso) — penalidade total \(\approx 8{,}5\), maior
-    que o ganho de 2,8 em \(-2\ell\). BIC <em>vai</em> rejeitar.
+    <strong>Incremento marginal de \(g=3\) para \(g=4\).</strong> A diferença
+    de log-verossimilhança entre os dois ajustes é de apenas 1,4 unidades
+    para \(n=5\,000\). Esta magnitude determina o veredito de cada critério
+    penalizado: o BIC penaliza \(\log(5000)/2 \approx 4{,}26\) por parâmetro;
+    a transição \(g=3 \to g=4\) acrescenta dois parâmetros (uma média e um
+    peso) — penalidade total \(\approx 8{,}5\), superior ao ganho de 2,8 em
+    \(-2\ell\). Em consequência, o BIC rejeitará o modelo mais complexo.
   </li>
   <li>
-    <strong>CEM falha em três das cinco cardinalidades</strong> (g = 4, 5, 6).
-    A atribuição dura do CEM colapsa componentes pequenos sob sobredispersão
-    alta — confirmando uma fragilidade conhecida do método em dados de contagem.
+    <strong>Não convergência do CEM.</strong> O CEM falha em três das cinco
+    cardinalidades testadas (\(g\) = 4, 5, 6). A atribuição dura colapsa
+    componentes de menor cardinalidade sob sobredispersão elevada,
+    corroborando uma fragilidade documentada do método em dados de contagem.
   </li>
 </ol>
 
 <div class="achado">
   <span class="tag">Achado A1</span>
-  <strong>Inicialização não afeta a qualidade neste problema.</strong>
-  Random, k-means e SEM+EM atingem a mesma log-verossimilhança máxima para
-  todo \(g\) testado. O desafio do problema é de <em>identificabilidade</em>,
-  não de otimização.
+  <strong>A inicialização não afeta a qualidade da solução neste
+  problema.</strong> As estratégias Random, k-means e SEM+EM atingem a mesma
+  log-verossimilhança máxima para todo \(g\) testado. O obstáculo
+  identificado é, portanto, de <em>identificabilidade</em> e não de
+  otimização.
 </div>
 
 <div class="achado">
   <span class="tag">Achado A2</span>
-  <strong>k-means é ~50× mais rápido que random multistart</strong> com
-  qualidade idêntica (\(g=3\): 1,6&nbsp;s vs 80,5&nbsp;s; \(g=4\): 1,6&nbsp;s
-  vs 98,8&nbsp;s). É a escolha prática de partida — escalar para random
-  multistart só se houver suspeita de ótimo local.
+  <strong>O k-means é aproximadamente 50 vezes mais rápido que o random
+  multistart</strong> com qualidade equivalente (\(g=3\): 1,6&nbsp;s contra
+  80,5&nbsp;s; \(g=4\): 1,6&nbsp;s contra 98,8&nbsp;s). Recomenda-se como
+  estratégia de partida; o random multistart deve ser adotado apenas
+  quando houver suspeita fundamentada de ótimos locais.
 </div>
 
 <blockquote class="cit">
@@ -1040,10 +1063,11 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 </blockquote>
 
 <p>
-  Nosso experimento corrobora empiricamente a observação canônica do Scharl
-  et al. (2010): no caso em que o EM converge sem ficar preso, a estratégia
-  de inicialização é praticamente irrelevante para a <em>qualidade</em> da
-  solução, importando apenas para o <em>custo computacional</em>.
+  Os resultados aqui obtidos corroboram empiricamente a observação canônica
+  de Scharl et al. (2010): em situações nas quais o EM converge sem ficar
+  retido em ótimos locais, a estratégia de inicialização mostra-se
+  praticamente irrelevante para a <em>qualidade</em> da solução, importando
+  apenas para o <em>custo computacional</em>.
 </p>
 
 
@@ -1051,9 +1075,10 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h2 id="modB">7 · Resultados — Módulo B · Critérios penalizados</h2>
 
 <p>
-  Tomando a melhor inicialização por \(g\) (em todos os casos: random ou
-  k-means — empatados em log-verossimilhança), aplicamos os quatro critérios
-  penalizados. A Tabela&nbsp;2 e a Figura&nbsp;3 mostram o resultado.
+  Adotando a melhor inicialização para cada \(g\) (em todos os casos:
+  random ou k-means, empatados em log-verossimilhança), aplicam-se os
+  quatro critérios penalizados. A Tabela&nbsp;2 e a Figura&nbsp;3
+  apresentam os resultados.
 </p>
 
 <div class="fig-wrapper">
@@ -1085,32 +1110,37 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h3>Análise da Figura 3</h3>
 
 <p>
-  Os mínimos de cada curva são autoexplicativos:
+  O posicionamento dos mínimos de cada curva permite a seguinte
+  interpretação:
 </p>
 
 <ul>
   <li>
-    <strong>BIC, AIC, AIC3 → \(g=3\):</strong> os três concordam em incluir
-    o componente que separa o continuum G3/G4 da moda central (G1, G2), mas
-    nenhum considera vantajoso dividir esse continuum em dois grupos
-    separados. O ganho de log-verossimilhança não vence a penalidade.
+    <strong>BIC, AIC e AIC3 → \(g=3\):</strong> os três critérios convergem
+    para a inclusão do componente que separa o continuum G3/G4 da moda
+    central (G1, G2), mas nenhum considera vantajosa a divisão desse
+    continuum em dois grupos distintos. O ganho de log-verossimilhança
+    não compensa o acréscimo da penalidade.
   </li>
   <li>
-    <strong>ICL → \(g=2\):</strong> mais conservador ainda. A penalidade
-    adicional pela entropia da classificação cresce monotonicamente com \(g\)
-    porque, conforme adicionamos componentes que se sobrepõem aos existentes,
-    as posteriores ficam mais difusas. ICL é, em termos práticos, monótono
-    crescente neste cenário — qualquer \(g > 2\) é penalizado.
+    <strong>ICL → \(g=2\):</strong> apresenta comportamento ainda mais
+    conservador. A penalidade adicional decorrente da entropia da
+    classificação cresce monotonicamente com \(g\), uma vez que a
+    introdução de componentes sobrepostos torna as probabilidades
+    posteriores progressivamente mais difusas. No cenário em análise, o
+    ICL é, em termos práticos, monótono crescente: qualquer \(g > 2\) é
+    penalizado.
   </li>
 </ul>
 
 <div class="alerta">
-  <strong>Alerta metodológico:</strong> o ICL é frequentemente recomendado
-  como alternativa ao BIC quando há sobreposição entre componentes. <em>O
-  experimento aqui mostra exatamente o oposto:</em> quando a sobreposição é a
-  estrutura real do problema (e não um artefato), o ICL é muito conservador. 
-  Use ICL apenas quando houver razão substantiva para acreditar
-  em componentes <em>bem separados</em>.
+  <strong>Implicação metodológica:</strong> o ICL é frequentemente
+  recomendado na literatura como alternativa ao BIC em situações de
+  sobreposição entre componentes. <em>Os resultados aqui obtidos indicam
+  exatamente o oposto:</em> quando a sobreposição constitui a estrutura
+  real do problema, e não um artefato, o ICL apresenta excessivo
+  conservadorismo. Sua utilização justifica-se apenas quando há razão
+  substantiva para supor componentes <em>bem separados</em>.
 </div>
 
 
@@ -1119,10 +1149,11 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 
 <p>
   O teste paramétrico de razão de verossimilhança via bootstrap (McLachlan,
-  1987) é a única alternativa que <em>não</em> depende de aproximações
-  assintóticas. Para cada par \((g, g+1)\), simulamos \(B=99\) amostras de
-  tamanho \(n=5\,000\) sob o modelo ajustado com \(g\) componentes, recalculamos
-  o LRT em cada uma, e construímos o p-valor empírico
+  1987) constitui a única alternativa que <em>não</em> depende de
+  aproximações assintóticas. Para cada par \((g, g+1)\), simulam-se \(B=99\)
+  amostras de tamanho \(n=5\,000\) sob o modelo ajustado com \(g\)
+  componentes, recalcula-se o LRT em cada réplica, e constrói-se o p-valor
+  empírico
   \(p = (\#\{\text{LRT}^{(b)} \geq \text{LRT}_\text{obs}\} + 1)/(B+1)\).
 </p>
 
@@ -1144,49 +1175,51 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
   <p class="fig-caption">
     <strong>Figura 4.</strong> Quatro distribuições bootstrap da estatística
     LRT sob \(H_0\), uma para cada par \((g, g+1)\). A linha vermelha tracejada
-    marca o LRT observado nos dados reais. Note como em \(g=2 \to 3\) e
-    \(g=3 \to 4\) o LRT observado está na cauda direita (p &lt; 0,05);
-    em \(g=4 \to 5\) e \(g=5 \to 6\) o LRT observado é praticamente zero,
-    consistente com a distribuição nula.
+    indica o LRT observado nos dados. Verifica-se que, em \(g=2 \to 3\) e
+    \(g=3 \to 4\), o LRT observado localiza-se na cauda direita da
+    distribuição (p &lt; 0,05); em \(g=4 \to 5\) e \(g=5 \to 6\), o LRT
+    observado aproxima-se de zero, em conformidade com a distribuição nula.
   </p>
 </div>
 
 <h3>Análise da Figura 4</h3>
 
 <p>
-  Os quatro paineis revelam um padrão que justifica integralmente o uso do
-  BLRT em vez do χ² assintótico:
+  Os quatro painéis revelam um padrão que justifica plenamente a adoção do
+  BLRT em detrimento da aproximação χ² assintótica:
 </p>
 
 <ul>
   <li>
-    <strong>\(g=2 \to 3\):</strong> LRT observado = 306,9. Distribuição
-    bootstrap fortemente concentrada perto de zero. \(p=0{,}01\) → rejeita
-    \(H_0\). Há um terceiro componente.
+    <strong>\(g=2 \to 3\):</strong> LRT observado = 306,9; distribuição
+    bootstrap fortemente concentrada próximo de zero. Com \(p=0{,}01\),
+    rejeita-se \(H_0\): verifica-se a existência de um terceiro componente.
   </li>
   <li>
-    <strong>\(g=3 \to 4\):</strong> LRT observado = <strong>apenas
-    2,8</strong> — extraordinariamente pequeno. Mas a distribuição bootstrap
-    sob \(H_0\) está ainda mais comprimida (a maioria dos LRTs replicados
-    fica abaixo de 1). Resultado: \(p=0{,}04\) → <strong>rejeita
-    \(H_0\)</strong>. <em>Há um quarto componente.</em>
+    <strong>\(g=3 \to 4\):</strong> LRT observado = <strong>apenas 2,8</strong>
+    — magnitude reduzida. Contudo, a distribuição bootstrap sob \(H_0\)
+    apresenta concentração ainda maior (a maioria das réplicas resulta em
+    LRT inferior a 1). Em consequência, obtém-se \(p=0{,}04\), com
+    <strong>rejeição de \(H_0\)</strong>: identifica-se um quarto
+    componente.
   </li>
   <li>
-    <strong>\(g=4 \to 5\):</strong> LRT observado ≈ 0, p = 0,57 → não rejeita.
-    \(g=4\) é suficiente.
+    <strong>\(g=4 \to 5\):</strong> LRT observado ≈ 0, p = 0,57; não se
+    rejeita \(H_0\). Conclui-se que \(g=4\) é suficiente.
   </li>
   <li>
-    <strong>\(g=5 \to 6\):</strong> idem (p = 0,47), confirmando o teto.
+    <strong>\(g=5 \to 6\):</strong> idêntico padrão (p = 0,47), confirmando
+    o limite superior.
   </li>
 </ul>
 
 <div class="achado">
   <span class="tag">Achado C1</span>
-  <strong>O BLRT é o único critério que recupera \(g=4\).</strong>
-  Ele detecta um ganho de log-verossimilhança de apenas 2,8 unidades como
-  significativo porque a distribuição empírica de LRT sob \(H_0\) é ainda mais
-  concentrada em zero — uma estrutura que a aproximação χ²(df) ignora por
-  completo.
+  <strong>O BLRT constitui o único critério que recupera \(g=4\).</strong>
+  Detecta como significativo um ganho de log-verossimilhança de apenas 2,8
+  unidades, uma vez que a distribuição empírica de LRT sob \(H_0\) apresenta
+  concentração próxima de zero ainda mais acentuada — estrutura que a
+  aproximação χ²(df) desconsidera por completo.
 </div>
 
 <blockquote class="cit">
@@ -1204,11 +1237,12 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h2 id="modD">9 · Resultados — Módulo D · Modelo final e estabilidade</h2>
 
 <p>
-  Tomando o voto majoritário entre os cinco critérios (AIC=3, BIC=3, AIC3=3,
-  ICL=2, BLRT=4), o consenso seria \(g=3\). Avaliamos a estabilidade
-  desse modelo por bootstrap não-paramétrico: reamostramos com reposição
-  \(B=100\) vezes, reajustamos a mistura com \(g=3\), e calculamos o ARI
-  entre a partição original e a do bootstrap.
+  Adotando o voto majoritário entre os cinco critérios (AIC=3, BIC=3,
+  AIC3=3, ICL=2, BLRT=4), o consenso conduziria a \(g=3\). Avalia-se a
+  estabilidade desse modelo por bootstrap não-paramétrico:
+  reamostram-se, com reposição, \(B=100\) réplicas; reajusta-se a mistura
+  com \(g=3\) em cada uma; calcula-se o ARI entre a partição original e a
+  obtida em cada réplica.
 </p>
 
 <div class="fig-wrapper">
@@ -1218,20 +1252,21 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
   <p class="fig-caption">
     <strong>Figura 5.</strong> Distribuição bootstrap do Adjusted Rand Index
     entre a partição original (\(g=3\)) e as partições obtidas em \(B=100\)
-    reamostragens. ARI médio = 0,894, IC 95% [0,724; 1,000]. Limiar usual de
-    estabilidade (0,80) marcado em laranja. O modelo \(g=3\) é
-    <strong>estavelmente reproduzido</strong> sob reamostragem.
+    reamostragens. ARI médio = 0,894; IC 95% = [0,724; 1,000]. Limiar
+    convencional de estabilidade (0,80) assinalado em laranja. O modelo
+    \(g=3\) apresenta <strong>elevada estabilidade sob reamostragem</strong>.
   </p>
 </div>
 
 <div class="alerta">
-  <strong>Atenção interpretativa:</strong> ARI = 0,894 é alto, mas isso
-  significa que o modelo \(g=3\) é <em>consistentemente o mesmo modelo
-  errado</em>, não que \(g=3\) seja a cardinalidade correta. Estabilidade
-  de partição não é evidência de cardinalidade correta — é apenas evidência
-  de que o procedimento converge para a mesma solução em reamostragens.
-  Quando o critério de seleção subestima \(g\), a partição resultante pode
-  ser perfeitamente estável e completamente equivocada.
+  <strong>Cautela interpretativa:</strong> o valor ARI = 0,894 é elevado,
+  porém indica que o modelo \(g=3\) é <em>consistentemente o mesmo modelo
+  incorreto</em>, e não que \(g=3\) corresponda à cardinalidade verdadeira.
+  A estabilidade de partição não constitui evidência de acerto da
+  cardinalidade — apenas atesta que o procedimento converge para a mesma
+  solução sob reamostragem. Quando o critério de seleção subestima \(g\),
+  a partição resultante pode ser perfeitamente estável e simultaneamente
+  equivocada.
 </div>
 
 <div class="fig-wrapper">
@@ -1239,12 +1274,13 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
        alt="Modelo final ajustado"
        loading="lazy">
   <p class="fig-caption">
-    <strong>Figura 6.</strong> Modelo final por consenso (\(g=3\), inicialização
-    random) sobreposto ao histograma dos dados. As três linhas coloridas são
-    as componentes NB ajustadas; a linha preta tracejada é a mistura total.
-    A terceira componente é uma <em>fusão</em> de G3 e G4 verdadeiros —
-    consistente com a interpretação de que BIC/AIC/ICL não conseguiram
-    separar o continuum de cauda direita.
+    <strong>Figura 6.</strong> Modelo final por consenso (\(g=3\),
+    inicialização random) sobreposto ao histograma dos dados. As três
+    linhas coloridas representam as componentes NB ajustadas; a linha preta
+    tracejada corresponde à mistura total. A terceira componente configura
+    uma <em>fusão</em> entre G3 e G4 verdadeiros, em concordância com a
+    interpretação de que os critérios BIC, AIC e ICL não foram capazes de
+    separar o continuum da cauda direita.
   </p>
 </div>
 
@@ -1253,80 +1289,88 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h2 id="conclusoes">10 · Sete conclusões metodológicas</h2>
 
 <p>
-  Cada conclusão é apoiada empiricamente nos resultados acima e referenciada
-  na literatura quando aplicável.
+  As conclusões a seguir encontram-se fundamentadas empiricamente nos
+  resultados apresentados e, quando aplicável, referenciadas na literatura
+  pertinente.
 </p>
 
 <div class="achado">
   <span class="tag">Conclusão 1</span>
   <strong>O problema é de identificabilidade, não de otimização.</strong>
-  As quatro estratégias de inicialização chegaram ao mesmo máximo da
-  log-verossimilhança para todo \(g\). O obstáculo está na paisagem da
-  verossimilhança em si: o ganho de \(g=3\) para \(g=4\) é apenas 1,4
-  unidades, pequeno demais para qualquer critério penalizado clássico
-  considerar relevante.
+  As quatro estratégias de inicialização atingiram o mesmo máximo da
+  log-verossimilhança para todo \(g\) testado. O obstáculo reside na
+  topografia da própria superfície de verossimilhança: o ganho de \(g=3\)
+  para \(g=4\) é de apenas 1,4 unidades, magnitude insuficiente para que
+  qualquer critério penalizado clássico o considere relevante.
 </div>
 
 <div class="achado">
   <span class="tag">Conclusão 2</span>
-  <strong>k-means inicializa o EM ~50× mais rápido com qualidade
-  equivalente.</strong> Para mistura NB univariada deste tipo, sempre comece
-  por k-means. Escalar para random multistart só se houver razão para
-  suspeitar de ótimo local.
+  <strong>O k-means inicializa o EM com qualidade equivalente em
+  aproximadamente um cinquentésimo do tempo.</strong> Em misturas NB
+  univariadas análogas à investigada, recomenda-se a adoção do k-means como
+  estratégia de partida; a expansão para random multistart justifica-se
+  apenas mediante suspeita fundamentada de ótimos locais.
 </div>
 
 <div class="achado">
   <span class="tag">Conclusão 3</span>
-  <strong>Bootstrap LRT é o único critério que recupera \(g=4\).</strong>
-  Os critérios penalizados clássicos (AIC, BIC, AIC3, ICL) subestimaram
-  sistematicamente. O BLRT detectou \(g=3 \to g=4\) como significativo
-  (p = 0,04) mesmo com ganho de log-verossimilhança ínfimo, porque a
-  distribuição empírica de LRT sob \(H_0\) é mais concentrada em zero do
-  que a aproximação χ² assintótica supõe.
+  <strong>O Bootstrap LRT constitui o único critério que recupera
+  \(g=4\).</strong> Os critérios penalizados clássicos (AIC, BIC, AIC3, ICL)
+  subestimaram sistematicamente a cardinalidade. O BLRT identificou a
+  transição \(g=3 \to g=4\) como estatisticamente significativa
+  (p = 0,04) ainda que o ganho de log-verossimilhança fosse marginal, dado
+  que a distribuição empírica de LRT sob \(H_0\) apresenta concentração
+  próxima de zero mais acentuada do que a aproximação χ² assintótica supõe.
 </div>
 
 <div class="alerta">
   <span class="tag">Conclusão 4</span>
-  <strong>CEM é frágil para contagens sobredispersas.</strong>
-  CEM+EM falhou em 3 de 5 valores de \(g\) (\(g\) = 4, 5, 6). A classificação
-  dura do CEM colapsa componentes pequenos quando há sobreposição.
-  Não usar CEM como default em mistura NB com θ baixo.
+  <strong>O CEM apresenta fragilidade em contagens sobredispersas.</strong>
+  A combinação CEM+EM não convergiu em três dos cinco valores de \(g\)
+  testados (\(g\) = 4, 5, 6). A classificação dura do CEM induz o colapso
+  de componentes de menor cardinalidade na presença de sobreposição.
+  Desaconselha-se sua adoção como estratégia padrão em misturas NB com
+  \(\theta\) reduzido.
 </div>
 
 <div class="alerta">
   <span class="tag">Conclusão 5</span>
-  <strong>ICL é muito conservador em cenários sobrepostos.</strong>
-  ICL escolheu \(g=2\), duas categorias abaixo da verdade. A penalidade por
-  entropia da classificação cresce monotonicamente com a sobreposição.
-  ICL é apropriado quando se sabe que os componentes são bem separados —
-  exatamente o oposto deste cenário.
+  <strong>O ICL exibe excessivo conservadorismo em cenários
+  sobrepostos.</strong> O ICL selecionou \(g=2\), valor duas unidades
+  abaixo da cardinalidade verdadeira. A penalidade decorrente da entropia
+  da classificação cresce monotonicamente com a sobreposição. O ICL é
+  apropriado quando se admite a hipótese de componentes bem separados —
+  precisamente o oposto do cenário investigado.
 </div>
 
 <div class="alerta">
   <span class="tag">Conclusão 6</span>
-  <strong>Voto majoritário entre critérios falha aqui.</strong>
-  Quatro critérios em cinco apontam \(g \leq 3\); apenas o BLRT aponta \(g=4\).
-  A maioria está errada. Lição: quando um critério é especificamente
-  justificado pelo tipo de dado (BLRT para sobreposição com sobredispersão),
-  ele deve ter peso desproporcional — ou ser usado como árbitro final em vez
-  de um voto entre muitos.
+  <strong>O voto majoritário entre critérios mostra-se falacioso neste
+  cenário.</strong> Quatro dos cinco critérios apontam \(g \leq 3\); apenas
+  o BLRT identifica \(g=4\). A maioria está incorreta. Implicação
+  metodológica: quando um critério é especificamente justificado pelas
+  características do dado (caso do BLRT em cenários de sobreposição com
+  sobredispersão), seu peso na decisão deve ser desproporcional ao dos
+  demais, ou ele deve ser empregado como árbitro final.
 </div>
 
 <div class="alerta">
   <span class="tag">Conclusão 7</span>
-  <strong>Estabilidade alta não implica cardinalidade correta.</strong>
-  O modelo \(g=3\) tem ARI bootstrap = 0,894 (IC95% [0,724; 1,000]) —
-  altamente estável. Mas está estavelmente <em>errado</em>: funde G3 e G4.
-  Estabilidade de partição mede consistência de reamostragem, não acerto da
-  cardinalidade.
+  <strong>Elevada estabilidade não implica cardinalidade correta.</strong>
+  O modelo \(g=3\) apresenta ARI bootstrap = 0,894 (IC 95% [0,724; 1,000])
+  — indicador de elevada estabilidade. Contudo, trata-se da reprodução
+  consistente de um modelo <em>incorreto</em>, no qual G3 e G4 são
+  fundidos. A estabilidade de partição mede a consistência sob
+  reamostragem, e não a adequação da cardinalidade.
 </div>
 
 <h3>Síntese comparativa das estratégias de inicialização</h3>
 
 <p>
-  A tabela abaixo consolida o veredito empírico para cada estratégia em três
-  dimensões — <em>qualidade da solução</em>, <em>velocidade</em> e
-  <em>robustez</em> — e indica em que cenário cada uma é a escolha
+  A tabela a seguir consolida o veredito empírico para cada estratégia em
+  três dimensões — <em>qualidade da solução</em>, <em>velocidade</em> e
+  <em>robustez</em> — e indica o cenário em que cada uma se mostra
   preferencial.
 </p>
 
@@ -1380,14 +1424,16 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 </table>
 
 <div class="achado">
-  <strong>Veredito.</strong> Quando a paisagem de verossimilhança é
-  bem-comportada (caso comum para misturas NB com <em>n</em> alto e
-  θ moderado), <strong>k-means + EM</strong> é a escolha que domina:
-  mesma qualidade da solução, fração do custo computacional, totalmente
-  determinístico. <em>Random multistart</em> permanece como apólice de
-  seguro caso haja suspeita de ótimos locais. <em>CEM</em> e <em>SEM</em>
-  são úteis em nichos específicos (componentes muito separados ou
-  múltiplos máximos), mas frágeis em contagens sobredispersas.
+  <strong>Veredito.</strong> Em cenários nos quais a superfície de
+  verossimilhança apresenta comportamento regular (situação típica em
+  misturas NB com <em>n</em> elevado e \(\theta\) moderado),
+  <strong>k-means + EM</strong> constitui a estratégia preferencial:
+  qualidade da solução equivalente, fração do custo computacional e
+  total determinismo. O <em>random multistart</em> permanece como
+  salvaguarda metodológica em situações de suspeita de ótimos locais.
+  O <em>CEM</em> e o <em>SEM</em> mostram-se úteis em nichos específicos
+  (componentes bem separados ou presença de múltiplos máximos), mas
+  apresentam fragilidade documentada em dados de contagem sobredispersos.
 </div>
 
 
@@ -1395,34 +1441,37 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 <h2 id="proximos">11 · Próximos passos</h2>
 
 <p>
-  Este experimento fixa um único cenário (\(\theta=2{,}5\), 4 grupos, médias
-  espaçadas). Para fortalecer as conclusões e produzir um experimento
-  factorial publicável, propõem-se três extensões:
+  O presente experimento contempla um único cenário (\(\theta=2{,}5\), quatro
+  grupos, médias espaçadas). Para fortalecer as conclusões e configurar um
+  experimento factorial passível de publicação, propõem-se as seguintes
+  extensões:
 </p>
 
 <ol>
   <li>
-    <strong>Replicar com \(\theta\) variável</strong> (e.g., \(\theta \in
-    \{1, 2{,}5, 5, 10\}\)) para mapear o regime em que cada critério
-    quebra. Hipótese: com \(\theta \geq 10\), todos os critérios convergem
-    para \(g=4\); com \(\theta \leq 1\), até o BLRT pode falhar.
+    <strong>Replicação sob \(\theta\) variável</strong> (por exemplo,
+    \(\theta \in \{1,\ 2{,}5,\ 5,\ 10\}\)), com o objetivo de delimitar o
+    regime em que cada critério deixa de operar adequadamente. Hipótese de
+    trabalho: para \(\theta \geq 10\), todos os critérios convergem para
+    \(g=4\); para \(\theta \leq 1\), mesmo o BLRT pode apresentar falhas.
   </li>
   <li>
-    <strong>Replicar com diferentes espaçamentos de \(\boldsymbol{\mu}\)</strong>
-    para isolar o efeito da sobreposição induzida pela proximidade das médias
-    versus pela dispersão.
+    <strong>Replicação sob diferentes espaçamentos de
+    \(\boldsymbol{\mu}\)</strong>, com vistas a isolar o efeito da
+    sobreposição induzida pela proximidade das médias daquela decorrente
+    da dispersão.
   </li>
   <li>
-    <strong>Adicionar short-EM (Biernacki, Celeux &amp; Govaert, 2003)</strong>
-    como quinta estratégia de inicialização (várias execuções curtas de EM,
-    seleciona a melhor, refina com EM completo). Completa a comparação do
-    Scharl et al. (2010).
+    <strong>Incorporação do short-EM (Biernacki, Celeux &amp; Govaert, 2003)</strong>
+    como quinta estratégia de inicialização — múltiplas execuções curtas
+    de EM, com seleção da melhor para refinamento via EM completo —
+    completando a comparação proposta por Scharl et al. (2010).
   </li>
   <li>
-    <strong>Repetir réplicas estocásticas</strong> (e.g., 30 simulações
-    independentes por configuração) para construir distribuições de
-    \(g^*\) por critério — mostra robustez ou variabilidade dos resultados
-    aqui apresentados.
+    <strong>Replicações estocásticas independentes</strong> (por exemplo,
+    30 simulações por configuração) para construção de distribuições
+    empíricas de \(g^*\) por critério, permitindo avaliar a robustez e a
+    variabilidade dos resultados aqui obtidos.
   </li>
 </ol>
 
@@ -1432,10 +1481,11 @@ Escolha o melhor SEM. Refine com EM completo. Retorne o ajuste refinado.</pre>
 
 <p>
   O script completo (<code>src/03_analises/04_univariado_init_comparacao.R</code>,
-  896 linhas) é apresentado abaixo em quatro blocos que correspondem aos
-  módulos descritos nesta página. Os blocos auxiliares (geração de gráficos
-  e tabelas formatadas via <code>gt</code>) foram omitidos por brevidade,
-  pois sua função é estritamente de apresentação.
+  896 linhas) é apresentado a seguir em quatro blocos correspondentes aos
+  módulos descritos neste capítulo. Os blocos auxiliares destinados à
+  geração de gráficos e tabelas formatadas (via pacote <code>gt</code>)
+  foram omitidos por brevidade, dado seu caráter estritamente de
+  apresentação.
 </p>
 
 <h3>12.1 · Configuração do experimento</h3>
