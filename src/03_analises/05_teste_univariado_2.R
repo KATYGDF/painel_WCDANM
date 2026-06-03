@@ -101,9 +101,9 @@ set.seed(1234)
 CSV_PATH   <- "dados/dados_simulados.csv"
 K_GRID     <- 2:6
 K_TRUE     <- 4
-BLRT_B     <- 99
-BLRT_NREP  <- 3
-BOOT_B     <- 100
+BLRT_B     <- 29       # reduzido de 99 (theta livre e' ~5x mais lento)
+BLRT_NREP  <- 2        # reduzido de 3
+BOOT_B     <- 50       # reduzido de 100
 ROTULOS    <- c("baixo_uso", "ambulatorial_coordenado",
                 "agudo_hospitalar", "atipico")
 G_LABEL    <- c("G1 · baixo uso", "G2 · ambulatorial",
@@ -231,6 +231,10 @@ simular_nb_mistura_livre <- function(fit, n_sim) {
 }
 
 # BLRT paramétrico (theta livre) — H0: k vs H1: k+1.
+# Inclui:
+#   - Controle endurecido (iter.max menor) para evitar loops em fits patologicos
+#   - Barra de progresso a cada 10% das replicacoes
+#   - Timeout efetivo via tryCatch + iter.max=80
 blrt_passo <- function(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP, seed = 1000) {
   set.seed(seed)
   k0 <- fit_k0@k; k1 <- fit_k1@k
@@ -242,7 +246,9 @@ blrt_passo <- function(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP, seed = 1000
       m <- tryCatch(suppressWarnings(flexmix(
         consultas ~ 1, data = df_b, k = k_val,
         model = FLXMRnegbin(),  # theta livre
-        control = list(iter.max = 200, minprior = 0.01, tolerance = 1e-6)
+        # iter.max ENDURECIDO: 80 iter ainda da margem para convergencia,
+        # mas corta loops patologicos quando theta de um componente explode
+        control = list(iter.max = 80, minprior = 0.02, tolerance = 1e-5)
       )), error = function(e) NULL)
       if (!is.null(m) && m@k == k_val) {
         ll <- as.numeric(logLik(m))
@@ -252,12 +258,22 @@ blrt_passo <- function(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP, seed = 1000
     if (is.infinite(best)) NA_real_ else best
   }
 
+  # Loop com progresso: imprime "."(rapido) ou "x"(falha) a cada replicacao,
+  # e um marcador a cada 10 % para nao perder no scroll.
+  cat("\n    progresso: ")
+  step <- max(1L, B %/% 10L)
   lrt_b <- vapply(seq_len(B), function(b) {
     y_b  <- simular_nb_mistura_livre(fit_k0, N)
     df_b <- data.frame(consultas = y_b)
     ll0  <- ll_best_k(df_b, k0); ll1 <- ll_best_k(df_b, k1)
-    if (anyNA(c(ll0, ll1))) NA_real_ else 2 * (ll1 - ll0)
+    out <- if (anyNA(c(ll0, ll1))) NA_real_ else 2 * (ll1 - ll0)
+    # Sinaliza progresso
+    if (is.na(out)) cat("x") else cat(".")
+    if (b %% step == 0L) cat(sprintf("[%d/%d]", b, B))
+    flush.console()
+    out
   }, numeric(1))
+  cat("\n  ")
 
   lrt_v <- lrt_b[!is.na(lrt_b)]
   pval  <- (sum(lrt_v >= lrt_obs) + 1) / (length(lrt_v) + 1)
@@ -500,10 +516,11 @@ if (file.exists(ari_cache)) {
   cat(sprintf("\n[cache] carregando ari_vec (B=%d) de RDS\n", BOOT_B))
   ari_vec <- readRDS(ari_cache)
 } else {
-  cat(sprintf("\nBootstrap de estabilidade (B=%d) ... ", BOOT_B))
+  cat(sprintf("\nBootstrap de estabilidade (B=%d) ...\n  progresso: ", BOOT_B))
   t0_boot <- proc.time()["elapsed"]
   set.seed(7777)
   cl_ref <- clusters(fit_final)
+  step_b <- max(1L, BOOT_B %/% 10L)
   ari_vec <- vapply(seq_len(BOOT_B), function(b) {
     idx <- sample.int(N, replace = TRUE)
     df_b <- data.frame(consultas = consultas[idx])
@@ -512,18 +529,22 @@ if (file.exists(ari_cache)) {
       m_i <- tryCatch(suppressWarnings(flexmix(
         consultas ~ 1, data = df_b, k = k_final,
         model = FLXMRnegbin(),
-        control = list(iter.max = 200, minprior = 0.01, tolerance = 1e-6)
+        control = list(iter.max = 80, minprior = 0.02, tolerance = 1e-5)
       )), error = function(e) NULL)
       if (!is.null(m_i) && m_i@k == k_final) {
         ll <- as.numeric(logLik(m_i))
         if (!is.na(ll) && ll > ll_best) { ll_best <- ll; m_best <- m_i }
       }
     }
-    if (is.null(m_best)) NA_real_
-    else adj_rand_index(cl_ref[idx], clusters(m_best))
+    out <- if (is.null(m_best)) NA_real_
+           else adj_rand_index(cl_ref[idx], clusters(m_best))
+    if (is.na(out)) cat("x") else cat(".")
+    if (b %% step_b == 0L) cat(sprintf("[%d/%d]", b, BOOT_B))
+    flush.console()
+    out
   }, numeric(1))
   dt_boot <- proc.time()["elapsed"] - t0_boot
-  cat(sprintf("%.0fs\n", dt_boot))
+  cat(sprintf("\n  Concluido em %.0fs\n", dt_boot))
   saveRDS(ari_vec, ari_cache)
 }
 
