@@ -166,7 +166,7 @@ fit_kmeans_em <- function(k_val, seed = 200) {
     return(tryCatch(suppressWarnings(flexmix(
       consultas ~ 1, data = df, k = 1L,
       model = FLXMRnegbin(),   # theta LIVRE (NULL implícito)
-      control = list(iter.max = 500, tolerance = 1e-7, minprior = 0.01)
+      control = list(iter.max = 500, tolerance = 1e-7, minprior = 0.005)
     )), error = function(e) NULL))
   }
   km <- kmeans(log1p(df$consultas), centers = k_val,
@@ -175,7 +175,7 @@ fit_kmeans_em <- function(k_val, seed = 200) {
     consultas ~ 1, data = df, k = k_val,
     cluster = km$cluster,
     model   = FLXMRnegbin(),  # theta LIVRE — sem argumento theta
-    control = list(iter.max = 500, tolerance = 1e-7, minprior = 0.01)
+    control = list(iter.max = 500, tolerance = 1e-7, minprior = 0.005)
   )), error = function(e) NULL)
 }
 
@@ -248,7 +248,7 @@ blrt_passo <- function(fit_k0, fit_k1, B = BLRT_B, nrep = BLRT_NREP, seed = 1000
         model = FLXMRnegbin(),  # theta livre
         # iter.max ENDURECIDO: 80 iter ainda da margem para convergencia,
         # mas corta loops patologicos quando theta de um componente explode
-        control = list(iter.max = 80, minprior = 0.02, tolerance = 1e-5)
+        control = list(iter.max = 80, minprior = 0.005, tolerance = 1e-5)
       )), error = function(e) NULL)
       if (!is.null(m) && m@k == k_val) {
         ll <- as.numeric(logLik(m))
@@ -529,7 +529,7 @@ if (file.exists(ari_cache)) {
       m_i <- tryCatch(suppressWarnings(flexmix(
         consultas ~ 1, data = df_b, k = k_final,
         model = FLXMRnegbin(),
-        control = list(iter.max = 80, minprior = 0.02, tolerance = 1e-5)
+        control = list(iter.max = 80, minprior = 0.005, tolerance = 1e-5)
       )), error = function(e) NULL)
       if (!is.null(m_i) && m_i@k == k_final) {
         ll <- as.numeric(logLik(m_i))
