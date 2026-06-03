@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste Univariado 2 — Dados reais + θ livre — SimSaúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+
+<!-- MathJax 3 -->
+<script>
+MathJax = {
+  tex: {
+    inlineMath:  [['\\(', '\\)']],
+    displayMath: [['$$', '$$']],
+    tags: 'none'
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<style>
+.toc {
+  background: var(--surface, #f8f7f4);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.toc ol { margin: 0.4rem 0 0 1.2rem; padding: 0; }
+.toc li { margin: 0.3rem 0; }
+.toc a  { color: var(--accent, #4a7c59); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+blockquote.cit {
+  margin: 1.2rem 0;
+  padding: 0.75rem 1.2rem;
+  border-left: 3px solid var(--accent, #4a7c59);
+  background: var(--surface, #f8f7f4);
+  font-style: italic;
+  font-size: 0.91rem;
+  line-height: 1.6;
+}
+blockquote.cit cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--muted, #666);
+}
+
+.nota {
+  background: #fffbf0;
+  border-left: 3px solid #e6a817;
+  padding: 0.7rem 1rem;
+  font-size: 0.87rem;
+  color: var(--muted, #444);
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+
+.teoria {
+  background: #f0f7ff;
+  border-left: 3px solid #2980b9;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+.teoria strong { color: #1a5276; }
+
+.achado {
+  background: #f0f9ee;
+  border-left: 3px solid #4a7c59;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.achado strong { color: #2d5a40; }
+.achado .tag {
+  display: inline-block;
+  background: #4a7c59;
+  color: white;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: 2px;
+}
+
+.alerta {
+  background: #fdf1ee;
+  border-left: 3px solid #c0392b;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.alerta strong { color: #922b21; }
+
+.fig-wrapper {
+  margin: 1.8rem 0;
+  text-align: center;
+}
+.fig-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 4px;
+  background: white;
+}
+.fig-caption {
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  margin-top: 0.6rem;
+  line-height: 1.55;
+  text-align: left;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fig-caption strong { color: var(--ink, #1a1a1a); }
+
+.ref-entry {
+  padding: 0.55rem 0 0.55rem 1.1rem;
+  border-left: 2px solid var(--border, #ddd);
+  margin-bottom: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.ref-entry cite {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin: 1.2rem 0;
+}
+.param-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  text-align: left;
+}
+.param-table td {
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+}
+.param-table tr:last-child td { border-bottom: none; }
+.param-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.param-table .ok  { color: #2d5a40; font-weight: 600; }
+.param-table .err { color: #922b21; font-weight: 600; }
+.param-table .best { background: #fef9e7; font-weight: 600; }
+
+pre.r-code {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 2;
+  margin: 1.2rem 0;
+}
+pre.r-code .com { color: #6c7086; font-style: italic; }
+pre.r-code .kw  { color: #cba6f7; }
+pre.r-code .fn  { color: #89b4fa; }
+pre.r-code .num { color: #fab387; }
+pre.r-code .str { color: #a6e3a1; }
+pre.r-code .op  { color: #89dceb; }
+
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="../index.html" class="sidebar-brand">SimSaúde</a>
+  <p class="sidebar-subtitle">Modelagem de Heterogeneidade<br>em Saúde Suplementar</p>
+  <ul class="sidebar-nav">
+    <li><a href="../index.html">Início</a></li>
+    <li><a href="estudo.html">O Estudo</a></li>
+    <li><a href="simulacao.html">Simulação</a></li>
+    <li><a href="eda_simsaude.html">EDA</a></li>
+    <li><a href="construcao_progressiva.html">Construção</a></li>
+    <li><a href="fundamentacao_em.html">Fundamentação EM</a></li>
+    <li><a href="analises.html">Análises</a></li>
+    <li><a href="teste_univariado_1.html">Teste Univariado 1</a></li>
+    <li><a href="teste_univariado_2.html" class="active">Teste Univariado 2</a></li>
+  </ul>
+  <div class="sidebar-footer">Katy Garcia de Freitas · 2026</div>
+</nav>
+
+<main class="main">
+<div class="prose">
+
+<h1>
+  Teste Univariado 2
+  <span style="display:block; font-size:1.2rem; font-weight:500;
+               color:var(--muted, #666); margin-top:0.4rem;
+               font-family: var(--ff-serif, 'Source Serif 4', serif);">
+    Mistura de Binomial Negativa sobre a variável <em>consultas</em> da
+    simulação calibrada, com θ livre por componente, inicialização
+    por k-means + EM e avaliação por AIC, BIC, ICL, AIC3 e Bootstrap LRT
+    via biblioteca <code style="font-size:0.95em; background:#eef;
+    padding:0.05rem 0.35rem; border-radius:3px;">flexmix</code>
+  </span>
+</h1>
+
+<p class="lead">
+  Segundo teste da série univariada. Difere do Teste 1 em três pontos
+  centrais: os dados não são gerados <em>ad hoc</em>, mas extraídos da
+  simulação calibrada do projeto (ANS); o parâmetro de dispersão θ é
+  <strong>livre por componente</strong> (não fixo); e apenas uma
+  estratégia de inicialização é empregada — k-means + EM, que o Teste 1
+  identificou como a configuração computacionalmente mais eficiente sem
+  perda de qualidade.
+</p>
+
+<p class="lead" style="font-size:1rem; color:var(--muted, #666);
+                       border-left:3px solid var(--accent, #4a7c59);
+                       padding-left:1rem; margin-top:1rem;">
+  <strong>Pergunta investigada:</strong> a variável <em>consultas</em>,
+  isoladamente, contém informação suficiente para que o flexmix com
+  θ livre recupere os quatro grupos latentes da simulação? Em caso
+  negativo, quantos componentes são empiricamente identificáveis a partir
+  dessa única dimensão?
+</p>
+
+<div class="toc">
+  <strong>Nesta página</strong>
+  <ol>
+    <li><a href="#motivacao">Motivação e desenho</a></li>
+    <li><a href="#dados">Dados da simulação</a></li>
+    <li><a href="#design">Configuração do experimento</a></li>
+    <li><a href="#modA">Resultados — Módulo A · Critérios penalizados</a></li>
+    <li><a href="#modB">Resultados — Módulo B · Bootstrap LRT</a></li>
+    <li><a href="#modC">Resultados — Módulo C · Estabilidade</a></li>
+    <li><a href="#modD">Resultados — Módulo D · Avaliação em k = 4</a></li>
+    <li><a href="#discussao">Discussão</a></li>
+    <li><a href="#comparacao">Comparação com o Teste 1</a></li>
+    <li><a href="#conclusoes">Conclusões</a></li>
+    <li><a href="#proximos">Próximos passos</a></li>
+    <li><a href="#referencias">Referências</a></li>
+  </ol>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="motivacao">1 · Motivação e desenho</h2>
+
+<p>
+  O Teste Univariado 1 demonstrou, sob condições controladas (μ bem
+  espaçadas, θ constante), que o flexmix com k-means + EM e Bootstrap
+  LRT recupera corretamente os quatro grupos latentes a partir da
+  variável <em>consultas</em>. Este Teste 2 transporta o mesmo
+  protocolo para a <strong>simulação calibrada</strong> do projeto —
+  dados que reproduzem a estrutura observada nos indicadores oficiais
+  da ANS — relaxando, simultaneamente, a hipótese de θ constante.
+</p>
+
+<p>
+  Trata-se, portanto, de um teste de <strong>robustez externa</strong>:
+  se a metodologia validada no cenário "limpo" do Teste 1 sobrevive
+  quando confrontada com uma distribuição mais próxima do que se
+  observa em dados administrativos reais.
+</p>
+
+<div class="teoria">
+  <strong>Distinção crucial.</strong> Em mistura finita há dois
+  conceitos relacionados, mas distintos: (i) o <em>número de
+  componentes geradores</em> — quantas distribuições probabilísticas
+  produziram os dados, objeto da modelagem; (ii) o <em>número de
+  clusters empiricamente identificáveis</em> — quantos modos
+  distinguíveis a distribuição marginal exibe. Em dimensões baixas,
+  ou quando os componentes se sobrepõem, esses dois números podem
+  divergir. O presente teste documenta um caso concreto dessa
+  divergência.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="dados">2 · Dados da simulação</h2>
+
+<p>
+  O conjunto de dados utilizado é o produzido pela
+  <a href="simulacao.html">simulação do projeto</a>
+  (\(n = 5\,000\) beneficiários, 4 grupos latentes calibrados a
+  indicadores oficiais da ANS). Restringe-se a análise à variável
+  <em>consultas</em>, descartando-se as demais cinco dimensões.
+</p>
+
+<table class="param-table">
+  <thead>
+    <tr><th>Grupo verdadeiro</th><th class="num">n</th><th class="num">% do total</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>G1 · baixo uso</td><td class="num">2.493</td><td class="num">49,9 %</td></tr>
+    <tr><td>G2 · ambulatorial coordenado</td><td class="num">1.268</td><td class="num">25,4 %</td></tr>
+    <tr><td>G3 · agudo / hospitalar</td><td class="num">982</td><td class="num">19,6 %</td></tr>
+    <tr><td>G4 · padrão atípico</td><td class="num">257</td><td class="num">5,1 %</td></tr>
+  </tbody>
+</table>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig01_dados_simulados.png"
+       alt="Distribuicao empirica de consultas por grupo verdadeiro"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 1.</strong> Densidade empírica do número de
+    <em>consultas</em> por grupo latente verdadeiro. Os quatro grupos
+    apresentam sobreposição substancial na distribuição marginal:
+    G3 (agudo) e G4 (atípico), em particular, ocupam regiões
+    largamente sobrepostas da cauda direita. Eixo truncado em P97.
+  </p>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="design">3 · Configuração do experimento</h2>
+
+<table class="param-table">
+  <thead>
+    <tr><th>Parâmetro</th><th>Configuração</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Dados</strong></td>
+      <td><code>dados/dados_simulados.csv</code>, coluna
+        <em>consultas</em> (\(n = 5\,000\))</td>
+    </tr>
+    <tr>
+      <td><strong>Modelo</strong></td>
+      <td>Mistura finita de Binomial Negativa univariada,
+        \(f(x \mid \Theta) = \sum_{k=1}^{g} \pi_k \cdot
+        \text{NB}(x \mid \mu_k, \theta_k)\)</td>
+    </tr>
+    <tr>
+      <td><strong>Parametrização</strong></td>
+      <td>θ <strong>livre por componente</strong> — diferente do Teste 1,
+        onde θ = 2,5 era fixo</td>
+    </tr>
+    <tr>
+      <td><strong>Inicialização</strong></td>
+      <td>k-means + EM (única estratégia; Teste 1 identificou-a como
+        ótima)</td>
+    </tr>
+    <tr>
+      <td><strong>Cardinalidades</strong></td>
+      <td>\(g \in \{2, 3, 4, 5, 6\}\)</td>
+    </tr>
+    <tr>
+      <td><strong>Critérios de seleção</strong></td>
+      <td>AIC, BIC, ICL, AIC3 e Bootstrap LRT (\(B = 29\) réplicas)</td>
+    </tr>
+    <tr>
+      <td><strong>Estabilidade</strong></td>
+      <td>Bootstrap não-paramétrico via ARI (\(B = 50\))</td>
+    </tr>
+    <tr>
+      <td><strong>Implementação</strong></td>
+      <td>R + <code>flexmix::flexmix</code> com <code>FLXMRnegbin()</code>
+        (de <code>countreg</code>) sem argumento <code>theta</code>;
+        peso mínimo \(\pi_k \geq 0{,}005\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="nota">
+  <strong>Reprodutibilidade.</strong> Script:
+  <code>src/03_analises/05_teste_univariado_2.R</code>. Saídas em
+  <code>docs/assets/img/teste_univariado_2/</code>.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modA">4 · Resultados — Módulo A · Critérios penalizados</h2>
+
+<p>
+  Para cada \(g \in \{2,\ldots,6\}\), ajusta-se um modelo NB com
+  k-means + EM e calcula-se log-verossimilhança, AIC, BIC, ICL e AIC3.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig02_criterios_por_k.png"
+       alt="Criterios normalizados vs k"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 2.</strong> Critérios AIC, BIC, ICL e AIC3
+    normalizados [0 = melhor, 1 = pior] em função do número de
+    componentes \(g\). Linha tracejada: \(g\) verdadeiro = 4.
+    <strong>Todos os quatro critérios selecionam \(g = 2\)</strong> —
+    o conjunto univariado das consultas não justifica modelos mais
+    complexos.
+  </p>
+</div>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th>
+      <th class="num">log-Lik</th>
+      <th class="num">np</th>
+      <th class="num">AIC</th>
+      <th class="num">BIC</th>
+      <th class="num">ICL</th>
+      <th class="num">AIC3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="best">
+      <td class="num"><strong>2</strong></td>
+      <td class="num">−12575,9</td>
+      <td class="num">5</td>
+      <td class="num"><strong>25161,8</strong></td>
+      <td class="num"><strong>25194,3</strong></td>
+      <td class="num"><strong>25441</strong></td>
+      <td class="num"><strong>25166,8</strong></td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td class="num">−12575,0</td>
+      <td class="num">8</td>
+      <td class="num">25166,0</td>
+      <td class="num">25218,1</td>
+      <td class="num">26068</td>
+      <td class="num">25174,0</td>
+    </tr>
+    <tr>
+      <td class="num">4</td>
+      <td class="num">−12575,0</td>
+      <td class="num">11</td>
+      <td class="num">25172,0</td>
+      <td class="num">25243,7</td>
+      <td class="num">26649</td>
+      <td class="num">25183,0</td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td class="num">−12574,8</td>
+      <td class="num">14</td>
+      <td class="num">25177,7</td>
+      <td class="num">25268,9</td>
+      <td class="num">27195</td>
+      <td class="num">25191,7</td>
+    </tr>
+    <tr>
+      <td class="num">6</td>
+      <td class="num">−12575,0</td>
+      <td class="num">17</td>
+      <td class="num">25184,0</td>
+      <td class="num">25294,9</td>
+      <td class="num">27721</td>
+      <td class="num">25201,0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="alerta">
+  <span class="tag">Observação central</span>
+  <strong>A log-verossimilhança é praticamente constante a partir de
+  \(g = 2\).</strong> O ganho de \(g=2\) para \(g=6\) é de apenas
+  ≈ 1,1 unidade em \(-2\ell\), enquanto cada componente adicional
+  custa três parâmetros (penalidade BIC ≈ 12,8 por componente). Os
+  quatro critérios penalizados, portanto, rejeitam todo \(g > 2\) —
+  decisão estatisticamente correta diante de uma curva tão chata.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modB">5 · Resultados — Módulo B · Bootstrap LRT</h2>
+
+<p>
+  O Bootstrap LRT é o teste paramétrico mais robusto para a seleção
+  de \(g\) em misturas — não depende de aproximações assintóticas
+  (McLachlan, 1987). Para cada par \((g, g+1)\), simulam-se \(B = 29\)
+  amostras paramétricas sob o modelo de \(g\) componentes e
+  recalcula-se o LRT.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig03_blrt_distribuicoes.png"
+       alt="Distribuicoes bootstrap LRT"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 3.</strong> Distribuições bootstrap da estatística
+    LRT sob \(H_0\) para cada par sequencial \((g, g+1)\). A linha
+    vermelha tracejada indica o LRT observado nos dados; em todos os
+    quatro pares, o LRT observado situa-se no centro da distribuição
+    nula, configurando p-valores não significativos.
+  </p>
+</div>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th><th class="num">g+1</th>
+      <th class="num">LRT observado</th>
+      <th class="num">p-valor</th>
+      <th class="num">B válidos</th>
+      <th>Rejeita H₀?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">2</td><td class="num">3</td>
+      <td class="num">1,8</td><td class="num">0,333</td>
+      <td class="num">29</td><td class="err">Não</td>
+    </tr>
+    <tr>
+      <td class="num">3</td><td class="num">4</td>
+      <td class="num">−0,1</td><td class="num">0,700</td>
+      <td class="num">29</td><td class="err">Não</td>
+    </tr>
+    <tr>
+      <td class="num">4</td><td class="num">5</td>
+      <td class="num">0,4</td><td class="num">0,552</td>
+      <td class="num">28</td><td class="err">Não</td>
+    </tr>
+    <tr>
+      <td class="num">5</td><td class="num">6</td>
+      <td class="num">−0,4</td><td class="num">0,654</td>
+      <td class="num">25</td><td class="err">Não</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="achado">
+  <span class="tag">Achado B</span>
+  <strong>O BLRT confirma \(g^* = 2\).</strong> Já no primeiro teste
+  sequencial (\(g = 2 \to 3\)), o p-valor de 0,333 indica que o LRT
+  observado é compatível com a hipótese nula de duas componentes.
+  Diferentemente do Teste 1 — onde o BLRT recuperou \(g = 4\) ao
+  detectar um ganho ínfimo de log-verossimilhança como estatisticamente
+  significativo — neste cenário o ganho é genuinamente nulo.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modC">6 · Resultados — Módulo C · Estabilidade do modelo final</h2>
+
+<p>
+  O modelo final por consenso (\(g_{\text{final}} = 2\)) foi
+  avaliado por bootstrap não-paramétrico (\(B = 50\) reamostragens
+  com reposição), com ARI entre a partição original e a de cada
+  réplica.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig04_estabilidade_ari.png"
+       alt="Bootstrap ARI estabilidade"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 4.</strong> Distribuição bootstrap do Adjusted Rand
+    Index entre a partição original (\(g = 2\)) e as partições obtidas
+    em 50 reamostragens. ARI médio = 0,649; IC 95% = [0,000; 1,000].
+    A amplitude extrema do intervalo de confiança revela que, embora a
+    média seja moderadamente alta, há réplicas em que o algoritmo
+    converge para soluções qualitativamente distintas — indicador de
+    instabilidade.
+  </p>
+</div>
+
+<div class="alerta">
+  <span class="tag">Cautela</span>
+  <strong>ARI médio 0,649 com IC95% incluindo 0,000 indica
+  instabilidade significativa.</strong> Diferentemente do Teste 1
+  (ARI = 0,894 com IC95% [0,724; 1,000]), o presente cenário produz
+  partições reproduzíveis apenas parcialmente. Atribui-se isso à
+  fronteira de decisão entre os dois componentes encontrados ser
+  particularmente sensível à composição da amostra — sinal adicional
+  de que duas componentes capturam apenas parcialmente a estrutura
+  geradora.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modD">7 · Resultados — Módulo D · Avaliação forçada em <em>k</em> = 4</h2>
+
+<p>
+  Embora os critérios indiquem \(g = 2\), interessa avaliar o que
+  acontece quando o modelo é forçado a ajustar \(g = 4\) componentes
+  — a cardinalidade verdadeira da simulação. Esta análise quantifica
+  o quanto da estrutura latente pode ser recuperada na "melhor
+  hipótese" possível.
+</p>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/tab03_metricas_globais.png"
+       alt="Tabela 3 — metricas globais em k=4"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 3.</strong> Métricas globais em \(g = 4\): ARI =
+    0,10; Acurácia = 0,498; Pureza = 0,573; F1 macro = 0,337. Todos
+    os indicadores ficam próximos do nível esperado por classificação
+    aleatória ponderada pelos tamanhos dos grupos verdadeiros.
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/tab04_parametros_diagnostico.png"
+       alt="Tabela 4 — parametros estimados e diagnostico por grupo"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 4.</strong> Parâmetros estimados (μ, θ, π) por
+    componente, alinhados aos grupos verdadeiros via algoritmo
+    húngaro, e diagnósticos de sensibilidade e F1 por grupo.
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig05_modelo_ajustado.png"
+       alt="Modelo ajustado com k=4"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 5.</strong> Modelo ajustado em \(g = 4\):
+    componentes NB estimados (linhas coloridas) e mistura total
+    (linha tracejada preta) sobrepostos ao histograma dos dados.
+    Apesar do bom ajuste da densidade marginal global, a partição
+    interna é falha — vide matriz de confusão.
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig06_matriz_confusao.png"
+       alt="Matriz de confusao em k=4"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 6.</strong> Matriz de confusão após pareamento
+    húngaro entre os 4 componentes estimados e os 4 grupos
+    verdadeiros. A diagonal principal — proporção de classificações
+    corretas — concentra apenas ≈ 50 % das observações, com
+    contaminação cruzada substancial entre todos os pares de grupos.
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig07_classificacao_grid.png"
+       alt="Classificacao por grupo — strip plot 4x2"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 7.</strong> Strip plot 4 × 2: por linha, um grupo
+    verdadeiro; por coluna, classificação <em>verdadeira</em> e
+    <em>estimada</em>. A diferença entre as duas colunas, em cada
+    linha, mede o erro de classificação visualmente — particularmente
+    severo em G3 e G4.
+  </p>
+</div>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/teste_univariado_2/fig08_erro_por_faixa.png"
+       alt="Taxa de erro por faixa de consultas"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 8.</strong> Taxa de erro de classificação por
+    faixa do número de consultas. A faixa intermediária concentra a
+    maior parcela do erro: é onde múltiplos grupos verdadeiros
+    coabitam a mesma região da reta real.
+  </p>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="discussao">8 · Discussão</h2>
+
+<p>
+  O resultado central deste teste é um achado <em>negativo
+  metodologicamente informativo</em>: nenhum dos cinco critérios
+  testados — inclusive o Bootstrap LRT, que no Teste 1 mostrou-se
+  sensível a ganhos marginais de log-verossimilhança — recupera os
+  quatro grupos da simulação a partir da variável <em>consultas</em>
+  isolada.
+</p>
+
+<h3>Por que ocorre o subajuste</h3>
+
+<p>
+  A simulação é construída de forma a respeitar a estrutura
+  observada nos indicadores oficiais (ANS), o que produz distribuições
+  marginais que se sobrepõem substancialmente em qualquer dimensão
+  individual. O grupo G1 (baixo uso) concentra metade da população
+  com valores próximos de zero; G2, G3 e G4 ocupam regiões
+  parcialmente compartilhadas da cauda direita. Ao colapsar essas
+  quatro distribuições em uma única dimensão, parte da informação
+  discriminante é irrecuperável.
+</p>
+
+<div class="teoria">
+  <strong>Identificabilidade vs. cardinalidade verdadeira.</strong>
+  Baudry (2015) demonstra que critérios consistentes recuperam o
+  <em>número de clusters identificáveis</em>, e não necessariamente
+  o número de componentes geradores. Quando há sobreposição forte
+  entre componentes, esses dois números divergem — e o critério
+  identifica corretamente o que é empiricamente distinguível,
+  mesmo que isso seja menos do que o gerador "real". O presente
+  experimento é uma instância dessa divergência: <strong>quatro
+  componentes geradores, dois clusters identificáveis</strong>.
+</div>
+
+<blockquote class="cit">
+  &ldquo;The solution provided by ICL [and consistent penalised
+  criteria more generally] is consistent for the number of
+  well-separated clusters, not for the number of components in the
+  mixture.&rdquo;
+  <cite>Baudry (2015). <em>Electronic Journal of Statistics</em>,
+    9(1), 1041–1077.</cite>
+</blockquote>
+
+<h3>O ajuste em k = 4 não está "errado" — está sub-determinado</h3>
+
+<p>
+  A Figura 5 mostra que, em \(g = 4\), o modelo ajusta razoavelmente
+  bem a densidade marginal global (linha tracejada). O problema não
+  está na <em>estimação dos parâmetros</em>, mas na
+  <em>atribuição das observações aos componentes</em>: os quatro
+  componentes estimados não correspondem aos quatro grupos
+  geradores. A função de verossimilhança simplesmente não
+  discrimina, na dimensão <em>consultas</em>, soluções com 2 e com 4
+  componentes.
+</p>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="comparacao">9 · Comparação com o Teste 1</h2>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th>Aspecto</th>
+      <th>Teste 1 (limpo)</th>
+      <th>Teste 2 (calibrado ANS)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Origem dos dados</strong></td>
+      <td><code>rnbinom()</code> com μ = (2, 12, 25, 50), θ = 2,5
+        constante</td>
+      <td>simulação calibrada (ANS), μ e θ implícitos</td>
+    </tr>
+    <tr>
+      <td><strong>θ no ajuste</strong></td>
+      <td>fixo (2,5)</td>
+      <td>livre por componente</td>
+    </tr>
+    <tr>
+      <td><strong>k* por AIC/BIC/ICL/AIC3</strong></td>
+      <td>3 / 3 / 2 / 3</td>
+      <td><strong>2 / 2 / 2 / 2</strong></td>
+    </tr>
+    <tr>
+      <td><strong>k* por BLRT</strong></td>
+      <td class="ok">4 ✓ (verdade)</td>
+      <td class="err">2 ✗ (subajuste)</td>
+    </tr>
+    <tr>
+      <td><strong>ARI em \(g = 4\)</strong></td>
+      <td>0,34</td>
+      <td><strong>0,10</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Acurácia em \(g = 4\)</strong></td>
+      <td>0,625</td>
+      <td><strong>0,498</strong></td>
+    </tr>
+    <tr>
+      <td><strong>ARI bootstrap (g final)</strong></td>
+      <td>0,894 (IC [0,724; 1,000])</td>
+      <td>0,649 (IC [0,000; 1,000])</td>
+    </tr>
+    <tr>
+      <td><strong>Conclusão</strong></td>
+      <td>Univariado <em>basta</em> para revelar 4 grupos quando
+        bem espaçados e θ constante</td>
+      <td>Univariado <em>insuficiente</em> sob sobreposição realista
+        — necessidade de múltiplas variáveis</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="achado">
+  <span class="tag">Achado integrador</span>
+  <strong>A passagem do Teste 1 para o Teste 2 substitui o cenário
+  controlado pelo cenário realista — e a metodologia, antes
+  bem-sucedida, deixa de recuperar a estrutura.</strong> A diferença
+  não está no algoritmo, mas na quantidade de informação
+  discriminante disponível no espaço univariado. Esse contraste
+  justifica formalmente a abordagem multivariada adotada na
+  <a href="analises.html">análise principal (V3, 5 variáveis)</a>:
+  com cinco dimensões, o ARI sobe para 0,73 e a acurácia, para 0,88
+  — porque cada dimensão adicional fornece informação ortogonal para
+  separar grupos que, marginalmente, se confundem.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="conclusoes">10 · Conclusões</h2>
+
+<div class="achado">
+  <span class="tag">Conclusão 1</span>
+  <strong>Os cinco critérios convergem para \(g = 2\).</strong>
+  AIC, BIC, ICL, AIC3 e Bootstrap LRT, isoladamente e em conjunto,
+  rejeitam todo modelo com mais de duas componentes. Não há
+  desacordo entre critérios — sinal de que a evidência empírica é
+  inequívoca neste cenário.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 2</span>
+  <strong>A escolha não é um artefato do algoritmo.</strong> A
+  log-verossimilhança em função de \(g\) é praticamente constante
+  a partir de \(g = 2\) (ganho total ≤ 1,1 unidade entre \(g = 2\)
+  e \(g = 6\)). O EM não está preso em ótimo local; simplesmente não
+  há ganho de ajuste em adicionar componentes.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 3</span>
+  <strong>A informação univariada de <em>consultas</em> é
+  insuficiente para distinguir os quatro grupos
+  geradores.</strong> Quando forçado a \(g = 4\), o modelo produz
+  ARI = 0,10 e Acurácia = 0,498 — desempenho próximo do esperado por
+  classificação aleatória ponderada pelos tamanhos dos grupos.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 4</span>
+  <strong>O BLRT continua confiável — recusa um \(g\) maior
+  corretamente.</strong> Diferentemente do Teste 1, onde o BLRT
+  detectou ganho minúsculo como significativo, aqui ele identifica
+  a ausência de ganho como não significativa. O critério se
+  comporta de forma consistente em ambos os cenários — recuperando
+  o número de clusters identificáveis, conforme prediz o resultado
+  de consistência de Baudry (2015).
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 5</span>
+  <strong>A estabilidade do modelo final é apenas moderada
+  (ARI = 0,65, IC inclui 0).</strong> Mesmo a solução parcimoniosa
+  com \(g = 2\) não é robustamente reproduzida sob reamostragem,
+  indicando que a fronteira de decisão entre os dois componentes
+  é instável.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 6</span>
+  <strong>A análise multivariada é metodologicamente
+  necessária.</strong> O contraste entre este teste e os resultados
+  da <a href="analises.html">análise V3 com 5 variáveis</a> —
+  onde os quatro grupos são corretamente recuperados (ARI = 0,73) —
+  evidencia que a informação discriminante reside nas correlações
+  entre variáveis, não em qualquer dimensão isolada.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="proximos">11 · Próximos passos</h2>
+
+<ol>
+  <li>
+    <strong>Teste Univariado 3:</strong> ampliar a análise para o
+    espaço <strong>bivariado</strong>, adicionando a variável
+    <em>internações</em> ou <em>exames</em> a <em>consultas</em>.
+    Quantificar a partir de quantas dimensões os critérios começam a
+    recuperar \(g = 4\) — caracteriza uma "rampa metodológica" entre o
+    presente teste e a análise multivariada principal.
+  </li>
+  <li>
+    <strong>Variação sistemática da sobredispersão simulada:</strong>
+    refazer o presente teste com diferentes graus de sobreposição
+    artificial entre grupos para mapear a fronteira em que o BLRT
+    deixa de operar.
+  </li>
+  <li>
+    <strong>Comparação com mistura zero-inflada (ZINB):</strong>
+    G1 (baixo uso) tem mediana próxima de zero. Avaliar se uma
+    mistura ZINB captura melhor a estrutura — especialmente o
+    componente de zeros estruturais.
+  </li>
+</ol>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">12 · Referências</h2>
+
+<div class="ref-entry">
+  <cite>Baudry, J.-P. (2015).</cite>
+  Estimation and model selection for model-based clustering with the
+  conditional classification likelihood.
+  <em>Electronic Journal of Statistics</em>, <em>9</em>(1), 1041–1077.
+</div>
+
+<div class="ref-entry">
+  <cite>Biernacki, C., Celeux, G. &amp; Govaert, G. (2000).</cite>
+  Assessing a mixture model for clustering with the integrated
+  completed likelihood.
+  <em>IEEE Transactions on Pattern Analysis and Machine
+    Intelligence</em>, <em>22</em>(7), 719–725.
+</div>
+
+<div class="ref-entry">
+  <cite>Grün, B. &amp; Leisch, F. (2008).</cite>
+  FlexMix Version 2: Finite Mixtures with Concomitant Variables and
+  Varying and Constant Parameters.
+  <em>Journal of Statistical Software</em>, <em>28</em>(4), 1–35.
+</div>
+
+<div class="ref-entry">
+  <cite>Hubert, L. &amp; Arabie, P. (1985).</cite>
+  Comparing partitions.
+  <em>Journal of Classification</em>, <em>2</em>(1), 193–218.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. (1987).</cite>
+  On bootstrapping the likelihood ratio test statistic for the number
+  of components in a normal mixture.
+  <em>Journal of the Royal Statistical Society. Series C (Applied
+    Statistics)</em>, <em>36</em>(3), 318–324.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. &amp; Peel, D. (2000).</cite>
+  <em>Finite Mixture Models.</em> John Wiley &amp; Sons.
+  ISBN 0-471-00626-2.
+</div>
+
+
+</div>
+</main>
+
+</body>
+</html>
