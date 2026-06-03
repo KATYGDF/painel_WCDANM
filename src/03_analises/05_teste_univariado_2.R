@@ -529,8 +529,11 @@ if (file.exists(ari_cache)) {
 
 ari_valid <- ari_vec[!is.na(ari_vec)]
 ari_med <- if (length(ari_valid)) mean(ari_valid) else NA
-ari_ic  <- if (length(ari_valid)) quantile(ari_valid, c(0.025, 0.975))
-           else c(NA, NA)
+ari_ic  <- if (length(ari_valid)) {
+  quantile(ari_valid, c(0.025, 0.975))
+} else {
+  c(NA, NA)
+}
 cat(sprintf("ARI medio = %.3f | IC95%% = [%.3f, %.3f]\n",
             ari_med, ari_ic[1], ari_ic[2]))
 
