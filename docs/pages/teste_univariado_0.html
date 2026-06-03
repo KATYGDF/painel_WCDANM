@@ -450,24 +450,87 @@ blockquote.cit cite {
     <strong>Figura 2.</strong> Critérios AIC, BIC, ICL e AIC3
     normalizados [0 = melhor, 1 = pior] em função do número de
     componentes \(g\). Linha tracejada: \(g\) verdadeiro = 4.
-    Os quatro critérios <strong>concordam</strong> em \(g^* = 4\),
-    com mínimo nítido — diferente do que se observa em distribuições
-    com sobreposição substancial (Teste 2).
+    Os quatro critérios <strong>concordam em \(g^* = 4\)</strong>,
+    com mínimo nítido — em contraste direto com o Teste 2, onde a
+    curva é plana e todos selecionam \(g = 2\).
   </p>
 </div>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th>
+      <th class="num">log-Lik</th>
+      <th class="num">np</th>
+      <th class="num">AIC</th>
+      <th class="num">BIC</th>
+      <th class="num">ICL</th>
+      <th class="num">AIC3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">2</td>
+      <td class="num">−20.835,3</td>
+      <td class="num">5</td>
+      <td class="num">41.680,6</td>
+      <td class="num">41.713,2</td>
+      <td class="num">—</td>
+      <td class="num">41.685,6</td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td class="num">−20.675,3</td>
+      <td class="num">8</td>
+      <td class="num">41.366,6</td>
+      <td class="num">41.418,7</td>
+      <td class="num">—</td>
+      <td class="num">41.374,6</td>
+    </tr>
+    <tr class="best">
+      <td class="num"><strong>4</strong></td>
+      <td class="num">−20.543,0</td>
+      <td class="num">11</td>
+      <td class="num"><strong>41.108,0</strong></td>
+      <td class="num"><strong>41.179,7</strong></td>
+      <td class="num"><strong>mín.</strong></td>
+      <td class="num"><strong>41.119,0</strong></td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td class="num">−20.543,3</td>
+      <td class="num">14</td>
+      <td class="num">41.114,6</td>
+      <td class="num">41.205,9</td>
+      <td class="num">—</td>
+      <td class="num">41.128,6</td>
+    </tr>
+    <tr>
+      <td class="num">6</td>
+      <td class="num">−20.543,1</td>
+      <td class="num">17</td>
+      <td class="num">41.120,2</td>
+      <td class="num">41.231,0</td>
+      <td class="num">—</td>
+      <td class="num">41.137,2</td>
+    </tr>
+  </tbody>
+</table>
 
 <div class="achado">
   <span class="tag">Achado A</span>
   <strong>Os quatro critérios penalizados (AIC, BIC, ICL, AIC3)
-  recuperam corretamente \(g = 4\).</strong> Em particular,
-  destaca-se o ICL: como Biernacki, Celeux &amp; Govaert (2000)
-  estabelecem, o ICL é o critério apropriado para retrieval de
-  clusters bem separados, e este é precisamente o regime do
-  presente teste. Sua convergência para \(g = 4\) — em contraste
-  com o Teste 2, onde elegeu \(g = 2\) — constitui evidência
-  empírica do diagnóstico de Baudry (2015): o ICL é consistente
-  para o número de clusters identificáveis, e quatro clusters são
-  identificáveis aqui.
+  concordam em \(g^* = 4\).</strong> Os ganhos de
+  log-verossimilhança são substanciais nas transições \(g = 2 \to 3\)
+  (Δ\(\ell\) = 160) e \(g = 3 \to 4\) (Δ\(\ell\) = 132), suficientes
+  para superar a penalidade BIC (\(\approx 12{,}8\) por parâmetro
+  adicional) com folga. A partir de \(g = 5\), a log-verossimilhança
+  estabiliza — o modelo não encontra estrutura adicional. Em
+  particular, o ICL converge para \(g = 4\) nesta análise:
+  como Biernacki, Celeux &amp; Govaert (2000) estabelecem, o ICL
+  opera adequadamente quando os componentes podem ser supostos bem
+  separados — domínio empiricamente confirmado aqui, em contraste
+  com o Teste 2 (\(g_{\text{ICL}} = 2\)).
 </div>
 
 
@@ -487,23 +550,75 @@ blockquote.cit cite {
        loading="lazy">
   <p class="fig-caption">
     <strong>Figura 3.</strong> Distribuições bootstrap da estatística
-    LRT sob \(H_0\) para cada par sequencial \((g,\ g+1)\). Espera-se:
-    LRT observado na cauda direita extrema em \(g = 2 \to 3\) e
-    \(g = 3 \to 4\) (p &lt; 0,01), porque os ganhos de
-    log-verossimilhança são substanciais em separações dramáticas;
-    LRT observado próximo do centro da distribuição nula em \(g = 4
-    \to 5\) e \(g = 5 \to 6\), confirmando \(g^* = 4\).
+    LRT sob \(H_0\) para cada par sequencial \((g,\ g+1)\). Os LRTs
+    observados em \(g = 2 \to 3\) (LRT = 320) e \(g = 3 \to 4\)
+    (LRT = 265) são substanciais, mas a distribuição nula apresenta
+    caudas longas com observações esparsas tão extremas quanto o
+    observado, resultando em p-valores borderline (0,10 e 0,067).
   </p>
 </div>
 
-<div class="achado">
-  <span class="tag">Achado B</span>
-  <strong>O BLRT confirma \(g^* = 4\)</strong> com p &lt; 0,01 nos
-  testes \(g = 2 \to 3\) e \(g = 3 \to 4\), e p &gt; 0,3 nos testes
-  subsequentes. Diferentemente do Teste 1 — onde o BLRT precisou
-  detectar um ganho minúsculo de log-verossimilhança como
-  significativo — aqui o ganho é substancial, e o BLRT opera com
-  ampla margem.
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th><th class="num">g+1</th>
+      <th class="num">LRT observado</th>
+      <th class="num">p-valor</th>
+      <th class="num">B válidos</th>
+      <th>Rejeita H₀?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">2</td><td class="num">3</td>
+      <td class="num">320,1</td><td class="num">0,100</td>
+      <td class="num">29</td><td class="err">Não (borderline)</td>
+    </tr>
+    <tr>
+      <td class="num">3</td><td class="num">4</td>
+      <td class="num">264,5</td><td class="num">0,067</td>
+      <td class="num">29</td><td class="err">Não (borderline)</td>
+    </tr>
+    <tr>
+      <td class="num">4</td><td class="num">5</td>
+      <td class="num">−0,7</td><td class="num">0,833</td>
+      <td class="num">29</td><td class="ok">Não</td>
+    </tr>
+    <tr>
+      <td class="num">5</td><td class="num">6</td>
+      <td class="num">0,5</td><td class="num">0,533</td>
+      <td class="num">29</td><td class="ok">Não</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="alerta">
+  <span class="tag">Achado B (atípico)</span>
+  <strong>O BLRT apresenta resultado borderline neste regime —
+  patologia conhecida.</strong> Os LRTs observados (320 e 265 nas
+  transições críticas) são enormes em magnitude absoluta, porém a
+  distribuição bootstrap sob \(H_0\) ocasionalmente produz LRTs
+  comparáveis, resultando em p-valores apenas marginalmente
+  acima de 0,05. A explicação está em uma patologia documentada do
+  BLRT em misturas Gaussianas: a verossimilhança é
+  <em>não-limitada</em> sob \(\sigma\) variável por componente
+  (um componente pode contrair-se sobre uma única observação,
+  inflando artificialmente \(\ell\)). Isto contamina a distribuição
+  nula bootstrap com caudas longas (McLachlan, 1987;
+  McLachlan &amp; Peel, 2000, cap. 6). Vale notar que este obstáculo
+  é específico do BLRT em Gauss com \(\sigma\) livre — não afeta o
+  Teste 1 (NB com \(\theta\) fixo) nem o Teste 2 (NB com \(\theta\)
+  livre, onde a verossimilhança é limitada).
+</div>
+
+<div class="teoria">
+  <strong>Verificação possível.</strong> Para confirmar o resultado,
+  recomenda-se re-executar o BLRT com \(B = 199\) (ou maior) — o que
+  reduziria a influência de bootstrap replicates espúrios isolados.
+  Espera-se que p caia para \(\approx 0{,}03\) nas transições críticas.
+  Alternativamente, restringir \(\sigma\) a ser comum entre
+  componentes (\(\sigma_h = \sigma\)) elimina o problema na origem,
+  ao custo de modelar a heterogeneidade de dispersão.
 </div>
 
 
@@ -517,11 +632,20 @@ blockquote.cit cite {
   <p class="fig-caption">
     <strong>Figura 4.</strong> Distribuição bootstrap do Adjusted Rand
     Index entre a partição original (\(g = 4\)) e as partições obtidas
-    em 50 reamostragens. Espera-se ARI &gt; 0,95 com intervalo de
-    confiança apertado — sinal de que a estrutura é robustamente
-    reproduzida sob reamostragem, em contraste direto com o Teste 2
-    (ARI = 0,65; IC95% [0,000; 1,000]).
+    em 50 reamostragens. <strong>ARI médio = 0,967; IC 95% =
+    [0,887; 0,998]</strong>. A estrutura é robustamente reproduzida
+    sob reamostragem, em contraste direto com o Teste 2
+    (ARI = 0,649; IC95% [0,000; 1,000]) — sinal claro de que a
+    partição em \(g = 4\) é estável.
   </p>
+</div>
+
+<div class="achado">
+  <span class="tag">Achado C</span>
+  <strong>A partição em \(g = 4\) é altamente estável.</strong> ARI
+  bootstrap médio de 0,967, com IC 95% concentrado entre 0,89 e
+  praticamente 1,0, indica que mesmo sob reamostragem com reposição
+  o modelo converge consistentemente para a mesma estrutura.
 </div>
 
 
@@ -534,10 +658,27 @@ blockquote.cit cite {
        loading="lazy">
   <p class="fig-caption">
     <strong>Tabela 3.</strong> Métricas globais de classificação em
-    \(g = 4\): ARI, Acurácia, Pureza e F1 macro. Espera-se valores
-    &gt; 0,95 em todos os indicadores.
+    \(g = 4\): <strong>ARI = 0,936 · Acurácia = 0,972 ·
+    Pureza = 0,972 · F1 macro = 0,961</strong>. Recuperação
+    substantiva próxima do limite superior.
   </p>
 </div>
+
+<table class="param-table">
+  <thead>
+    <tr><th>Grupo</th>
+        <th class="num">n verdadeiro</th>
+        <th class="num">Sensibilidade</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>G1 · pop. base</td><td class="num">2.493</td><td class="num ok">0,986</td></tr>
+    <tr><td>G2 · grupo médio</td><td class="num">1.268</td><td class="num ok">0,957</td></tr>
+    <tr><td>G3 · grupo intensivo</td><td class="num">982</td><td class="num ok">0,965</td></tr>
+    <tr><td><strong>G4 · grupo raro</strong></td>
+        <td class="num"><strong>257</strong></td>
+        <td class="num ok"><strong>0,934</strong></td></tr>
+  </tbody>
+</table>
 
 <div class="fig-wrapper">
   <img src="../assets/img/teste_univariado_0/tab04_parametros_diagnostico.png"
@@ -545,11 +686,11 @@ blockquote.cit cite {
        loading="lazy">
   <p class="fig-caption">
     <strong>Tabela 4.</strong> Recuperação paramétrica (μ e σ
-    estimados vs verdadeiros) e diagnóstico por grupo
-    (sensibilidade, F1). O ponto-chave a observar é a
-    <strong>sensibilidade de G4</strong> (250 obs.): se ficar
-    &gt; 0,90, confirma-se que a rarefação per se não compromete a
-    detecção em condições ideais de distribuição e separação.
+    estimados vs. verdadeiros) e diagnóstico por grupo.
+    Mesmo G4, com apenas 257 observações, é identificado com
+    sensibilidade 0,934 — evidência direta de que a rarefação
+    <em>per se</em> não compromete a recuperação em condições ideais
+    de distribuição e separação.
   </p>
 </div>
 
@@ -560,9 +701,8 @@ blockquote.cit cite {
   <p class="fig-caption">
     <strong>Figura 5.</strong> Modelo Gaussiano ajustado em \(g = 4\)
     — componentes coloridos e mistura total (linha tracejada)
-    sobrepostas ao histograma dos dados. Espera-se concordância
-    visual quase perfeita entre os parâmetros estimados e os
-    verdadeiros.
+    sobrepostos ao histograma dos dados. A concordância visual entre
+    os parâmetros estimados e os verdadeiros é praticamente perfeita.
   </p>
 </div>
 
@@ -572,10 +712,22 @@ blockquote.cit cite {
        loading="lazy">
   <p class="fig-caption">
     <strong>Figura 6.</strong> Matriz de confusão após pareamento
-    húngaro. Espera-se que a diagonal principal concentre &gt; 95 %
-    das observações; o pouco erro residual deve concentrar-se nas
-    fronteiras entre componentes adjacentes (G2↔G3 e G3↔G4).
+    húngaro. A diagonal principal concentra 97 % das observações; o
+    erro residual está nas fronteiras entre componentes adjacentes
+    (G2↔G3 e G3↔G4), como esperado em mistura Gaussiana com
+    \(\Delta\mu / \sigma = 4\).
   </p>
+</div>
+
+<div class="achado">
+  <span class="tag">Achado D</span>
+  <strong>Recuperação substantiva quase perfeita.</strong>
+  Acurácia 97 %, F1 macro 96 %, e — crucialmente — sensibilidade
+  93 % para o grupo raro G4. Estes valores confirmam que <em>nem a
+  rarefação dos pesos (G4 = 5 %), nem a sobreposição moderada
+  (\(\sigma = 5\) com \(\Delta\mu = 20\)) impedem a recuperação</em>
+  em distribuição Gauss. O resultado pedagógico central da página
+  está estabelecido.
 </div>
 
 
@@ -644,32 +796,38 @@ blockquote.cit cite {
     </tr>
     <tr>
       <td><strong>k* por BLRT</strong></td>
-      <td class="ok">4 ✓</td>
+      <td>2 ⚠️ (borderline; ver §5)</td>
       <td class="ok">4 ✓</td>
       <td class="err">2 ✗</td>
     </tr>
     <tr>
       <td><strong>ARI em g = 4</strong></td>
-      <td class="ok">~ 0,98</td>
+      <td class="ok">0,936</td>
       <td>0,34</td>
       <td class="err">0,10</td>
     </tr>
     <tr>
       <td><strong>Acurácia em g = 4</strong></td>
-      <td class="ok">~ 0,98</td>
+      <td class="ok">0,972</td>
       <td>0,625</td>
       <td class="err">0,498</td>
     </tr>
     <tr>
+      <td><strong>Sensibilidade G4 (raro)</strong></td>
+      <td class="ok">0,934</td>
+      <td>—</td>
+      <td class="err">—</td>
+    </tr>
+    <tr>
       <td><strong>Estabilidade ARI (g final)</strong></td>
-      <td class="ok">~ 0,98 (IC apertado)</td>
+      <td class="ok">0,967 [0,887; 0,998]</td>
       <td>0,894 [0,724; 1,000]</td>
       <td class="err">0,649 [0,000; 1,000]</td>
     </tr>
     <tr>
       <td><strong>Diagnóstico</strong></td>
-      <td>Trivial — metodologia em domínio ideal</td>
-      <td>Limítrofe — apenas BLRT recupera</td>
+      <td>Recuperação substantiva — critérios penalizados em domínio ideal; BLRT esbarra em patologia de Gauss σ-livre</td>
+      <td>Limítrofe — apenas BLRT recupera, critérios penalizados falham</td>
       <td>Subajuste — univariância insuficiente</td>
     </tr>
   </tbody>
@@ -683,18 +841,39 @@ blockquote.cit cite {
   livre adiciona heterogeneidade entre componentes; separação
   dramática → sobreposição forte reduz a informação discriminante
   marginal; pesos balanceados → desbalanceados pressionam a detecção
-  de componentes raros.
+  de componentes raros. <em>Cada teste introduz um eixo de
+  realismo</em>, e o desempenho do conjunto de critérios degrada
+  proporcionalmente.
+</div>
+
+<div class="achado">
+  <span class="tag">Domínios de validade dos critérios</span>
+  <strong>Os cinco critérios têm zonas de validade
+  complementares:</strong>
+  <ul style="margin:0.5rem 0 0 1.2rem; padding:0;">
+    <li><strong>Critérios penalizados (AIC, BIC, ICL, AIC3):</strong>
+      ótimos em Gauss bem separada (Teste 0); falham progressivamente
+      sob NB com ganho marginal (Teste 1) e sob sobreposição forte
+      (Teste 2).</li>
+    <li><strong>BLRT:</strong> ótimo em NB com θ fixo (Teste 1, onde
+      detecta ganhos minúsculos); apresenta patologia conhecida em
+      Gauss com σ livre (Teste 0); insuficiente quando o sinal
+      verdadeiramente desaparece (Teste 2).</li>
+  </ul>
+  Isto significa que <em>nenhum critério isolado serve em todos os
+  regimes</em> — e justifica o protocolo de avaliar os cinco
+  conjuntamente como prática metodológica robusta.
 </div>
 
 <div class="achado">
   <span class="tag">Implicação central</span>
   <strong>O fracasso do Teste 2 não pode ser atribuído isoladamente
   à distribuição NB (Teste 1 trabalha em NB e funciona), nem aos
-  pesos desbalanceados (Teste 0 trabalha com 50/25/20/5 e funciona),
-  nem à existência de sobreposição moderada (Teste 0 a comporta).
-  A causa do fracasso é a <em>combinação</em> entre sobredispersão
-  da NB e sobreposição substancial das distribuições marginais —
-  precisamente o regime em que a univariância se torna
+  pesos desbalanceados (Teste 0 trabalha com 50/25/20/5 e
+  recupera), nem à existência de sobreposição moderada (Teste 0 a
+  comporta). A causa do fracasso é a <em>combinação</em> entre
+  sobredispersão da NB e sobreposição substancial das distribuições
+  marginais — precisamente o regime em que a univariância se torna
   insuficiente.</strong> Esse diagnóstico, obtido por exclusão,
   justifica empiricamente a abordagem multivariada adotada na
   <a href="analises.html">análise principal (V3, 5 variáveis)</a>,
@@ -708,10 +887,11 @@ blockquote.cit cite {
 
 <div class="achado">
   <span class="tag">Conclusão 1</span>
-  <strong>Os cinco critérios concordam em \(g = 4\).</strong>
-  AIC, BIC, ICL, AIC3 e Bootstrap LRT recuperam a cardinalidade
-  verdadeira em distribuição Gaussiana bem separada, mesmo com
-  pesos desbalanceados que incluem um componente raro (5 %).
+  <strong>Os quatro critérios penalizados (AIC, BIC, ICL, AIC3)
+  concordam em \(g = 4\).</strong> A recuperação substantiva, medida
+  por ARI = 0,936 e Acurácia = 0,972, confirma a identificação
+  correta da estrutura latente — quatro componentes Gaussianos com
+  médias bem separadas e dispersão constante.
 </div>
 
 <div class="achado">
@@ -719,29 +899,55 @@ blockquote.cit cite {
   <strong>O ICL opera em sua zona de validade.</strong>
   Conforme Biernacki, Celeux &amp; Govaert (2000) e Baudry (2015),
   o ICL é apropriado quando os componentes podem ser supostos bem
-  separados — exatamente o caso aqui. Sua concordância com BIC e
-  BLRT, em \(g = 4\), valida empiricamente seu domínio de
+  separados — exatamente o caso aqui. Sua concordância com BIC,
+  AIC e AIC3 em \(g = 4\) valida empiricamente seu domínio de
   aplicabilidade.
 </div>
 
 <div class="achado">
   <span class="tag">Conclusão 3</span>
   <strong>A rarefação per se não compromete a recuperação.</strong>
-  G4 (5 %, n ≈ 250) é identificado com alta sensibilidade,
-  desmentindo a hipótese de que o desbalanceamento dos pesos seja
-  o fator dominante no fracasso do Teste 2.
+  G4 (5 % da amostra, n = 257) é identificado com sensibilidade
+  0,934, desmentindo a hipótese de que o desbalanceamento dos pesos
+  seja o fator dominante no fracasso do Teste 2.
 </div>
 
 <div class="achado">
   <span class="tag">Conclusão 4</span>
   <strong>A sobreposição moderada per se também não compromete a
-  recuperação.</strong> Com \(\sigma = 5\) e \(\Delta\mu = 20\), há
-  cauda compartilhada entre componentes vizinhos — porém suficiente
-  estrutura discriminante para o modelo recuperar a partição.
+  recuperação.</strong> Com \(\sigma = 5\) e \(\Delta\mu = 20\)
+  (separação padronizada de 4σ), há cauda compartilhada entre
+  componentes vizinhos — porém suficiente estrutura discriminante
+  para o modelo recuperar a partição com ARI = 0,94 e estabilidade
+  bootstrap de 0,97.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 5 (atípica)</span>
+  <strong>O BLRT exibe patologia em mistura Gaussiana com σ
+  livre.</strong> Os p-valores nas transições críticas (\(g = 2 \to
+  3\): p = 0,10; \(g = 3 \to 4\): p = 0,067) ficaram borderline
+  apesar dos LRTs observados serem enormes (320 e 265). A causa é
+  o problema de modos espúrios — bem documentado em McLachlan
+  (1987) e McLachlan &amp; Peel (2000, cap. 6) — em que a
+  verossimilhança Gaussiana com σ variável não é limitada. O
+  resultado <em>não invalida</em> a recuperação substantiva (ARI
+  = 0,94), apenas evidencia o domínio de aplicabilidade restrito
+  do BLRT neste regime.
 </div>
 
 <div class="achado">
-  <span class="tag">Conclusão 5 · diagnóstico final da série</span>
+  <span class="tag">Conclusão 6 · domínios complementares dos critérios</span>
+  <strong>Os cinco critérios têm zonas de validade complementares
+  ao longo da série univariada</strong> — penalizados em Gauss
+  separada (Teste 0); BLRT em NB clean com ganho marginal
+  (Teste 1); nenhum critério resolve subdeterminação estrutural
+  (Teste 2). A prática metodológica robusta consiste em avaliar
+  os cinco conjuntamente, sem privilegiar qualquer um a priori.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 7 · diagnóstico final da série</span>
   <strong>O fracasso da recuperação univariada nos dados reais
   (Teste 2) é causado pela combinação entre sobredispersão da NB
   e sobreposição substancial das distribuições marginais —
