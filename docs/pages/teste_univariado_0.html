@@ -674,6 +674,23 @@ pre.r-code .op  { color: #89dceb; }
 <!-- ══════════════════════════════════════════════════════════ -->
 <h2 id="modD">7 · Resultados — Módulo D · Avaliação em <em>k</em> = 4</h2>
 
+<div class="nota">
+  <strong>Sobre o modelo avaliado.</strong> Os resultados desta seção
+  referem-se ao <em>modelo Gaussiano de quatro componentes</em>
+  ajustado no Módulo A. O procedimento de estimação foi:
+  <strong>(i)</strong> partição inicial obtida por <em>k-means</em>
+  sobre a variável <code>valor</code> (com 25 reinícios internos),
+  <strong>(ii)</strong> refinamento da partição via algoritmo
+  <em>Expectation-Maximization</em> completo no <code>flexmix</code>,
+  com média e desvio-padrão estimados livremente por componente
+  (tolerância \(10^{-7}\), no máximo 500 iterações, peso mínimo
+  \(\pi_h \geq 0{,}005\)). Esta combinação k-means + EM foi a única
+  estratégia de inicialização avaliada no Teste 0 — escolha herdada
+  do <a href="teste_univariado_1.html">Teste Univariado 1</a>, que
+  documentou sua qualidade equivalente ao random multistart com
+  custo computacional cerca de cinquenta vezes menor.
+</div>
+
 <div class="fig-wrapper">
   <img src="../assets/img/teste_univariado_0/tab03_metricas_globais.png"
        alt="Tabela 3 — metricas globais em k=4"
