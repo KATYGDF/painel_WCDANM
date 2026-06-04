@@ -182,6 +182,27 @@ blockquote.cit cite {
   font-family: var(--ff-mono, monospace);
   font-size: 0.85em;
 }
+
+/* ── Bloco de código R (tema escuro) ────────────────────────── */
+pre.r-code {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 2;
+  margin: 1.2rem 0;
+}
+pre.r-code .com { color: #6c7086; font-style: italic; }
+pre.r-code .kw  { color: #cba6f7; }
+pre.r-code .fn  { color: #89b4fa; }
+pre.r-code .num { color: #fab387; }
+pre.r-code .str { color: #a6e3a1; }
+pre.r-code .op  { color: #89dceb; }
 </style>
 </head>
 <body>
@@ -257,6 +278,7 @@ blockquote.cit cite {
     <li><a href="#modD">Resultados — Módulo D · Avaliação em k = 4</a></li>
     <li><a href="#comparacao">Comparação Teste 0 ↔ 1 ↔ 2</a></li>
     <li><a href="#conclusoes">Conclusões</a></li>
+    <li><a href="#codigo">Código R</a></li>
     <li><a href="#referencias">Referências</a></li>
   </ol>
 </div>
@@ -960,7 +982,215 @@ blockquote.cit cite {
 
 
 <!-- ══════════════════════════════════════════════════════════ -->
-<h2 id="referencias">10 · Referências</h2>
+<h2 id="codigo">10 · Código R</h2>
+
+<p>
+  O script completo (<code>src/03_analises/06_teste_univariado_0.R</code>)
+  é apresentado a seguir em quatro blocos correspondentes aos
+  módulos descritos na página. Os blocos auxiliares de geração de
+  gráficos e tabelas formatadas (via pacote <code>gt</code>) foram
+  omitidos por brevidade.
+</p>
+
+<h3>10.1 · Configuração da simulação</h3>
+
+<p>
+  Parâmetros do experimento e geração dos dados Gaussianos.
+</p>
+
+<pre class="r-code"><span class="com"># ── Parâmetros do experimento ─────────────────────────────────────────────────</span>
+<span class="fn">set.seed</span>(<span class="num">1234</span>)
+N          <span class="op">&lt;-</span> <span class="num">5000</span>
+PI_TRUE    <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="num">0.50</span>, <span class="num">0.25</span>, <span class="num">0.20</span>, <span class="num">0.05</span>)   <span class="com"># pesos = estrutura real</span>
+MU_TRUE    <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="num">10</span>, <span class="num">30</span>, <span class="num">50</span>, <span class="num">70</span>)              <span class="com"># Δμ = 20 (4σ entre vizinhos)</span>
+SIGMA_TRUE <span class="op">&lt;-</span> <span class="num">5</span>                              <span class="com"># σ constante</span>
+K_TRUE     <span class="op">&lt;-</span> <span class="num">4</span>
+K_GRID     <span class="op">&lt;-</span> <span class="num">2</span>:<span class="num">6</span>
+BLRT_B     <span class="op">&lt;-</span> <span class="num">29</span>; BLRT_NREP <span class="op">&lt;-</span> <span class="num">2</span>
+BOOT_B     <span class="op">&lt;-</span> <span class="num">50</span>
+
+<span class="com"># ── Simulação Gaussiana ──────────────────────────────────────────────────────</span>
+grupo_real <span class="op">&lt;-</span> <span class="fn">sample</span>(<span class="num">1</span>:<span class="num">4</span>, size <span class="op">=</span> N, replace <span class="op">=</span> <span class="kw">TRUE</span>, prob <span class="op">=</span> PI_TRUE)
+valor      <span class="op">&lt;-</span> <span class="fn">rnorm</span>(N, mean <span class="op">=</span> MU_TRUE[grupo_real], sd <span class="op">=</span> SIGMA_TRUE)
+
+df <span class="op">&lt;-</span> <span class="fn">data.frame</span>(
+  grupo_real <span class="op">=</span> <span class="fn">factor</span>(grupo_real, levels <span class="op">=</span> <span class="num">1</span>:<span class="num">4</span>,
+                       labels <span class="op">=</span> <span class="fn">c</span>(<span class="str">"G1"</span>, <span class="str">"G2"</span>, <span class="str">"G3"</span>, <span class="str">"G4"</span>)),
+  valor      <span class="op">=</span> valor
+)
+grupo_int <span class="op">&lt;-</span> <span class="fn">as.integer</span>(df<span class="op">$</span>grupo_real)
+</pre>
+
+<h3>10.2 · Inicialização k-means + EM (Gaussian)</h3>
+
+<p>
+  Diferentemente dos Testes 1 e 2 (que usam <code>FLXMRnegbin</code>),
+  aqui usa-se o ajuste Gaussiano default do flexmix.
+  A função <code>fit_kmeans_em()</code> roda k-means em
+  <code>valor</code> diretamente (sem transformação log) e passa a
+  partição como semente para o EM completo.
+</p>
+
+<pre class="r-code"><span class="com"># ── Ajuste via flexmix Gaussiano (default, sem FLXMRnegbin) ──────────────────</span>
+fit_kmeans_em <span class="op">&lt;-</span> <span class="kw">function</span>(k_val, seed <span class="op">=</span> <span class="num">200</span>) {
+  <span class="fn">set.seed</span>(seed)
+  <span class="kw">if</span> (k_val <span class="op">==</span> 1L) {
+    <span class="kw">return</span>(<span class="fn">tryCatch</span>(<span class="fn">suppressWarnings</span>(<span class="fn">flexmix</span>(
+      valor <span class="op">~</span> <span class="num">1</span>, data <span class="op">=</span> df, k <span class="op">=</span> 1L,
+      control <span class="op">=</span> <span class="fn">list</span>(iter.max <span class="op">=</span> <span class="num">500</span>, tolerance <span class="op">=</span> <span class="num">1e-7</span>, minprior <span class="op">=</span> <span class="num">0.005</span>)
+    )), error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>))
+  }
+  km <span class="op">&lt;-</span> <span class="fn">kmeans</span>(df<span class="op">$</span>valor, centers <span class="op">=</span> k_val, nstart <span class="op">=</span> <span class="num">25</span>, iter.max <span class="op">=</span> <span class="num">100</span>)
+  <span class="fn">tryCatch</span>(<span class="fn">suppressWarnings</span>(<span class="fn">flexmix</span>(
+    valor <span class="op">~</span> <span class="num">1</span>, data <span class="op">=</span> df, k <span class="op">=</span> k_val,
+    cluster <span class="op">=</span> km<span class="op">$</span>cluster,
+    control <span class="op">=</span> <span class="fn">list</span>(iter.max <span class="op">=</span> <span class="num">500</span>, tolerance <span class="op">=</span> <span class="num">1e-7</span>, minprior <span class="op">=</span> <span class="num">0.005</span>)
+  )), error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+}
+
+<span class="com"># ── Extração de métricas penalizadas ─────────────────────────────────────────</span>
+extrair_metricas <span class="op">&lt;-</span> <span class="kw">function</span>(fit) {
+  <span class="kw">if</span> (<span class="fn">is.null</span>(fit)) <span class="kw">return</span>(<span class="kw">NULL</span>)
+  ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit))
+  np <span class="op">&lt;-</span> <span class="fn">attr</span>(<span class="fn">logLik</span>(fit), <span class="str">"df"</span>)
+  <span class="fn">list</span>(
+    k_efetivo <span class="op">=</span> fit@k,
+    logLik    <span class="op">=</span> <span class="fn">round</span>(ll, <span class="num">2</span>),
+    np        <span class="op">=</span> np,
+    AIC       <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> <span class="num">2</span> <span class="op">*</span> np, <span class="num">2</span>),
+    BIC       <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> np <span class="op">*</span> <span class="fn">log</span>(N), <span class="num">2</span>),
+    ICL       <span class="op">=</span> <span class="fn">round</span>(<span class="fn">ICL</span>(fit), <span class="num">2</span>),
+    AIC3      <span class="op">=</span> <span class="fn">round</span>(-<span class="num">2</span> <span class="op">*</span> ll <span class="op">+</span> <span class="num">3</span> <span class="op">*</span> np, <span class="num">2</span>)
+  )
+}
+</pre>
+
+<h3>10.3 · Bootstrap LRT paramétrico</h3>
+
+<p>
+  Para Gauss, <code>parameters(fit)</code> retorna matriz 2×<em>k</em>
+  com média (linha 1) e desvio-padrão (linha 2) por componente.
+  A simulação paramétrica sob H₀ amostra de
+  \(\mathcal{N}(\mu_h, \sigma_h^2)\) com pesos \(\pi_h\).
+</p>
+
+<pre class="r-code"><span class="com"># ── Simulação paramétrica sob H0 (Gaussiana) ─────────────────────────────────</span>
+simular_normal_mistura <span class="op">&lt;-</span> <span class="kw">function</span>(fit, n_sim) {
+  pesos <span class="op">&lt;-</span> <span class="fn">prior</span>(fit)
+  pars  <span class="op">&lt;-</span> <span class="fn">parameters</span>(fit)
+  k     <span class="op">&lt;-</span> fit@k
+  pars_m <span class="op">&lt;-</span> <span class="kw">if</span> (<span class="fn">is.matrix</span>(pars)) pars <span class="kw">else</span> <span class="fn">matrix</span>(pars, nrow <span class="op">=</span> <span class="num">2</span>)
+  mus    <span class="op">&lt;-</span> pars_m[1L, ]
+  sigmas <span class="op">&lt;-</span> pars_m[2L, ]
+  comp <span class="op">&lt;-</span> <span class="fn">sample.int</span>(k, size <span class="op">=</span> n_sim, replace <span class="op">=</span> <span class="kw">TRUE</span>, prob <span class="op">=</span> pesos)
+  y <span class="op">&lt;-</span> <span class="fn">numeric</span>(n_sim)
+  <span class="kw">for</span> (h <span class="kw">in</span> <span class="fn">seq_len</span>(k)) {
+    idx <span class="op">&lt;-</span> <span class="fn">which</span>(comp <span class="op">==</span> h)
+    <span class="kw">if</span> (<span class="fn">length</span>(idx))
+      y[idx] <span class="op">&lt;-</span> <span class="fn">rnorm</span>(<span class="fn">length</span>(idx), mean <span class="op">=</span> mus[h], sd <span class="op">=</span> sigmas[h])
+  }
+  y
+}
+
+<span class="com"># ── BLRT: H0: k vs H1: k+1 ───────────────────────────────────────────────────</span>
+blrt_passo <span class="op">&lt;-</span> <span class="kw">function</span>(fit_k0, fit_k1, B <span class="op">=</span> BLRT_B, nrep <span class="op">=</span> BLRT_NREP, seed <span class="op">=</span> <span class="num">1000</span>) {
+  <span class="fn">set.seed</span>(seed)
+  k0 <span class="op">&lt;-</span> fit_k0@k; k1 <span class="op">&lt;-</span> fit_k1@k
+  lrt_obs <span class="op">&lt;-</span> <span class="num">2</span> <span class="op">*</span> (<span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k1)) <span class="op">-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(fit_k0)))
+
+  ll_best_k <span class="op">&lt;-</span> <span class="kw">function</span>(df_b, k_val) {
+    best <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+    <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(nrep)) {
+      m <span class="op">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">suppressWarnings</span>(<span class="fn">flexmix</span>(
+        valor <span class="op">~</span> <span class="num">1</span>, data <span class="op">=</span> df_b, k <span class="op">=</span> k_val,
+        control <span class="op">=</span> <span class="fn">list</span>(iter.max <span class="op">=</span> <span class="num">200</span>, minprior <span class="op">=</span> <span class="num">0.005</span>, tolerance <span class="op">=</span> <span class="num">1e-6</span>)
+      )), error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+      <span class="kw">if</span> (!<span class="fn">is.null</span>(m) <span class="op">&amp;&amp;</span> m@k <span class="op">==</span> k_val) {
+        ll <span class="op">&lt;-</span> <span class="fn">as.numeric</span>(<span class="fn">logLik</span>(m))
+        <span class="kw">if</span> (!<span class="fn">is.na</span>(ll) <span class="op">&amp;&amp;</span> ll <span class="op">&gt;</span> best) best <span class="op">&lt;-</span> ll
+      }
+    }
+    <span class="kw">if</span> (<span class="fn">is.infinite</span>(best)) NA_real_ <span class="kw">else</span> best
+  }
+
+  lrt_b <span class="op">&lt;-</span> <span class="fn">vapply</span>(<span class="fn">seq_len</span>(B), <span class="kw">function</span>(b) {
+    y_b  <span class="op">&lt;-</span> <span class="fn">simular_normal_mistura</span>(fit_k0, N)
+    df_b <span class="op">&lt;-</span> <span class="fn">data.frame</span>(valor <span class="op">=</span> y_b)
+    ll0  <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(df_b, k0)
+    ll1  <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(df_b, k1)
+    <span class="kw">if</span> (<span class="fn">anyNA</span>(<span class="fn">c</span>(ll0, ll1))) NA_real_ <span class="kw">else</span> <span class="num">2</span> <span class="op">*</span> (ll1 <span class="op">-</span> ll0)
+  }, <span class="fn">numeric</span>(<span class="num">1</span>))
+
+  lrt_v <span class="op">&lt;-</span> lrt_b[!<span class="fn">is.na</span>(lrt_b)]
+  pval  <span class="op">&lt;-</span> (<span class="fn">sum</span>(lrt_v <span class="op">&gt;=</span> lrt_obs) <span class="op">+</span> <span class="num">1</span>) <span class="op">/</span> (<span class="fn">length</span>(lrt_v) <span class="op">+</span> <span class="num">1</span>)
+  <span class="fn">list</span>(k0 <span class="op">=</span> k0, k1 <span class="op">=</span> k1, lrt_obs <span class="op">=</span> <span class="fn">round</span>(lrt_obs, <span class="num">2</span>),
+       pval <span class="op">=</span> <span class="fn">round</span>(pval, <span class="num">4</span>), B_valido <span class="op">=</span> <span class="fn">length</span>(lrt_v), lrt_boot <span class="op">=</span> lrt_v)
+}
+</pre>
+
+<h3>10.4 · Loop principal e avaliação em <em>k</em> = 4</h3>
+
+<p>
+  Ajuste em cada <em>g</em> ∈ {2,…,6}, seleção de <em>k</em> por
+  consenso entre critérios e avaliação substantiva da partição
+  obtida no <em>k</em> verdadeiro.
+</p>
+
+<pre class="r-code"><span class="com"># ── Ajustes em K_GRID ────────────────────────────────────────────────────────</span>
+fits     <span class="op">&lt;-</span> <span class="fn">setNames</span>(<span class="fn">vector</span>(<span class="str">"list"</span>, <span class="fn">length</span>(K_GRID)), <span class="fn">as.character</span>(K_GRID))
+tab_init <span class="op">&lt;-</span> <span class="fn">list</span>()
+<span class="kw">for</span> (k_val <span class="kw">in</span> K_GRID) {
+  fit_kv <span class="op">&lt;-</span> <span class="fn">fit_kmeans_em</span>(k_val)
+  fits[[<span class="fn">as.character</span>(k_val)]] <span class="op">&lt;-</span> fit_kv
+  m <span class="op">&lt;-</span> <span class="fn">extrair_metricas</span>(fit_kv)
+  tab_init[[<span class="fn">length</span>(tab_init) <span class="op">+</span> <span class="num">1</span>]] <span class="op">&lt;-</span> <span class="fn">data.frame</span>(
+    k <span class="op">=</span> k_val, logLik <span class="op">=</span> m<span class="op">$</span>logLik, np <span class="op">=</span> m<span class="op">$</span>np,
+    AIC <span class="op">=</span> m<span class="op">$</span>AIC, BIC <span class="op">=</span> m<span class="op">$</span>BIC, ICL <span class="op">=</span> m<span class="op">$</span>ICL, AIC3 <span class="op">=</span> m<span class="op">$</span>AIC3)
+}
+tab_init <span class="op">&lt;-</span> <span class="fn">do.call</span>(rbind, tab_init)
+
+<span class="com"># Seleção por cada critério</span>
+k_aic  <span class="op">&lt;-</span> tab_init<span class="op">$</span>k[<span class="fn">which.min</span>(tab_init<span class="op">$</span>AIC)]
+k_bic  <span class="op">&lt;-</span> tab_init<span class="op">$</span>k[<span class="fn">which.min</span>(tab_init<span class="op">$</span>BIC)]
+k_icl  <span class="op">&lt;-</span> tab_init<span class="op">$</span>k[<span class="fn">which.min</span>(tab_init<span class="op">$</span>ICL)]
+k_aic3 <span class="op">&lt;-</span> tab_init<span class="op">$</span>k[<span class="fn">which.min</span>(tab_init<span class="op">$</span>AIC3)]
+
+<span class="com"># BLRT sequencial — busca primeiro k com p &gt; 0.05</span>
+resultados_blrt  <span class="op">&lt;-</span> <span class="fn">list</span>()
+k_blrt_escolhido <span class="op">&lt;-</span> NA_integer_
+<span class="kw">for</span> (k0 <span class="kw">in</span> K_GRID[-<span class="fn">length</span>(K_GRID)]) {
+  res <span class="op">&lt;-</span> <span class="fn">blrt_passo</span>(fits[[<span class="fn">as.character</span>(k0)]],
+                    fits[[<span class="fn">as.character</span>(k0 <span class="op">+</span> 1L)]],
+                    B <span class="op">=</span> BLRT_B, nrep <span class="op">=</span> BLRT_NREP, seed <span class="op">=</span> <span class="num">1000</span> <span class="op">+</span> k0)
+  resultados_blrt[[<span class="fn">as.character</span>(k0)]] <span class="op">&lt;-</span> res
+  <span class="kw">if</span> (<span class="fn">is.na</span>(k_blrt_escolhido) <span class="op">&amp;&amp;</span> res<span class="op">$</span>pval <span class="op">&gt;</span> <span class="num">0.05</span>) k_blrt_escolhido <span class="op">&lt;-</span> k0
+}
+
+<span class="com"># Consenso entre critérios</span>
+votos <span class="op">&lt;-</span> <span class="fn">c</span>(AIC <span class="op">=</span> k_aic, BIC <span class="op">=</span> k_bic, ICL <span class="op">=</span> k_icl,
+           AIC3 <span class="op">=</span> k_aic3, BLRT <span class="op">=</span> k_blrt_escolhido)
+k_final <span class="op">&lt;-</span> <span class="fn">as.integer</span>(<span class="fn">names</span>(<span class="fn">sort</span>(<span class="fn">table</span>(votos), decreasing <span class="op">=</span> <span class="kw">TRUE</span>))[<span class="num">1</span>])
+
+<span class="com"># ── Avaliação substantiva em k = K_TRUE = 4 ──────────────────────────────────</span>
+fit_K   <span class="op">&lt;-</span> fits[[<span class="fn">as.character</span>(K_TRUE)]]
+est_K   <span class="op">&lt;-</span> <span class="fn">as.integer</span>(<span class="fn">clusters</span>(fit_K))
+est_par <span class="op">&lt;-</span> <span class="fn">remap_hungarian</span>(grupo_int, est_K)   <span class="com"># pareamento hungaro</span>
+ari_K   <span class="op">&lt;-</span> <span class="fn">adj_rand_index</span>(grupo_int, est_K)
+acu_K   <span class="op">&lt;-</span> <span class="fn">mean</span>(est_par <span class="op">==</span> grupo_int, na.rm <span class="op">=</span> <span class="kw">TRUE</span>)
+conf_K  <span class="op">&lt;-</span> <span class="fn">table</span>(real <span class="op">=</span> grupo_int, est <span class="op">=</span> est_K)
+pur_K   <span class="op">&lt;-</span> <span class="fn">sum</span>(<span class="fn">apply</span>(conf_K, 2L, max)) <span class="op">/</span> <span class="fn">sum</span>(conf_K)
+
+<span class="com"># Sensibilidade por grupo (incluindo G4 raro)</span>
+sens_grp <span class="op">&lt;-</span> <span class="fn">vapply</span>(<span class="num">1</span>:<span class="num">4</span>, <span class="kw">function</span>(g)
+  <span class="fn">sum</span>(est_par <span class="op">==</span> g <span class="op">&amp;</span> grupo_int <span class="op">==</span> g) <span class="op">/</span> <span class="fn">sum</span>(grupo_int <span class="op">==</span> g),
+  <span class="fn">numeric</span>(<span class="num">1</span>))
+
+<span class="com"># Script completo: src/03_analises/06_teste_univariado_0.R</span>
+</pre>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">11 · Referências</h2>
 
 <div class="ref-entry">
   <cite>Baudry, J.-P. (2015).</cite>
