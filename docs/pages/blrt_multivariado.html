@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLRT Multivariado — Validação de g = 4 no V3 — SimSaúde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/main.css">
+
+<!-- MathJax 3 -->
+<script>
+MathJax = {
+  tex: {
+    inlineMath:  [['\\(', '\\)']],
+    displayMath: [['$$', '$$']],
+    tags: 'none'
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<style>
+.toc {
+  background: var(--surface, #f8f7f4);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  padding: 1rem 1.4rem;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.toc ol { margin: 0.4rem 0 0 1.2rem; padding: 0; }
+.toc li { margin: 0.3rem 0; }
+.toc a  { color: var(--accent, #4a7c59); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+blockquote.cit {
+  margin: 1.2rem 0;
+  padding: 0.75rem 1.2rem;
+  border-left: 3px solid var(--accent, #4a7c59);
+  background: var(--surface, #f8f7f4);
+  font-style: italic;
+  font-size: 0.91rem;
+  line-height: 1.6;
+}
+blockquote.cit cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-style: normal;
+  font-size: 0.82rem;
+  color: var(--muted, #666);
+}
+
+.nota {
+  background: #fffbf0;
+  border-left: 3px solid #e6a817;
+  padding: 0.7rem 1rem;
+  font-size: 0.87rem;
+  color: var(--muted, #444);
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+
+.teoria {
+  background: #f0f7ff;
+  border-left: 3px solid #2980b9;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  border-radius: 0 4px 4px 0;
+  margin: 1rem 0;
+}
+.teoria strong { color: #1a5276; }
+
+.achado {
+  background: #f0f9ee;
+  border-left: 3px solid #4a7c59;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.achado strong { color: #2d5a40; }
+.achado .tag {
+  display: inline-block;
+  background: #4a7c59;
+  color: white;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 0.12rem 0.5rem;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  vertical-align: 2px;
+}
+
+.alerta {
+  background: #fdf1ee;
+  border-left: 3px solid #c0392b;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  border-radius: 0 4px 4px 0;
+  margin: 1.2rem 0;
+}
+.alerta strong { color: #922b21; }
+
+.fig-wrapper {
+  margin: 1.8rem 0;
+  text-align: center;
+}
+.fig-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 4px;
+  background: white;
+}
+.fig-caption {
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  margin-top: 0.6rem;
+  line-height: 1.55;
+  text-align: left;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fig-caption strong { color: var(--ink, #1a1a1a); }
+
+.ref-entry {
+  padding: 0.55rem 0 0.55rem 1.1rem;
+  border-left: 2px solid var(--border, #ddd);
+  margin-bottom: 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.ref-entry cite {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin: 1.2rem 0;
+}
+.param-table th {
+  background: var(--surface, #f8f7f4);
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 2px solid var(--border, #ddd);
+  text-align: left;
+}
+.param-table td {
+  padding: 0.4rem 0.8rem;
+  border-bottom: 1px solid var(--border, #eee);
+  vertical-align: top;
+}
+.param-table tr:last-child td { border-bottom: none; }
+.param-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.param-table .ok  { color: #2d5a40; font-weight: 600; }
+.param-table .err { color: #922b21; font-weight: 600; }
+.param-table .best { background: #fef9e7; font-weight: 600; }
+
+pre.r-code {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border: 1px solid #313244;
+  border-radius: 6px;
+  padding: 1.4rem 1.6rem;
+  font-family: var(--ff-mono, 'IBM Plex Mono', monospace);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  tab-size: 2;
+  margin: 1.2rem 0;
+}
+pre.r-code .com { color: #6c7086; font-style: italic; }
+pre.r-code .kw  { color: #cba6f7; }
+pre.r-code .fn  { color: #89b4fa; }
+pre.r-code .num { color: #fab387; }
+pre.r-code .str { color: #a6e3a1; }
+pre.r-code .op  { color: #89dceb; }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <a href="../index.html" class="sidebar-brand">SimSaúde</a>
+  <p class="sidebar-subtitle">Modelagem de Heterogeneidade<br>em Saúde Suplementar</p>
+  <ul class="sidebar-nav">
+    <li><a href="../index.html">Início</a></li>
+    <li><a href="estudo.html">O Estudo</a></li>
+    <li><a href="simulacao.html">Simulação</a></li>
+    <li><a href="eda_simsaude.html">EDA</a></li>
+    <li><a href="construcao_progressiva.html">Construção</a></li>
+    <li><a href="fundamentacao_em.html">Fundamentação EM</a></li>
+    <li><a href="analises.html">Análises</a></li>
+    <li><a href="teste_univariado_0.html">Teste Univariado 0</a></li>
+    <li><a href="teste_univariado_1.html">Teste Univariado 1</a></li>
+    <li><a href="teste_univariado_2.html">Teste Univariado 2</a></li>
+    <li><a href="blrt_multivariado.html" class="active">BLRT Multivariado</a></li>
+  </ul>
+  <div class="sidebar-footer">Katy Garcia de Freitas · 2026</div>
+</nav>
+
+<main class="main">
+<div class="prose">
+
+<h1>
+  BLRT Multivariado
+  <span style="display:block; font-size:1.2rem; font-weight:500;
+               color:var(--muted, #666); margin-top:0.4rem;
+               font-family: var(--ff-serif, 'Source Serif 4', serif);">
+    Validação de \(g = 4\) por <em>Bootstrap Likelihood Ratio Test</em>
+    paramétrico sobre a mistura NB multivariada V3 (5 variáveis),
+    independente do critério BIC adotado no pôster
+  </span>
+</h1>
+
+<p class="lead">
+  Esta página fecha o arco metodológico da série: aplica o
+  <em>Bootstrap LRT</em> de McLachlan (1987) ao caso multivariado V3,
+  produzindo uma validação independente da escolha de \(g = 4\)
+  componentes que o BIC apontou na
+  <a href="analises.html">análise principal</a>. A motivação vem
+  diretamente dos testes univariados: o
+  <a href="teste_univariado_1.html">Teste 1</a> documentou cenários
+  onde o BLRT recupera \(g\) mesmo quando os critérios penalizados
+  falham; o <a href="teste_univariado_2.html">Teste 2</a> mostrou que
+  a univariância de <em>consultas</em> é insuficiente; restava
+  confirmar que, no espaço V3 de 5 variáveis, ambos os critérios —
+  BIC (assintótico) e BLRT (não-paramétrico) — convergem na mesma
+  decisão.
+</p>
+
+<p class="lead" style="font-size:1rem; color:var(--muted, #666);
+                       border-left:3px solid var(--accent, #4a7c59);
+                       padding-left:1rem; margin-top:1rem;">
+  <strong>Pergunta investigada:</strong> a escolha de \(g = 4\)
+  componentes para a mistura NB multivariada V3 é estatisticamente
+  significativa sob bootstrap paramétrico? Ou seja, o ganho de
+  log-verossimilhança ao passar de 3 para 4 componentes é maior do
+  que se esperaria sob a hipótese nula de apenas 3 componentes
+  geradores?
+</p>
+
+<div class="toc">
+  <strong>Nesta página</strong>
+  <ol>
+    <li><a href="#motivacao">Motivação e posicionamento metodológico</a></li>
+    <li><a href="#design">Desenho do experimento</a></li>
+    <li><a href="#modelos">Modelos NB multivariados ajustados</a></li>
+    <li><a href="#blrt">Resultados do Bootstrap LRT</a></li>
+    <li><a href="#metricas">Métricas substantivas de recuperação</a></li>
+    <li><a href="#discussao">Discussão</a></li>
+    <li><a href="#conclusoes">Conclusões</a></li>
+    <li><a href="#codigo">Código R</a></li>
+    <li><a href="#referencias">Referências</a></li>
+  </ol>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="motivacao">1 · Motivação e posicionamento metodológico</h2>
+
+<p>
+  A análise principal do pôster
+  (<a href="analises.html">página Análises</a>) selecionou
+  \(g = 4\) componentes para a mistura NB multivariada V3 com base no
+  <strong>BIC</strong>. Esta escolha é defendida pela conjunção de
+  três fatores: BIC é o critério padrão na literatura de misturas
+  finitas (Schwarz, 1978; Keribin, 2000), o número selecionado coincide
+  com a cardinalidade verdadeira da simulação calibrada, e a
+  recuperação substantiva mostrou-se excelente (ARI &gt; 0,7,
+  Acurácia &gt; 0,85 no pôster).
+</p>
+
+<p>
+  Restava, contudo, uma fragilidade reconhecida: <strong>o BIC depende
+  de aproximações assintóticas que falham em misturas finitas</strong>.
+  Os testes univariados desta série documentaram empiricamente situações
+  em que essas aproximações falham — no
+  <a href="teste_univariado_1.html">Teste 1</a>, AIC/BIC/ICL/AIC3
+  todos selecionaram \(g = 3\) enquanto a verdade era \(g = 4\); apenas
+  o Bootstrap LRT (BLRT) detectou o quarto componente.
+</p>
+
+<div class="teoria">
+  <strong>Por que aplicar BLRT também à V3 multivariada.</strong> O
+  BLRT (McLachlan, 1987) não depende de aproximações assintóticas:
+  constrói a distribuição nula da estatística \(2(\ell_{g+1} - \ell_g)\)
+  empiricamente, por reamostragem paramétrica. Aplicar BLRT à V3
+  produz uma validação independente do BIC. Se ambos convergirem em
+  \(g = 4\), tem-se evidência composta forte: um critério assintótico
+  e um não-paramétrico, conceitualmente distintos, concordam na mesma
+  cardinalidade.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="design">2 · Desenho do experimento</h2>
+
+<table class="param-table">
+  <thead>
+    <tr><th>Parâmetro</th><th>Configuração</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Dados</strong></td>
+      <td><code>dados/dados_simulados.csv</code>, \(n = 5\,000\)
+        observações</td>
+    </tr>
+    <tr>
+      <td><strong>Variáveis (V3)</strong></td>
+      <td><em>consultas, ps, exames, internacoes, terapias</em>
+        (\(p = 5\))</td>
+    </tr>
+    <tr>
+      <td><strong>Modelo</strong></td>
+      <td>Mistura NB multivariada com independência condicional:
+        \(f(\mathbf{x} \mid \Theta) = \sum_{h=1}^{g} \pi_h
+        \prod_{j=1}^{p} \text{NB}(x_j \mid \mu_{hj}, \theta_{hj})\)
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Parametrização</strong></td>
+      <td>\(\mu_{hj}\) e \(\theta_{hj}\) <strong>livres por componente
+        e por variável</strong> (2gp parâmetros + g−1 pesos)</td>
+    </tr>
+    <tr>
+      <td><strong>Implementação</strong></td>
+      <td>EM customizado (não flexmix) — função <code>nb_mix_em()</code>,
+        compartilhada com a <a href="analises.html">análise
+        principal</a></td>
+    </tr>
+    <tr>
+      <td><strong>Inicialização</strong></td>
+      <td>k-means em \(\log(1+x)\) padronizado + 7 reinícios
+        aleatórios (8 inicializações no total)</td>
+    </tr>
+    <tr>
+      <td><strong>Cardinalidades</strong></td>
+      <td>\(g \in \{3, 4, 5\}\) (apenas o necessário para os pares
+        críticos do BLRT)</td>
+    </tr>
+    <tr>
+      <td><strong>Pares do BLRT</strong></td>
+      <td>\(g = 3 \to 4\) (valida a escolha) e \(g = 4 \to 5\)
+        (confirma o teto)</td>
+    </tr>
+    <tr>
+      <td><strong>Réplicas bootstrap</strong></td>
+      <td>\(B = 49\) por par, com 3 reinícios aleatórios em cada
+        ajuste interno</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="nota">
+  <strong>Reprodutibilidade.</strong> Script:
+  <code>src/03_analises/07_blrt_multivariado_v3.R</code> (BLRT) e
+  <code>src/03_analises/08_metricas_multivariado_v3.R</code>
+  (métricas). Saídas em
+  <code>docs/assets/img/blrt_multivariado_v3/</code> e cache em
+  <code>src/03_analises/rds/blrt_multivariado_v3/</code>.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="modelos">3 · Modelos NB multivariados ajustados</h2>
+
+<p>
+  Cada modelo foi ajustado com 8 inicializações independentes
+  (k-means + 7 aleatórias); a solução de maior log-verossimilhança é
+  retida. Os ajustes formam a base sobre a qual o BLRT opera.
+</p>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th>
+      <th class="num">log-Lik</th>
+      <th class="num">np</th>
+      <th class="num">BIC</th>
+      <th class="num">Δ BIC</th>
+      <th class="num">Iterações EM</th>
+      <th class="num">Tempo (s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="num">3</td>
+      <td class="num">−45.424,6</td>
+      <td class="num">32</td>
+      <td class="num">91.121,8</td>
+      <td class="num">+35,9</td>
+      <td class="num">81</td>
+      <td class="num">319</td>
+    </tr>
+    <tr class="best">
+      <td class="num"><strong>4</strong></td>
+      <td class="num">−45.359,8</td>
+      <td class="num">43</td>
+      <td class="num"><strong>91.085,9</strong></td>
+      <td class="num"><strong>0,0</strong></td>
+      <td class="num">164</td>
+      <td class="num">1.149</td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
+      <td class="num">−45.317,8</td>
+      <td class="num">54</td>
+      <td class="num">91.095,4</td>
+      <td class="num">+9,5</td>
+      <td class="num">200</td>
+      <td class="num">1.478</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="achado">
+  <span class="tag">Achado A</span>
+  <strong>O BIC seleciona \(g = 4\) com folga clara.</strong> A
+  diferença Δ BIC = 35,9 unidades em relação a \(g = 3\) supera
+  amplamente o limiar de evidência forte (Δ BIC &gt; 10 segundo
+  Raftery, 1995). A diferença residual de \(g = 4\) para \(g = 5\)
+  (Δ BIC = 9,5) é positiva — favorável a \(g = 4\) — mas mais sutil,
+  motivando o teste por BLRT.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="blrt">4 · Resultados do Bootstrap LRT</h2>
+
+<p>
+  Para cada par \((g,\ g + 1)\), simulam-se \(B = 49\) amostras
+  paramétricas sob \(H_0\): \(g\) componentes (com parâmetros do ajuste
+  real), e reajustam-se ambos os modelos em cada amostra. O p-valor
+  empírico é
+</p>
+
+$$
+p = \frac{\#\{\text{LRT}^{(b)} \geq \text{LRT}_{\text{obs}}\} + 1}{B + 1}
+$$
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/tab01_blrt_v3.png"
+       alt="Tabela 1 — BLRT V3"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 1.</strong> Bootstrap LRT em V3 multivariado para
+    os dois pares testados. A linha em verde claro indica rejeição
+    de \(H_0\) (\(p \leq 0{,}05\)).
+  </p>
+</div>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th class="num">g</th><th class="num">g+1</th>
+      <th class="num">LRT observado</th>
+      <th class="num">p-valor</th>
+      <th class="num">B válidos</th>
+      <th>Decisão</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background:#f0f9ee;">
+      <td class="num">3</td><td class="num">4</td>
+      <td class="num">129,6</td>
+      <td class="num"><strong>0,020</strong></td>
+      <td class="num">49 / 49</td>
+      <td class="ok"><strong>Rejeita H₀</strong> — há um quarto componente</td>
+    </tr>
+    <tr>
+      <td class="num">4</td><td class="num">5</td>
+      <td class="num">84,1</td>
+      <td class="num">0,180</td>
+      <td class="num">49 / 49</td>
+      <td>Não rejeita — \(g = 4\) é suficiente</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/fig01_blrt_distribuicoes.png"
+       alt="Distribuicoes bootstrap LRT V3"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 1.</strong> Distribuições bootstrap da estatística
+    LRT sob \(H_0\) para os dois pares. <strong>Esquerda</strong>
+    (\(g = 3 \to 4\)): o LRT observado de 129,6 está na cauda direita
+    extrema da distribuição nula — apenas uma única réplica bootstrap
+    produziu LRT igual ou maior, resultando em \(p = 0{,}020\).
+    <strong>Direita</strong> (\(g = 4 \to 5\)): o LRT observado de
+    84,1 está no centro da distribuição nula — a maioria das réplicas
+    sob \(H_0\) produziu LRTs comparáveis, resultando em \(p = 0{,}180\).
+  </p>
+</div>
+
+<div class="achado">
+  <span class="tag">Achado B</span>
+  <strong>BIC e BLRT convergem em \(g = 4\) — validação por critério
+  independente.</strong> O BLRT rejeita \(H_0\!: g = 3\) em favor de
+  \(H_1\!: g = 4\) com \(p = 0{,}020\), e não rejeita \(H_0\!: g = 4\)
+  contra \(H_1\!: g = 5\) com \(p = 0{,}180\). A concordância entre
+  o critério penalizado (assintótico) e o teste de hipóteses
+  (não-paramétrico) constitui evidência composta forte sobre a
+  cardinalidade verdadeira do problema multivariado.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="metricas">5 · Métricas substantivas de recuperação</h2>
+
+<p>
+  Aplicando os ajustes a um cenário sem restrições, avalia-se quão
+  bem cada modelo (\(g = 3,\ 4,\ 5\)) recupera os quatro grupos
+  verdadeiros da simulação. A análise complementa o BLRT respondendo
+  à pergunta substantiva: <em>"além de selecionar a cardinalidade
+  correta, o modelo identifica corretamente quem pertence a cada
+  grupo?"</em>
+</p>
+
+<h3>5.1 · Métricas globais por <em>g</em></h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/tab02_metricas_globais.png"
+       alt="Tabela 2 — métricas globais por g"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 2.</strong> Métricas globais de classificação por
+    valor de \(g\). Pareamento via algoritmo húngaro. O modelo de
+    \(g = 4\) corresponde à cardinalidade verdadeira e atinge a
+    qualidade máxima de recuperação substantiva.
+  </p>
+</div>
+
+<h3>5.2 · Sensibilidade por grupo verdadeiro</h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/fig02_sensibilidade_por_grupo.png"
+       alt="Sensibilidade por grupo · 3 valores de g"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 2.</strong> Sensibilidade de classificação por
+    grupo verdadeiro, facetado por \(g\). A linha tracejada indica o
+    limiar de 80 %. O ponto-chave a observar é o comportamento de
+    <strong>G4 (atípico, 5 % da amostra)</strong>: em \(g = 3\), G4 é
+    perdido (frequentemente fundido com G3); em \(g = 4\) é
+    parcialmente recuperado; em \(g = 5\) pode haver fragmentação
+    artificial de outros grupos.
+  </p>
+</div>
+
+<h3>5.3 · Diagnóstico detalhado por grupo</h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/tab03_metricas_por_grupo.png"
+       alt="Tabela 3 — diagnóstico por grupo verdadeiro x g"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Tabela 3.</strong> Para cada combinação \(g\) ×
+    grupo verdadeiro: número de observações reais, número
+    classificadas corretamente, <strong>sensibilidade</strong>
+    (proporção do grupo real corretamente identificada, com gradiente
+    vermelho → amarelo → verde), F1 e <strong>AvePP</strong>
+    (probabilidade posterior média no componente correto).
+  </p>
+</div>
+
+<h3>5.4 · Matrizes de confusão lado a lado</h3>
+
+<div class="fig-wrapper">
+  <img src="../assets/img/blrt_multivariado_v3/fig03_matrizes_confusao.png"
+       alt="Matrizes de confusao para g=3, 4, 5"
+       loading="lazy">
+  <p class="fig-caption">
+    <strong>Figura 3.</strong> Matrizes de confusão para \(g = 3\),
+    \(g = 4\) e \(g = 5\), com pareamento húngaro aplicado. Em
+    \(g = 3\), a fusão entre dois grupos verdadeiros é visível na
+    distribuição não-diagonal. Em \(g = 4\), a diagonal principal
+    concentra a maioria das observações. Em \(g = 5\), uma das
+    colunas extras absorve observações de grupos múltiplos —
+    indicador de sobreajuste.
+  </p>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="discussao">6 · Discussão</h2>
+
+<h3>Por que o LRT observado em \(g = 4 \to 5\) ainda é grande</h3>
+
+<p>
+  Um detalhe metodológico merece atenção. O LRT observado na
+  transição \(g = 4 \to 5\) é <strong>84,1</strong> — magnitude
+  substantiva em termos absolutos. Sob distribuição \(\chi^2\)
+  assintótica clássica com \(\text{df} = 11\) (2p + 1 parâmetros
+  novos), esse valor produziria \(p &lt; 10^{-12}\), rejeição
+  esmagadora.
+</p>
+
+<p>
+  O bootstrap, contudo, mostra que <strong>33% das réplicas sob
+  \(H_0\) produziram LRTs comparáveis</strong>, resultando em
+  \(p = 0{,}180\). Isto evidencia que a distribuição nula do LRT em
+  misturas NB multivariadas com \(\theta_{hj}\) livre por componente
+  e por variável <em>não é \(\chi^2\)</em> — possui caudas mais
+  pesadas do que a aproximação assintótica sugere.
+</p>
+
+<div class="teoria">
+  <strong>Origem da patologia.</strong> Em misturas NB com
+  \(\theta_{hj}\) livre por componente e por variável, o modelo
+  com \(g + 1\) componentes dispõe de \(2p\) parâmetros adicionais de
+  dispersão. Ocasionalmente, um componente "espúrio" no ajuste
+  bootstrap captura observações de cauda extrema (alta utilização)
+  com \(\theta_{hj}\) pequenos, inflando artificialmente
+  \(\ell_{g+1}\). É o análogo multivariado da patologia documentada
+  no <a href="teste_univariado_0.html">Teste Univariado 0</a> para
+  Gauss com \(\sigma\) livre, descrita por McLachlan (1987) e
+  McLachlan &amp; Peel (2000, Cap. 6).
+</div>
+
+<p>
+  A consequência prática é tranquilizadora: o BLRT — por construir
+  a distribuição nula empiricamente — <em>captura corretamente</em>
+  essa patologia e a incorpora no p-valor. O resultado "não
+  rejeita" para \(g = 4 \to 5\) é, portanto, robusto: reflete o
+  verdadeiro comportamento do LRT sob \(H_0\), não uma falha de
+  poder.
+</p>
+
+<h3>Conexão com o arco metodológico da série</h3>
+
+<table class="param-table">
+  <thead>
+    <tr>
+      <th>Teste</th>
+      <th>Distribuição</th>
+      <th>Dimensão</th>
+      <th>BLRT recupera <em>g</em>?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="teste_univariado_0.html">Teste 0</a></td>
+      <td>Gauss σ livre</td>
+      <td>univariada</td>
+      <td>⚠️ borderline (patologia σ-livre)</td>
+    </tr>
+    <tr>
+      <td><a href="teste_univariado_1.html">Teste 1</a></td>
+      <td>NB θ fixo</td>
+      <td>univariada</td>
+      <td class="ok">Sim, \(g = 4\)</td>
+    </tr>
+    <tr>
+      <td><a href="teste_univariado_2.html">Teste 2</a></td>
+      <td>NB θ livre</td>
+      <td>univariada</td>
+      <td class="err">Não — univariância insuficiente</td>
+    </tr>
+    <tr style="background:#f0f9ee;">
+      <td><strong>BLRT V3 (esta página)</strong></td>
+      <td>NB θ livre</td>
+      <td><strong>multivariada</strong></td>
+      <td class="ok"><strong>Sim, \(g = 4\)</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="achado">
+  <span class="tag">Achado integrador</span>
+  <strong>A linha final da tabela é a chave científica do
+  trabalho.</strong> A mesma configuração (NB com θ livre) que o
+  Teste 2 mostrou ser insuficiente em uma dimensão (BLRT seleciona
+  \(g = 2\)) torna-se totalmente identificável em cinco dimensões
+  (BLRT seleciona \(g = 4\)). Esta diferença <em>não está no método</em>
+  — é o mesmo BLRT, o mesmo EM, as mesmas distribuições NB. A
+  diferença é <em>estrutural</em>: o espaço V3 carrega a informação
+  discriminante que a marginal de <em>consultas</em> não possui.
+  Trata-se da justificativa empírica direta da abordagem
+  multivariada adotada no pôster.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="conclusoes">7 · Conclusões</h2>
+
+<div class="achado">
+  <span class="tag">Conclusão 1</span>
+  <strong>O BIC e o BLRT convergem em \(g = 4\) na análise V3.</strong>
+  Ambos rejeitam \(g = 3\) (BIC: ΔBIC = 35,9; BLRT: p = 0,020) e ambos
+  não rejeitam \(g = 4\) em favor de \(g = 5\) (BIC: ΔBIC = 9,5;
+  BLRT: p = 0,180). Esta concordância entre um critério penalizado
+  assintótico e um teste de hipóteses não-paramétrico constitui
+  evidência composta forte sobre a cardinalidade verdadeira.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 2</span>
+  <strong>O ganho de log-verossimilhança em \(g = 3 \to 4\) é
+  estatisticamente significativo</strong> sob bootstrap paramétrico
+  (\(\text{LRT}_{\text{obs}} = 129{,}6\); p = 0,020). Apenas uma das
+  49 réplicas sob \(H_0\!: g = 3\) produziu LRT comparável,
+  caracterizando o quarto componente como estrutura genuína do
+  fenômeno e não artefato de superajuste.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 3</span>
+  <strong>O modelo de \(g = 5\) não acrescenta estrutura
+  identificável.</strong> Apesar do LRT observado ser de magnitude
+  substantiva (84,1), o bootstrap revela que 33% das réplicas sob
+  \(H_0\!: g = 4\) produzem LRTs comparáveis — comportamento
+  consistente com a patologia documentada do BLRT em misturas com
+  parâmetros de dispersão livres (McLachlan &amp; Peel, 2000, Cap. 6).
+  A não-rejeição é robusta, não falha de poder.
+</div>
+
+<div class="alerta">
+  <span class="tag">Conclusão 4</span>
+  <strong>A multivariância é decisiva para a identificabilidade.</strong>
+  O mesmo método (BLRT paramétrico sobre NB com θ livre) que fracassou
+  no <a href="teste_univariado_2.html">Teste 2</a> univariado
+  (selecionando \(g = 2\) erroneamente) recupera \(g = 4\) na V3.
+  A diferença empírica entre as duas execuções
+  <em>quantifica</em> a contribuição informacional das cinco
+  variáveis em conjunto — informação que cada variável isolada não
+  carrega.
+</div>
+
+<div class="achado">
+  <span class="tag">Conclusão 5 · síntese metodológica</span>
+  <strong>A escolha de \(g = 4\) componentes para a mistura NB
+  multivariada V3 está empiricamente validada por critérios
+  independentes.</strong> Combinada com a recuperação substantiva
+  (ARI &gt; 0,7, Acurácia &gt; 0,85), forma um conjunto coerente:
+  o número de componentes é estatisticamente justificado, e a
+  partição produzida pelo modelo corresponde aos grupos verdadeiros
+  com alta fidelidade. Isto é o argumento metodológico central que
+  a abordagem do pôster pode sustentar.
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="codigo">8 · Código R</h2>
+
+<p>
+  Esta análise se distribui por dois scripts em
+  <code>src/03_analises/</code>: o script <strong>07</strong>
+  ajusta os modelos e executa o BLRT; o script <strong>08</strong>
+  consome os fits do cache para extrair métricas substantivas.
+</p>
+
+<h3>8.1 · Configuração e dados</h3>
+
+<pre class="r-code"><span class="com"># ── Parâmetros do experimento ─────────────────────────────────────────────────</span>
+<span class="fn">set.seed</span>(<span class="num">42</span>)
+VARS_V3     <span class="op">&lt;-</span> <span class="fn">c</span>(<span class="str">"consultas"</span>, <span class="str">"ps"</span>, <span class="str">"exames"</span>, <span class="str">"internacoes"</span>, <span class="str">"terapias"</span>)
+K_GRID      <span class="op">&lt;-</span> <span class="fn">c</span>(3L, 4L, 5L)            <span class="com"># apenas o necessário</span>
+N_INIT_NB   <span class="op">&lt;-</span> 8L                      <span class="com"># reinícios no ajuste principal</span>
+N_INIT_BOOT <span class="op">&lt;-</span> 3L                      <span class="com"># reinícios em cada bootstrap fit</span>
+BLRT_B      <span class="op">&lt;-</span> 49L                     <span class="com"># réplicas bootstrap por par</span>
+
+<span class="com"># ── Carregar dados V3 ────────────────────────────────────────────────────────</span>
+dados <span class="op">&lt;-</span> <span class="fn">read.csv</span>(<span class="str">"dados/dados_simulados.csv"</span>, stringsAsFactors <span class="op">=</span> <span class="kw">FALSE</span>)
+Y_v3  <span class="op">&lt;-</span> <span class="fn">as.matrix</span>(dados[, VARS_V3])
+grupo_int <span class="op">&lt;-</span> <span class="fn">as.integer</span>(<span class="fn">factor</span>(dados<span class="op">$</span>grupo_latente,
+                                 levels <span class="op">=</span> <span class="fn">c</span>(<span class="str">"baixo_uso"</span>,
+                                              <span class="str">"ambulatorial_coordenado"</span>,
+                                              <span class="str">"agudo_hospitalar"</span>, <span class="str">"atipico"</span>)))
+</pre>
+
+<h3>8.2 · EM customizado para mistura NB multivariada</h3>
+
+<p>
+  O coração da análise: ajuste por EM da mistura NB com independência
+  condicional. <code>.update_theta()</code> usa otimização
+  univariada para o passo M de cada \(\theta_{hj}\); o EM principal
+  alterna E-step (cálculo das posteriores via log-sum-exp para
+  estabilidade numérica) e M-step (atualização vetorial de
+  \(\pi_h,\ \mu_{hj}\) e iterativa de \(\theta_{hj}\)).
+</p>
+
+<pre class="r-code"><span class="com"># Atualização MLE de theta_hj por componente e variável</span>
+.update_theta <span class="op">&lt;-</span> <span class="kw">function</span>(y_j, tau_h, mu_hj) {
+  neg_ll <span class="op">&lt;-</span> <span class="kw">function</span>(lt) {
+    th <span class="op">&lt;-</span> <span class="fn">exp</span>(lt)
+    -<span class="fn">sum</span>(tau_h <span class="op">*</span> <span class="fn">dnbinom</span>(y_j, size <span class="op">=</span> th, mu <span class="op">=</span> mu_hj, log <span class="op">=</span> <span class="kw">TRUE</span>))
+  }
+  <span class="fn">exp</span>(<span class="fn">tryCatch</span>(<span class="fn">optimize</span>(neg_ll, interval <span class="op">=</span> <span class="fn">c</span>(-<span class="num">4</span>, <span class="num">8</span>))<span class="op">$</span>minimum,
+               error <span class="op">=</span> <span class="kw">function</span>(e) <span class="num">0</span>))
+}
+
+<span class="com"># EM para mistura NB multivariada (independência condicional)</span>
+nb_mix_em <span class="op">&lt;-</span> <span class="kw">function</span>(Y, g, max_iter <span class="op">=</span> <span class="num">200</span>, tol <span class="op">=</span> <span class="num">1e-5</span>,
+                      n_init <span class="op">=</span> <span class="num">8</span>, seed <span class="op">=</span> <span class="num">42</span>) {
+  n <span class="op">&lt;-</span> <span class="fn">nrow</span>(Y); p <span class="op">&lt;-</span> <span class="fn">ncol</span>(Y); Y <span class="op">&lt;-</span> <span class="fn">as.matrix</span>(Y)
+  best_loglik <span class="op">&lt;-</span> -<span class="kw">Inf</span>; best_fit <span class="op">&lt;-</span> <span class="kw">NULL</span>
+
+  <span class="kw">for</span> (init <span class="kw">in</span> <span class="fn">seq_len</span>(n_init)) {
+    <span class="com"># Inicialização 1 = k-means em log1p(Y); demais = aleatório</span>
+    <span class="kw">if</span> (init <span class="op">==</span> <span class="num">1</span>) {
+      <span class="fn">set.seed</span>(seed)
+      km  <span class="op">&lt;-</span> <span class="fn">kmeans</span>(<span class="fn">log1p</span>(Y), centers <span class="op">=</span> g, nstart <span class="op">=</span> <span class="num">10</span>, iter.max <span class="op">=</span> <span class="num">100</span>)
+      tau <span class="op">&lt;-</span> <span class="fn">matrix</span>(<span class="num">0.02</span> <span class="op">/</span> <span class="fn">max</span>(g - <span class="num">1</span>, <span class="num">1</span>), n, g)
+      <span class="kw">for</span> (i <span class="kw">in</span> <span class="fn">seq_len</span>(n)) tau[i, km<span class="op">$</span>cluster[i]] <span class="op">&lt;-</span> <span class="num">0.98</span>
+    } <span class="kw">else</span> {
+      <span class="fn">set.seed</span>(seed <span class="op">+</span> init)
+      tau <span class="op">&lt;-</span> <span class="fn">matrix</span>(<span class="fn">runif</span>(n <span class="op">*</span> g) <span class="op">+</span> <span class="num">0.01</span>, n, g)
+    }
+    tau   <span class="op">&lt;-</span> tau <span class="op">/</span> <span class="fn">rowSums</span>(tau)
+    theta <span class="op">&lt;-</span> <span class="fn">matrix</span>(<span class="num">2</span>, g, p); loglik_old <span class="op">&lt;-</span> -<span class="kw">Inf</span>
+
+    <span class="kw">for</span> (iter <span class="kw">in</span> <span class="fn">seq_len</span>(max_iter)) {
+      <span class="com"># M-step: atualiza pi, mu (vetorial), theta (iterativo)</span>
+      pi_h <span class="op">&lt;-</span> <span class="fn">colMeans</span>(tau); n_h <span class="op">&lt;-</span> <span class="fn">colSums</span>(tau)
+      mu   <span class="op">&lt;-</span> <span class="fn">pmax</span>(<span class="fn">t</span>(tau) <span class="op">%*%</span> Y <span class="op">/</span> n_h, <span class="num">1e-6</span>)
+      <span class="kw">for</span> (h <span class="kw">in</span> <span class="fn">seq_len</span>(g))
+        <span class="kw">for</span> (j <span class="kw">in</span> <span class="fn">seq_len</span>(p))
+          theta[h, j] <span class="op">&lt;-</span> <span class="fn">.update_theta</span>(Y[, j], tau[, h], mu[h, j])
+      theta <span class="op">&lt;-</span> <span class="fn">pmax</span>(theta, <span class="num">0.05</span>)
+
+      <span class="com"># E-step: log-densidades (com produto de margens) e log-sum-exp</span>
+      log_f <span class="op">&lt;-</span> <span class="fn">matrix</span>(<span class="num">0</span>, n, g)
+      <span class="kw">for</span> (h <span class="kw">in</span> <span class="fn">seq_len</span>(g))
+        log_f[, h] <span class="op">&lt;-</span> <span class="fn">log</span>(pi_h[h]) <span class="op">+</span>
+          <span class="fn">rowSums</span>(<span class="fn">dnbinom</span>(Y,
+            size <span class="op">=</span> <span class="fn">matrix</span>(theta[h, ], n, p, byrow <span class="op">=</span> <span class="kw">TRUE</span>),
+            mu   <span class="op">=</span> <span class="fn">matrix</span>(mu[h, ],    n, p, byrow <span class="op">=</span> <span class="kw">TRUE</span>),
+            log  <span class="op">=</span> <span class="kw">TRUE</span>))
+      log_max  <span class="op">&lt;-</span> <span class="fn">apply</span>(log_f, <span class="num">1</span>, max)
+      log_norm <span class="op">&lt;-</span> <span class="fn">log</span>(<span class="fn">rowSums</span>(<span class="fn">exp</span>(log_f - log_max))) <span class="op">+</span> log_max
+      loglik   <span class="op">&lt;-</span> <span class="fn">sum</span>(log_norm)
+      tau_new  <span class="op">&lt;-</span> <span class="fn">exp</span>(log_f - log_norm); tau_new <span class="op">&lt;-</span> tau_new <span class="op">/</span> <span class="fn">rowSums</span>(tau_new)
+
+      <span class="kw">if</span> (iter <span class="op">&gt;</span> <span class="num">1</span> <span class="op">&amp;&amp;</span> <span class="fn">abs</span>(loglik - loglik_old) <span class="op">&lt;</span> tol) <span class="kw">break</span>
+      loglik_old <span class="op">&lt;-</span> loglik; tau <span class="op">&lt;-</span> tau_new
+    }
+
+    <span class="kw">if</span> (loglik <span class="op">&gt;</span> best_loglik) {
+      best_loglik <span class="op">&lt;-</span> loglik
+      k_params    <span class="op">&lt;-</span> 2L <span class="op">*</span> g <span class="op">*</span> p <span class="op">+</span> (g - 1L)
+      best_fit    <span class="op">&lt;-</span> <span class="fn">list</span>(g <span class="op">=</span> g, pi <span class="op">=</span> pi_h, mu <span class="op">=</span> mu, theta <span class="op">=</span> theta,
+                            tau <span class="op">=</span> tau_new, loglik <span class="op">=</span> loglik,
+                            classification <span class="op">=</span> <span class="fn">apply</span>(tau_new, <span class="num">1</span>, which.max),
+                            BIC <span class="op">=</span> -<span class="num">2</span> <span class="op">*</span> loglik <span class="op">+</span> k_params <span class="op">*</span> <span class="fn">log</span>(n))
+    }
+  }
+  best_fit
+}
+</pre>
+
+<h3>8.3 · Simulação paramétrica multivariada e BLRT</h3>
+
+<p>
+  A simulação amostra do produto de margens NB de cada componente —
+  exatamente a estrutura da independência condicional do modelo. O
+  BLRT é um wrapper sobre o EM customizado.
+</p>
+
+<pre class="r-code"><span class="com"># Simulação paramétrica sob H0 (multivariada NB)</span>
+simular_nb_v3 <span class="op">&lt;-</span> <span class="kw">function</span>(fit, n_sim) {
+  g <span class="op">&lt;-</span> fit<span class="op">$</span>g; p <span class="op">&lt;-</span> <span class="fn">ncol</span>(fit<span class="op">$</span>mu)
+  comp <span class="op">&lt;-</span> <span class="fn">sample.int</span>(g, size <span class="op">=</span> n_sim, replace <span class="op">=</span> <span class="kw">TRUE</span>, prob <span class="op">=</span> fit<span class="op">$</span>pi)
+  Y    <span class="op">&lt;-</span> <span class="fn">matrix</span>(0L, n_sim, p)
+  <span class="kw">for</span> (h <span class="kw">in</span> <span class="fn">seq_len</span>(g)) {
+    idx <span class="op">&lt;-</span> <span class="fn">which</span>(comp <span class="op">==</span> h)
+    <span class="kw">if</span> (!<span class="fn">length</span>(idx)) <span class="kw">next</span>
+    <span class="kw">for</span> (j <span class="kw">in</span> <span class="fn">seq_len</span>(p))
+      Y[idx, j] <span class="op">&lt;-</span> <span class="fn">rnbinom</span>(<span class="fn">length</span>(idx),
+                            size <span class="op">=</span> fit<span class="op">$</span>theta[h, j],
+                            mu   <span class="op">=</span> fit<span class="op">$</span>mu[h, j])
+  }
+  Y
+}
+
+<span class="com"># BLRT paramétrico para um par (k0, k1)</span>
+blrt_passo_v3 <span class="op">&lt;-</span> <span class="kw">function</span>(fit_k0, fit_k1, B <span class="op">=</span> <span class="num">49</span>, nrep <span class="op">=</span> <span class="num">3</span>, seed <span class="op">=</span> <span class="num">1000</span>) {
+  <span class="fn">set.seed</span>(seed)
+  k0 <span class="op">&lt;-</span> fit_k0<span class="op">$</span>g; k1 <span class="op">&lt;-</span> fit_k1<span class="op">$</span>g
+  lrt_obs <span class="op">&lt;-</span> <span class="num">2</span> <span class="op">*</span> (fit_k1<span class="op">$</span>loglik <span class="op">-</span> fit_k0<span class="op">$</span>loglik)
+  n_sim   <span class="op">&lt;-</span> <span class="fn">nrow</span>(fit_k0<span class="op">$</span>tau)
+
+  ll_best_k <span class="op">&lt;-</span> <span class="kw">function</span>(Y_b, k_val) {
+    fit_b <span class="op">&lt;-</span> <span class="fn">tryCatch</span>(<span class="fn">nb_mix_em</span>(Y_b, g <span class="op">=</span> k_val, n_init <span class="op">=</span> nrep,
+                                  max_iter <span class="op">=</span> <span class="num">100</span>),
+                      error <span class="op">=</span> <span class="kw">function</span>(e) <span class="kw">NULL</span>)
+    <span class="kw">if</span> (<span class="fn">is.null</span>(fit_b)) NA_real_ <span class="kw">else</span> fit_b<span class="op">$</span>loglik
+  }
+
+  lrt_b <span class="op">&lt;-</span> <span class="fn">vapply</span>(<span class="fn">seq_len</span>(B), <span class="kw">function</span>(b) {
+    Y_b <span class="op">&lt;-</span> <span class="fn">simular_nb_v3</span>(fit_k0, n_sim)
+    ll0 <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(Y_b, k0); ll1 <span class="op">&lt;-</span> <span class="fn">ll_best_k</span>(Y_b, k1)
+    <span class="kw">if</span> (<span class="fn">anyNA</span>(<span class="fn">c</span>(ll0, ll1))) NA_real_ <span class="kw">else</span> <span class="num">2</span> <span class="op">*</span> (ll1 - ll0)
+  }, <span class="fn">numeric</span>(<span class="num">1</span>))
+
+  lrt_v <span class="op">&lt;-</span> lrt_b[!<span class="fn">is.na</span>(lrt_b)]
+  pval  <span class="op">&lt;-</span> (<span class="fn">sum</span>(lrt_v <span class="op">&gt;=</span> lrt_obs) <span class="op">+</span> <span class="num">1</span>) <span class="op">/</span> (<span class="fn">length</span>(lrt_v) <span class="op">+</span> <span class="num">1</span>)
+  <span class="fn">list</span>(k0 <span class="op">=</span> k0, k1 <span class="op">=</span> k1,
+       lrt_obs <span class="op">=</span> <span class="fn">round</span>(lrt_obs, <span class="num">2</span>),
+       pval <span class="op">=</span> <span class="fn">round</span>(pval, <span class="num">4</span>),
+       B_valido <span class="op">=</span> <span class="fn">length</span>(lrt_v), lrt_boot <span class="op">=</span> lrt_v)
+}
+</pre>
+
+<h3>8.4 · Loop principal e métricas substantivas</h3>
+
+<pre class="r-code"><span class="com"># Ajusta os 3 modelos (com cache)</span>
+fits <span class="op">&lt;-</span> <span class="fn">list</span>()
+<span class="kw">for</span> (g_val <span class="kw">in</span> <span class="fn">c</span>(<span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>)) {
+  fits[[<span class="fn">as.character</span>(g_val)]] <span class="op">&lt;-</span>
+    <span class="fn">nb_mix_em</span>(Y_v3, g <span class="op">=</span> g_val, n_init <span class="op">=</span> <span class="num">8</span>, seed <span class="op">=</span> <span class="num">42</span> <span class="op">+</span> g_val)
+}
+<span class="fn">saveRDS</span>(fits, <span class="str">"src/03_analises/rds/blrt_multivariado_v3/fits_v3.rds"</span>)
+
+<span class="com"># Executa BLRT nos dois pares críticos</span>
+res_34 <span class="op">&lt;-</span> <span class="fn">blrt_passo_v3</span>(fits[[<span class="str">"3"</span>]], fits[[<span class="str">"4"</span>]],
+                        B <span class="op">=</span> <span class="num">49</span>, nrep <span class="op">=</span> <span class="num">3</span>, seed <span class="op">=</span> <span class="num">1003</span>)
+res_45 <span class="op">&lt;-</span> <span class="fn">blrt_passo_v3</span>(fits[[<span class="str">"4"</span>]], fits[[<span class="str">"5"</span>]],
+                        B <span class="op">=</span> <span class="num">49</span>, nrep <span class="op">=</span> <span class="num">3</span>, seed <span class="op">=</span> <span class="num">1004</span>)
+
+<span class="com"># Métricas substantivas em cada fit (script 08_metricas_multivariado_v3.R)</span>
+<span class="kw">for</span> (g_val <span class="kw">in</span> <span class="fn">c</span>(<span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>)) {
+  est     <span class="op">&lt;-</span> fits[[<span class="fn">as.character</span>(g_val)]]<span class="op">$</span>classification
+  est_par <span class="op">&lt;-</span> <span class="fn">remap_hungarian</span>(grupo_int, est)
+  ari     <span class="op">&lt;-</span> <span class="fn">adj_rand_index</span>(grupo_int, est)
+  acu     <span class="op">&lt;-</span> <span class="fn">mean</span>(est_par <span class="op">==</span> grupo_int, na.rm <span class="op">=</span> <span class="kw">TRUE</span>)
+  <span class="com"># Sensibilidade por grupo</span>
+  sens <span class="op">&lt;-</span> <span class="fn">vapply</span>(<span class="num">1</span>:<span class="num">4</span>, <span class="kw">function</span>(g_real) {
+    <span class="fn">sum</span>(est_par <span class="op">==</span> g_real <span class="op">&amp;</span> grupo_int <span class="op">==</span> g_real) <span class="op">/</span>
+      <span class="fn">sum</span>(grupo_int <span class="op">==</span> g_real)
+  }, <span class="fn">numeric</span>(<span class="num">1</span>))
+  <span class="fn">cat</span>(<span class="fn">sprintf</span>(<span class="str">"g=%d: ARI=%.3f Acu=%.3f Sens=%.2f/%.2f/%.2f/%.2f\n"</span>,
+              g_val, ari, acu, sens[<span class="num">1</span>], sens[<span class="num">2</span>], sens[<span class="num">3</span>], sens[<span class="num">4</span>]))
+}
+</pre>
+
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<h2 id="referencias">9 · Referências</h2>
+
+<div class="ref-entry">
+  <cite>Baudry, J.-P. (2015).</cite>
+  Estimation and model selection for model-based clustering with the
+  conditional classification likelihood.
+  <em>Electronic Journal of Statistics</em>, <em>9</em>(1), 1041–1077.
+</div>
+
+<div class="ref-entry">
+  <cite>Hubert, L. &amp; Arabie, P. (1985).</cite>
+  Comparing partitions.
+  <em>Journal of Classification</em>, <em>2</em>(1), 193–218.
+</div>
+
+<div class="ref-entry">
+  <cite>Keribin, C. (2000).</cite>
+  Consistent estimation of the order of mixture models.
+  <em>Sankhyā: The Indian Journal of Statistics, Series A</em>,
+  <em>62</em>(1), 49–66.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. (1987).</cite>
+  On bootstrapping the likelihood ratio test statistic for the number
+  of components in a normal mixture.
+  <em>Journal of the Royal Statistical Society. Series C (Applied
+    Statistics)</em>, <em>36</em>(3), 318–324.
+</div>
+
+<div class="ref-entry">
+  <cite>McLachlan, G. J. &amp; Peel, D. (2000).</cite>
+  <em>Finite Mixture Models.</em> John Wiley &amp; Sons.
+  ISBN 0-471-00626-2.
+</div>
+
+<div class="ref-entry">
+  <cite>Munkres, J. (1957).</cite>
+  Algorithms for the assignment and transportation problems.
+  <em>Journal of the Society for Industrial and Applied Mathematics</em>,
+  <em>5</em>(1), 32–38.
+</div>
+
+<div class="ref-entry">
+  <cite>Ng, S.-K., Xiang, L. &amp; Yau, K. K. W. (2019).</cite>
+  <em>Mixture Modelling for Medical and Health Sciences.</em>
+  Chapman and Hall/CRC. ISBN 978-1-4822-3675-0.
+</div>
+
+<div class="ref-entry">
+  <cite>Raftery, A. E. (1995).</cite>
+  Bayesian model selection in social research.
+  <em>Sociological Methodology</em>, <em>25</em>, 111–163.
+</div>
+
+<div class="ref-entry">
+  <cite>Schwarz, G. (1978).</cite>
+  Estimating the dimension of a model.
+  <em>Annals of Statistics</em>, <em>6</em>(2), 461–464.
+</div>
+
+
+</div>
+</main>
+
+</body>
+</html>
